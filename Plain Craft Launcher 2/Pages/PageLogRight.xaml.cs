@@ -27,13 +27,17 @@ public partial class PageLogRight
     public void Init()
     {
         PanLogCard.Inlines.Clear();
-        PanLogCard.Inlines.Add(new Run(Lang.Text("LogPage.Title")));
+        var titleRun = new Run();
+        titleRun.TrySetLocalizedValue("Text", "LogPage.Title");
+        PanLogCard.Inlines.Add(titleRun);
         PanLogCard.Inlines.Add(new Run(" | "));
-        labDebug = new Run($"0 {Lang.Text("LogPage.Level.Debug")}")
-            { Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushDebug"] };
+        labDebug = new Run
+        {
+            Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushDebug"]
+        };
         PanLogCard.Inlines.Add(labDebug);
         PanLogCard.Inlines.Add(new Run(" | "));
-        labInfo = new Run($"0 {Lang.Text("LogPage.Level.Info")}")
+        labInfo = new Run
         {
             Foreground =
                 (Brush)System.Windows.Application.Current.Resources[
@@ -41,17 +45,24 @@ public partial class PageLogRight
         };
         PanLogCard.Inlines.Add(labInfo);
         PanLogCard.Inlines.Add(new Run(" | "));
-        labWarn = new Run($"0 {Lang.Text("LogPage.Level.Warn")}")
-            { Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushWarn"] };
+        labWarn = new Run
+        {
+            Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushWarn"]
+        };
         PanLogCard.Inlines.Add(labWarn);
         PanLogCard.Inlines.Add(new Run(" | "));
-        labError = new Run($"0 {Lang.Text("LogPage.Level.Error")}")
-            { Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushError"] };
+        labError = new Run
+        {
+            Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushError"]
+        };
         PanLogCard.Inlines.Add(labError);
         PanLogCard.Inlines.Add(new Run(" | "));
-        labFatal = new Run($"0 {Lang.Text("LogPage.Level.Fatal")}")
-            { Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushFatal"] };
+        labFatal = new Run
+        {
+            Foreground = (Brush)System.Windows.Application.Current.Resources["ColorBrushFatal"]
+        };
         PanLogCard.Inlines.Add(labFatal);
+        RefreshLabText();
     }
 
     private void PageLogRight_Loaded(object sender, RoutedEventArgs e)
@@ -101,17 +112,32 @@ public partial class PageLogRight
     private void RefreshLabText()
     {
         // 刷新计数器
+        LocalizedText.TryBind(
+            labFatal,
+            "Text",
+            () => $"{GetCount(log => log.countFatal)} {Lang.Text("LogPage.Level.Fatal")}");
+        LocalizedText.TryBind(
+            labError,
+            "Text",
+            () => $"{GetCount(log => log.countError)} {Lang.Text("LogPage.Level.Error")}");
+        LocalizedText.TryBind(
+            labWarn,
+            "Text",
+            () => $"{GetCount(log => log.countWarn)} {Lang.Text("LogPage.Level.Warn")}");
+        LocalizedText.TryBind(
+            labInfo,
+            "Text",
+            () => $"{GetCount(log => log.countInfo)} {Lang.Text("LogPage.Level.Info")}");
+        LocalizedText.TryBind(
+            labDebug,
+            "Text",
+            () => $"{GetCount(log => log.countDebug)} {Lang.Text("LogPage.Level.Debug")}");
+    }
 
-        LocalizedText.TryBind(labFatal, "Text",
-            () => $"{ModMain.frmLogLeft.currentLog.countFatal} {Lang.Text("LogPage.Level.Fatal")}");
-        LocalizedText.TryBind(labError, "Text",
-            () => $"{ModMain.frmLogLeft.currentLog.countError} {Lang.Text("LogPage.Level.Error")}");
-        LocalizedText.TryBind(labWarn, "Text",
-            () => $"{ModMain.frmLogLeft.currentLog.countWarn} {Lang.Text("LogPage.Level.Warn")}");
-        LocalizedText.TryBind(labInfo, "Text",
-            () => $"{ModMain.frmLogLeft.currentLog.countInfo} {Lang.Text("LogPage.Level.Info")}");
-        LocalizedText.TryBind(labDebug, "Text",
-            () => $"{ModMain.frmLogLeft.currentLog.countDebug} {Lang.Text("LogPage.Level.Debug")}");
+    private static uint GetCount(Func<ModWatcher.Watcher, uint> selector)
+    {
+        var log = ModMain.frmLogLeft?.currentLog;
+        return log is null ? 0u : selector(log);
     }
 
     private void OnLogOutput(ModWatcher.Watcher sender, ModWatcher.LogOutputEventArgs e)

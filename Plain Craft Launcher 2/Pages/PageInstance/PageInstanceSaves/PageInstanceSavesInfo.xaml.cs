@@ -122,9 +122,9 @@ public partial class PageInstanceSavesInfo : IRefreshable
         var combo = new MyComboBox
         {
             Width = 100d, HorizontalAlignment = HorizontalAlignment.Left,
-            ToolTip = Lang.Text("Instance.Saves.Info.Modify.BeforeSave"),
             SelectedValuePath = "Value", DisplayMemberPath = "Display",
         };
+        combo.TrySetLocalizedValue("ToolTip", "Instance.Saves.Info.Modify.BeforeSave");
         combo.Items.Add(new { Value = 0, Display = Lang.Text("Instance.Saves.Info.AllowCommands.NotAllowed") });
         combo.Items.Add(new { Value = 1, Display = Lang.Text("Instance.Saves.Info.AllowCommands.Allowed") });
         combo.SelectedValue = allowCommands ? 1 : 0;
@@ -170,9 +170,9 @@ public partial class PageInstanceSavesInfo : IRefreshable
         var combo = new MyComboBox
         {
             Width = 100d, HorizontalAlignment = HorizontalAlignment.Left,
-            ToolTip = Lang.Text("Instance.Saves.Info.Modify.BeforeSave"),
             SelectedValuePath = "Value", DisplayMemberPath = "Display",
         };
+        combo.TrySetLocalizedValue("ToolTip", "Instance.Saves.Info.Modify.BeforeSave");
         combo.Items.Add(new { Value = 0, Display = Lang.Text("Instance.Saves.Info.Difficulty.Peaceful") });
         combo.Items.Add(new { Value = 1, Display = Lang.Text("Instance.Saves.Info.Difficulty.Easy") });
         combo.Items.Add(new { Value = 2, Display = Lang.Text("Instance.Saves.Info.Difficulty.Normal") });
@@ -181,12 +181,12 @@ public partial class PageInstanceSavesInfo : IRefreshable
 
         var lockCheckBox = new MyCheckBox
         {
-            Text = Lang.Text("Instance.Saves.Info.LockDifficulty"),
-            ToolTip = Lang.Text("Instance.Saves.Info.LockDifficulty.ToolTip"),
             VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10d, 0d, 0d, 0d),
             Checked = isLocked,
             Visibility = isHardcore ? Visibility.Collapsed : Visibility.Visible,
         };
+        lockCheckBox.TrySetLocalizedValue("Text", "Instance.Saves.Info.LockDifficulty");
+        lockCheckBox.TrySetLocalizedValue("ToolTip", "Instance.Saves.Info.LockDifficulty.ToolTip");
 
         var panel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Left };
         panel.Children.Add(combo);
@@ -240,7 +240,7 @@ public partial class PageInstanceSavesInfo : IRefreshable
 
     private static void ShowHint(MyHint hint, string langKey)
     {
-        hint.Text = Lang.Text(langKey);
+        hint.TrySetLocalizedValue("Text", langKey);
         hint.Visibility = Visibility.Visible;
     }
 
@@ -279,9 +279,9 @@ public partial class PageInstanceSavesInfo : IRefreshable
             {
                 SvgIcon = "lucide/external-link",
                 Width = 22d,
-                Height = 22d,
-                ToolTip = Lang.Text("Instance.Saves.Info.Chunkbase.ToolTip"),
+                Height = 22d
             };
+            chunkbaseBtn.TrySetLocalizedValue("ToolTip", "Instance.Saves.Info.Chunkbase.ToolTip");
             chunkbaseBtn.Click += (_, _) => OpenChunkbase(content, versionName);
             contentStack.Children.Add(chunkbaseBtn);
         }

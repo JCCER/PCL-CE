@@ -410,7 +410,12 @@ public partial class PageDownloadInstall
             {
                 BtnOptiFineClear.Visibility = Visibility.Collapsed;
                 ImgOptiFine.Visibility = Visibility.Collapsed;
-                LabOptiFine.Text = optiFineError ?? Lang.Text("Download.Install.State.CanAdd");
+                var optiFineErrorText = optiFineError;
+
+                LocalizedText.TryBind(
+                    LabOptiFine,
+                    "Text",
+                    () => optiFineErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabOptiFine.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -441,7 +446,12 @@ public partial class PageDownloadInstall
             {
                 BtnLiteLoaderClear.Visibility = Visibility.Collapsed;
                 ImgLiteLoader.Visibility = Visibility.Collapsed;
-                LabLiteLoader.Text = liteLoaderError ?? Lang.Text("Download.Install.State.CanAdd");
+                var liteLoaderErrorText = liteLoaderError;
+
+                LocalizedText.TryBind(
+                    LabLiteLoader,
+                    "Text",
+                    () => liteLoaderErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabLiteLoader.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -471,7 +481,12 @@ public partial class PageDownloadInstall
             {
                 BtnForgeClear.Visibility = Visibility.Collapsed;
                 ImgForge.Visibility = Visibility.Collapsed;
-                LabForge.Text = forgeError ?? Lang.Text("Download.Install.State.CanAdd");
+                var forgeErrorText = forgeError;
+
+                LocalizedText.TryBind(
+                    LabForge,
+                    "Text",
+                    () => forgeErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabForge.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -496,7 +511,12 @@ public partial class PageDownloadInstall
             {
                 BtnCleanroomClear.Visibility = Visibility.Collapsed;
                 ImgCleanroom.Visibility = Visibility.Collapsed;
-                LabCleanroom.Text = cleanroomError ?? Lang.Text("Download.Install.State.CanAdd");
+                var cleanroomErrorText = cleanroomError;
+
+                LocalizedText.TryBind(
+                    LabCleanroom,
+                    "Text",
+                    () => cleanroomErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabCleanroom.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -529,7 +549,12 @@ public partial class PageDownloadInstall
             {
                 BtnNeoForgeClear.Visibility = Visibility.Collapsed;
                 ImgNeoForge.Visibility = Visibility.Collapsed;
-                LabNeoForge.Text = neoForgeError ?? Lang.Text("Download.Install.State.CanAdd");
+                var neoForgeErrorText = neoForgeError;
+
+                LocalizedText.TryBind(
+                    LabNeoForge,
+                    "Text",
+                    () => neoForgeErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabNeoForge.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -559,7 +584,12 @@ public partial class PageDownloadInstall
             {
                 BtnFabricClear.Visibility = Visibility.Collapsed;
                 ImgFabric.Visibility = Visibility.Collapsed;
-                LabFabric.Text = fabricError ?? Lang.Text("Download.Install.State.CanAdd");
+                var fabricErrorText = fabricError;
+
+                LocalizedText.TryBind(
+                    LabFabric,
+                    "Text",
+                    () => fabricErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabFabric.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -588,7 +618,12 @@ public partial class PageDownloadInstall
             {
                 BtnFabricApiClear.Visibility = Visibility.Collapsed;
                 ImgFabricApi.Visibility = Visibility.Collapsed;
-                LabFabricApi.Text = fabricApiError ?? Lang.Text("Download.Install.State.CanAdd");
+                var fabricApiErrorText = fabricApiError;
+
+                LocalizedText.TryBind(
+                    LabFabricApi,
+                    "Text",
+                    () => fabricApiErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabFabricApi.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -619,7 +654,12 @@ public partial class PageDownloadInstall
             {
                 BtnLegacyFabricClear.Visibility = Visibility.Collapsed;
                 ImgLegacyFabric.Visibility = Visibility.Collapsed;
-                LabLegacyFabric.Text = legacyFabricError ?? Lang.Text("Download.Install.State.CanAdd");
+                var legacyFabricErrorText = legacyFabricError;
+
+                LocalizedText.TryBind(
+                    LabLegacyFabric,
+                    "Text",
+                    () => legacyFabricErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabLegacyFabric.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -649,7 +689,12 @@ public partial class PageDownloadInstall
             {
                 BtnLegacyFabricApiClear.Visibility = Visibility.Collapsed;
                 ImgLegacyFabricApi.Visibility = Visibility.Collapsed;
-                LabLegacyFabricApi.Text = legacyFabricApiError ?? Lang.Text("Download.Install.State.CanAdd");
+                var legacyFabricApiErrorText = legacyFabricApiError;
+
+                LocalizedText.TryBind(
+                    LabLegacyFabricApi,
+                    "Text",
+                    () => legacyFabricApiErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabLegacyFabricApi.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -679,7 +724,12 @@ public partial class PageDownloadInstall
             {
                 BtnLabyModClear.Visibility = Visibility.Collapsed;
                 ImgLabyMod.Visibility = Visibility.Collapsed;
-                LabLabyMod.Text = labyModError ?? Lang.Text("Download.Install.State.CanAdd");
+                var labyModErrorText = labyModError;
+
+                LocalizedText.TryBind(
+                    LabLabyMod,
+                    "Text",
+                    () => labyModErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabLabyMod.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -708,7 +758,12 @@ public partial class PageDownloadInstall
             {
                 BtnOptiFabricClear.Visibility = Visibility.Collapsed;
                 ImgOptiFabric.Visibility = Visibility.Collapsed;
-                LabOptiFabric.Text = optiFabricError ?? Lang.Text("Download.Install.State.CanAdd");
+                var optiFabricErrorText = optiFabricError;
+
+                LocalizedText.TryBind(
+                    LabOptiFabric,
+                    "Text",
+                    () => optiFabricErrorText ?? Lang.Text("Download.Install.State.CanAdd"));
                 LabOptiFabric.Foreground = ThemeManager.colorGray4;
             }
             else
@@ -1011,6 +1066,7 @@ public partial class PageDownloadInstall
         LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
         if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray versions)
             _RebuildVersionCards(versions);
+        ReloadSelected();
     });
 
     private void _AddLatestVersionCard(Dictionary<McVersionCategory, List<JsonObject>> dict)
@@ -1070,9 +1126,14 @@ public partial class PageDownloadInstall
 
             var card = new MyCard
             {
-                Title = $"{McVersionClassifier.GetCategoryDisplayName(category)} ({versions.Count})",
                 Margin = new Thickness(0d, 0d, 0d, 15d)
             };
+            var categoryKey = McVersionClassifier.GetCategoryKey(category);
+            var categoryCount = versions.Count;
+            LocalizedText.TryBind(
+                card,
+                "Title",
+                () => $"{Lang.Text(categoryKey)} ({categoryCount})");
 
             var stack = _CreateVersionStack(versions);
 

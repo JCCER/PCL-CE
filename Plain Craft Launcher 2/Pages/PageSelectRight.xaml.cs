@@ -260,7 +260,8 @@ public partial class PageSelectRight
                 var cardCount = filteredInstances.Count;
                 var newCard = new MyCard
                 {
-                    Margin = new Thickness(0d, 0d, 0d, 15d)
+                    Margin = new Thickness(0d, 0d, 0d, 15d),
+                    Tag = (Key: cardNameKey, Type: cardType)
                 };
                 LocalizedText.TryBind(
                     newCard,
@@ -413,20 +414,21 @@ public partial class PageSelectRight
         var tags = new List<string>();
         tags.Add(instanceInfo.VanillaName);
         if (instanceInfo.HasForge)
-            tags.Add("Forge " + instanceInfo.Forge);
+            tags.Add("Forge" + McInstanceInfo.FormatVersion(instanceInfo.Forge));
         else if (instanceInfo.HasNeoForge)
-            tags.Add("NeoForge " + instanceInfo.NeoForge);
+            tags.Add("NeoForge" + McInstanceInfo.FormatVersion(instanceInfo.NeoForge));
         else if (instanceInfo.HasCleanroom)
-            tags.Add("Cleanroom " + instanceInfo.Cleanroom);
+            tags.Add("Cleanroom" + McInstanceInfo.FormatVersion(instanceInfo.Cleanroom));
         else if (instanceInfo.HasLabyMod)
-            tags.Add("LabyMod " + instanceInfo.LabyMod);
+            tags.Add("LabyMod" + McInstanceInfo.FormatVersion(instanceInfo.LabyMod));
         else if (instanceInfo.HasQuilt)
-            tags.Add("Quilt " + instanceInfo.Quilt);
-        else if (instanceInfo.HasFabric) tags.Add("Fabric " + instanceInfo.Fabric);
+            tags.Add("Quilt" + McInstanceInfo.FormatVersion(instanceInfo.Quilt));
+        else if (instanceInfo.HasFabric)
+            tags.Add("Fabric" + McInstanceInfo.FormatVersion(instanceInfo.Fabric));
         if (instanceInfo.HasLiteLoader)
             tags.Add("LiteLoader");
         if (instanceInfo.HasOptiFine)
-            tags.Add("OptiFine " + instanceInfo.OptiFine);
+            tags.Add("OptiFine" + McInstanceInfo.FormatVersion(instanceInfo.OptiFine));
         newItem.PlainTags = tags;
         try
         {
@@ -605,9 +607,19 @@ public partial class PageSelectRight
                 {
                     // 删除后还有剩
                     var card = (MyCard)parent.Parent;
-                    card.Title = card.Title.Replace(Lang.Number(parent.Children.Count - 1, "N0"),
-                        Lang.Number(parent.Children.Count - 2, "N0")); // 有一个占位符
                     parent.Children.Remove(item);
+                    if (card.Tag is ValueTuple<string, McInstanceCardType> cardInfo)
+                    {
+                        var newCount = parent.Children.Count - 1; // 有一个占位符
+                        var infoKey = cardInfo.Item1;
+                        var infoType = cardInfo.Item2;
+                        LocalizedText.TryBind(
+                            card,
+                            "Title",
+                            () => $"{Lang.Text(infoKey)}{(infoType == McInstanceCardType.Star
+                                ? ""
+                                : $" ({Lang.Number(newCount, "N0")})")}");
+                    }
                     if (ModInstanceList.McMcInstanceSelected is not null && (mcInstance.PathInstance ?? "") ==
                         (ModInstanceList.McMcInstanceSelected.PathInstance ?? ""))
                         // 删除当前实例就更改选择

@@ -376,9 +376,12 @@ public partial class PageLoginAuth
     private void ComboName_TextChanged(object sender, TextChangedEventArgs e)
     {
         _isRegisterMode = string.IsNullOrEmpty(TextName.Text);
-        BtnLink.Content = _isRegisterMode
-            ? Lang.Text("Launch.Account.Auth.Register")
-            : Lang.Text("Launch.Account.Auth.ForgotPassword");
+        LocalizedText.TryBind(
+            BtnLink,
+            "Content",
+            () => _isRegisterMode
+                ? Lang.Text("Launch.Account.Auth.Register")
+                : Lang.Text("Launch.Account.Auth.ForgotPassword"));
     }
 
     private void Btn_Click(object sender, EventArgs e)

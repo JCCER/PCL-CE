@@ -252,13 +252,15 @@ public static class ModInstanceList
                                 VanillaName = instanceCfg.VanillaVersionName[instance.PathInstance],
                                 vanilla = new Version(instanceCfg.VanillaVersion[instance.PathInstance])
                             };
-                            instanceInfo.HasFabric = instanceInfo.Fabric.Any();
-                            instanceInfo.HasLegacyFabric = instanceInfo.LegacyFabric.Any();
-                            instanceInfo.HasQuilt = instanceInfo.Quilt.Any();
-                            instanceInfo.HasForge = instanceInfo.Forge.Any();
-                            instanceInfo.HasNeoForge = instanceInfo.NeoForge.Any();
-                            instanceInfo.HasCleanroom = instanceInfo.Cleanroom.Any();
-                            instanceInfo.HasOptiFine = instanceInfo.OptiFine.Any();
+                            instanceInfo.HasFabric = !string.IsNullOrEmpty(instanceInfo.Fabric);
+                            instanceInfo.HasLegacyFabric =
+                                !string.IsNullOrEmpty(instanceInfo.LegacyFabric);
+                            instanceInfo.HasQuilt = !string.IsNullOrEmpty(instanceInfo.Quilt);
+                            instanceInfo.HasForge = !string.IsNullOrEmpty(instanceInfo.Forge);
+                            instanceInfo.HasNeoForge = !string.IsNullOrEmpty(instanceInfo.NeoForge);
+                            instanceInfo.HasCleanroom =
+                                !string.IsNullOrEmpty(instanceInfo.Cleanroom);
+                            instanceInfo.HasOptiFine = !string.IsNullOrEmpty(instanceInfo.OptiFine);
                             instance.Info = instanceInfo;
                         }
 

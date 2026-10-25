@@ -129,7 +129,11 @@ public partial class MyLoading
             }
             else if (ShowProgress && State.IsLoader)
             {
-                LabText.Text = Text + " - " + Lang.Number(State.Progress, "P0");
+                var progressText = Text;
+                LocalizedText.TryBind(
+                    LabText,
+                    nameof(Text),
+                    () => $"{progressText} - {Lang.Number(State.Progress, "P0")}");
             }
             else
             {

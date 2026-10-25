@@ -1192,12 +1192,41 @@ public partial class PageInstanceExport : IRefreshable
                 loader.Progress = 0.2d;
                 // 导出最终 JSON 文件
                 var dependencies = new JsonObject { { "minecraft", mcInstance.Info.VanillaName } };
-                if (mcInstance.Info.HasForge)
-                    dependencies.Add("forge", mcInstance.Info.Forge);
-                if (mcInstance.Info.HasFabric)
-                    dependencies.Add("fabric-loader", mcInstance.Info.Fabric);
-                if (mcInstance.Info.HasNeoForge)
-                    dependencies.Add("neoforge", mcInstance.Info.NeoForge);
+                switch (mcInstance.Info.HasForge)
+                {
+                    case true when !string.IsNullOrEmpty(mcInstance.Info.Forge):
+                        dependencies.Add("forge", mcInstance.Info.Forge);
+                        break;
+                    case true:
+                        ModBase.Log(
+                            "[Export] Forge 版本未知，已跳过 modrinth.index.json 的 Forge 依赖项",
+                            ModBase.LogLevel.Debug);
+                        break;
+                }
+
+                switch (mcInstance.Info.HasFabric)
+                {
+                    case true when !string.IsNullOrEmpty(mcInstance.Info.Fabric):
+                        dependencies.Add("fabric-loader", mcInstance.Info.Fabric);
+                        break;
+                    case true:
+                        ModBase.Log(
+                            "[Export] Fabric 版本未知，已跳过 modrinth.index.json 的 Fabric 依赖项",
+                            ModBase.LogLevel.Debug);
+                        break;
+                }
+
+                switch (mcInstance.Info.HasNeoForge)
+                {
+                    case true when !string.IsNullOrEmpty(mcInstance.Info.NeoForge):
+                        dependencies.Add("neoforge", mcInstance.Info.NeoForge);
+                        break;
+                    case true:
+                        ModBase.Log(
+                            "[Export] NeoForge 版本未知，已跳过 modrinth.index.json 的 NeoForge 依赖项",
+                            ModBase.LogLevel.Debug);
+                        break;
+                }
                 var resultJson = new JsonObject
                 {
                     { "game", "minecraft" }, { "formatVersion", 1 }, { "versionId", packVersion }, { "name", packName },

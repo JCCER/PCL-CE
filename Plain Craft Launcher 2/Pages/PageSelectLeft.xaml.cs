@@ -64,13 +64,14 @@ public partial class PageSelectLeft : IRefreshable
             ModMain.frmSelectLeft.PanList.Children.Clear();
 
             // 文件夹列表标题
-            ModMain.frmSelectLeft.PanList.Children.Add(new TextBlock
+            var listTitle = new TextBlock
             {
-                Text = Lang.Text("Select.Folder.ListTitle"),
                 Margin = new Thickness(13, 18, 5, 4),
                 Opacity = 0.6,
                 FontSize = 12
-            });
+            };
+            listTitle.TrySetLocalizedValue("Text", "Select.Folder.ListTitle");
+            ModMain.frmSelectLeft.PanList.Children.Add(listTitle);
 
             for (var i = 0; i < ModFolder.mcFolderList.Count; i++)
             {
@@ -213,13 +214,14 @@ public partial class PageSelectLeft : IRefreshable
             }
 
             // 标题文本
-            ModMain.frmSelectLeft.PanList.Children.Add(new TextBlock
+            var addOrImportTitle = new TextBlock
             {
-                Text = Lang.Text("Select.Folder.AddOrImport"),
                 Margin = new Thickness(13, 18, 5, 4),
                 Opacity = 0.6,
                 FontSize = 12
-            });
+            };
+            addOrImportTitle.TrySetLocalizedValue("Text", "Select.Folder.AddOrImport");
+            ModMain.frmSelectLeft.PanList.Children.Add(addOrImportTitle);
 
             // 创建新文件夹按钮
             if (!Directory.Exists(Path.Combine(ModBase.exePath, ".minecraft")))
@@ -228,12 +230,12 @@ public partial class PageSelectLeft : IRefreshable
                 {
                     IsScaleAnimationEnabled = false,
                     Type = MyListItem.CheckType.Clickable,
-                    Title = Lang.Text("Select.Folder.CreateNew.Title"),
                     Height = 34,
-                    ToolTip = Lang.Text("Select.Folder.CreateNew.ToolTip"),
                     LogoScale = 0.9,
                     SvgIcon = "lucide/folder-plus"
                 };
+                itemCreate.TrySetLocalizedValue("Title", "Select.Folder.CreateNew.Title");
+                itemCreate.TrySetLocalizedValue("ToolTip", "Select.Folder.CreateNew.ToolTip");
                 ToolTipService.SetPlacement(itemCreate, PlacementMode.Right);
                 itemCreate.Click += (_, _) => ModMain.frmSelectLeft.Create_Click();
                 ModMain.frmSelectLeft.PanList.Children.Add(itemCreate);
@@ -244,11 +246,11 @@ public partial class PageSelectLeft : IRefreshable
             {
                 IsScaleAnimationEnabled = false,
                 Type = MyListItem.CheckType.Clickable,
-                Title = Lang.Text("Select.Folder.AddExisting.Title"),
                 Height = 34,
-                ToolTip = Lang.Text("Select.Folder.AddExisting.ToolTip"),
                 SvgIcon = "lucide/folder-input"
             };
+            itemAdd.TrySetLocalizedValue("Title", "Select.Folder.AddExisting.Title");
+            itemAdd.TrySetLocalizedValue("ToolTip", "Select.Folder.AddExisting.ToolTip");
             ToolTipService.SetPlacement(itemAdd, PlacementMode.Right);
             itemAdd.Click += (_, _) => ModMain.frmSelectLeft.Add_Click();
             ModMain.frmSelectLeft.PanList.Children.Add(itemAdd);
@@ -258,11 +260,11 @@ public partial class PageSelectLeft : IRefreshable
             {
                 IsScaleAnimationEnabled = false,
                 Type = MyListItem.CheckType.Clickable,
-                Title = Lang.Text("Select.Folder.ImportModpack.Title"),
                 Height = 34,
-                ToolTip = Lang.Text("Select.Folder.ImportModpack.ToolTip"),
                 SvgIcon = "lucide/package-plus"
             };
+            itemInstall.TrySetLocalizedValue("Title", "Select.Folder.ImportModpack.Title");
+            itemInstall.TrySetLocalizedValue("ToolTip", "Select.Folder.ImportModpack.ToolTip");
             ToolTipService.SetPlacement(itemInstall, PlacementMode.Right);
             itemInstall.Click += (_, _) => ModModpack.ModpackInstall();
             ModMain.frmSelectLeft.PanList.Children.Add(itemInstall);
@@ -354,6 +356,10 @@ public partial class PageSelectLeft : IRefreshable
         if (string.Equals(
                 normalized,
                 Normalize(ModBase.exePath),
+                StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(
+                normalized,
+                Normalize(Path.Combine(ModBase.exePath, ".minecraft")),
                 StringComparison.OrdinalIgnoreCase))
             return ModFolder.McFolder.BuiltinNamePrefix + "Select.Folder.CurrentFolder";
 

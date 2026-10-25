@@ -95,6 +95,7 @@ public partial class FormMain
         MsgBoxWrapper.OnShow += ModMain.MsgBoxWrapper_OnShow;
         // 注册 Hint 事件
         HintWrapper.OnShow += HintService.HintWrapper_OnShow;
+        WeakLanguageChanged.Add(this, OnLanguageChanged);
         // 加载 UI
         InitializeComponent();
         Opacity = 0d;
@@ -218,7 +219,8 @@ public partial class FormMain
         // Timer 启动
         ModAnimation.AniStart();
         ModMain.TimerMainStart();
-        // 特殊版本提示
+        // 特殊版本提示        // 次级页面标题栏dd由代码设置，语言变更后需要重新求值
+
         ModBase.RunInNewThread(() =>
         {
             // 特殊版本提示
@@ -1521,6 +1523,15 @@ public partial class FormMain
     public void PageNameRefresh(PageStackData type)
     {
         LabTitleInner.Text = PageNameGet(type);
+    }
+
+    private static void OnLanguageChanged(FormMain form)
+    {
+        ModBase.RunInUi(() =>
+        {
+            if (!string.IsNullOrEmpty(form.PageNameGet(form.pageCurrent)))
+                form.PageNameRefresh();
+        });
     }
 
     /// <summary>

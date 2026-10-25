@@ -33,20 +33,23 @@ internal static class TagPanelHelper
         var list = (keys ?? [])
             .Where(key => !string.IsNullOrWhiteSpace(key))
             .Distinct()
+            .Select(key => (Key: key, Text: Lang.Text(key)))
+            .Where(item => !string.IsNullOrEmpty(item.Text))
+            .OrderBy(item => item.Text, StringComparer.CurrentCulture)
             .ToList();
         panel.Children.Clear();
         panel.Visibility = list.Count > 0
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-        foreach (var key in list.OrderBy(Lang.Text, StringComparer.CurrentCulture))
+        foreach (var item in list)
         {
             var textBlock = CreateTextBlock(
                 foreground,
                 new Binding
                 {
                     Source = LocalizationSource.Instance,
-                    Path = new PropertyPath($"[{key}]"),
+                    Path = new PropertyPath($"[{item.Key}]"),
                     Mode = BindingMode.OneWay
                 });
             panel.Children.Add(CreateBubble(textBlock, backgroundAlpha));

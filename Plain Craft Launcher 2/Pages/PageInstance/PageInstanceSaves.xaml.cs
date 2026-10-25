@@ -144,6 +144,11 @@ public partial class PageInstanceSaves : IRefreshable
         ModAnimation.AniEndControl();
     }
 
+    protected override void RefreshLocalization()
+    {
+        RefreshUI();
+    }
+
     private void RefreshUI()
     {
         try
@@ -210,28 +215,35 @@ public partial class PageInstanceSaves : IRefreshable
                     {
                         Logo = saveLogo,
                         Title = GetFolderNameFromPath(curFolder),
-                        Info =
-                            Lang.Text("Instance.Saves.CreationTime", Lang.Date(Directory.GetCreationTime(curFolder), "d"), Lang.Date(Directory.GetLastWriteTime(curFolder), "d")),
                         Type = MyListItem.CheckType.Clickable
                     };
+                    var createTime = Directory.GetCreationTime(curFolder);
+                    var writeTime = Directory.GetLastWriteTime(curFolder);
+                    LocalizedText.TryBind(
+                        worldItem,
+                        "Info",
+                        () => Lang.Text(
+                            "Instance.Saves.CreationTime",
+                            Lang.Date(createTime, "d"),
+                            Lang.Date(writeTime, "d")));
                     worldItem.Click += (_, _) => ModMain.frmMain.PageChange(new FormMain.PageStackData
                         { page = FormMain.PageType.VersionSaves, additional = (null, null, null, ModComp.CompLoaderType.Any, ModComp.CompType.Any, tmpCurFolder) });
 
                     var btnOpen = new MyIconButton
                     {
                         SvgIcon = "lucide/folder-open",
-                        ToolTip = Lang.Text("Common.Action.Open")
                     };
+                    btnOpen.TrySetLocalizedValue("ToolTip", "Common.Action.Open");
                     btnOpen.Click += (_, _) => ModBase.OpenExplorer(tmpCurFolder);
                     var btnDelete = new MyIconButton
                     {
                         SvgIcon = "lucide/trash-2",
-                        ToolTip = Lang.Text("Common.Action.Delete")
                     };
+                    btnDelete.TrySetLocalizedValue("ToolTip", "Common.Action.Delete");
                     btnDelete.Click += (_, _) =>
                     {
                         worldItem.IsEnabled = false;
-                        worldItem.Info = Lang.Text("Instance.Saves.Deleting");
+                        LocalizedText.TryBind(worldItem, "Info", () => Lang.Text("Instance.Saves.Deleting"));
                         ModBase.RunInNewThread(() =>
                         {
                             try
@@ -255,8 +267,8 @@ public partial class PageInstanceSaves : IRefreshable
                     var btnCopy = new MyIconButton
                     {
                         SvgIcon = "lucide/copy",
-                        ToolTip = Lang.Text("Common.Action.Copy")
                     };
+                    btnCopy.TrySetLocalizedValue("ToolTip", "Common.Action.Copy");
                     btnCopy.Click += (_, _) =>
                     {
                         try
@@ -284,16 +296,16 @@ public partial class PageInstanceSaves : IRefreshable
                     var btnInfo = new MyIconButton
                     {
                         SvgIcon = "lucide/info",
-                        ToolTip = Lang.Text("Instance.Saves.Details")
                     };
+                    btnInfo.TrySetLocalizedValue("ToolTip", "Instance.Saves.Details");
                     btnInfo.Click += (_, _) => ModMain.frmMain.PageChange(new FormMain.PageStackData
                         { page = FormMain.PageType.VersionSaves, additional = (null, null, null, ModComp.CompLoaderType.Any, ModComp.CompType.Any, tmpCurFolder) });
 
                     var btnLaunch = new MyIconButton
                     {
                         SvgIcon = "lucide/play",
-                        ToolTip = Lang.Text("Instance.Saves.QuickPlay")
                     };
+                    btnLaunch.TrySetLocalizedValue("ToolTip", "Instance.Saves.QuickPlay");
                     btnLaunch.Click += (_, _) =>
                     {
                         var worldName = GetFileNameFromPath(tmpCurFolder);

@@ -106,8 +106,13 @@ public partial class PageDownloadClient
                 if (!Pair.Value.Any())
                     continue;
 
-                var newCard = new MyCard
-                    { Title = McVersionClassifier.GetCategoryDisplayName(Pair.Key) + " (" + Pair.Value.Count + ")", Margin = new Thickness(0d, 0d, 0d, 15d) };
+                var newCard = new MyCard { Margin = new Thickness(0d, 0d, 0d, 15d) };
+                var categoryKey = McVersionClassifier.GetCategoryKey(Pair.Key);
+                var categoryCount = Pair.Value.Count;
+                LocalizedText.TryBind(
+                    newCard,
+                    "Title",
+                    () => $"{Lang.Text(categoryKey)} ({categoryCount})");
                 var newStack = new StackPanel
                 {
                     Margin = new Thickness(20d, MyCard.SwapedHeight, 18d, 0d),

@@ -146,6 +146,13 @@ public partial class PageInstanceSavesDatapack : IRefreshable
         }
     }
 
+    protected override void RefreshLocalization()
+    {
+        foreach (var item in datapackItems.Values)
+            item.Refresh();
+        RefreshBars();
+    }
+
     // 强制刷新
     private void RefreshSelf()
     {
@@ -415,7 +422,12 @@ public partial class PageInstanceSavesDatapack : IRefreshable
                 }
             });
             // 显示
-            BtnFilterAll.Text = IsSearching ? Lang.Text("Instance.Resource.Filter.SearchResult") : Lang.Text("Instance.Resource.Filter.AllWithCount", anyCount);
+            LocalizedText.TryBind(
+                BtnFilterAll,
+                "Text",
+                () => IsSearching
+                    ? Lang.Text("Instance.Resource.Filter.SearchResult")
+                    : Lang.Text("Instance.Resource.Filter.AllWithCount", anyCount));
             LocalizedText.TryBind(
                 BtnFilterCanUpdate,
                 "Text",

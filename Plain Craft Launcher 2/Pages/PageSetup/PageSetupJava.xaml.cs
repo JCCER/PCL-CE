@@ -47,10 +47,10 @@ public partial class PageSetupJava
         PanContent.Children.Clear();
         var itemAuto = new MyListItem
         {
-            Type = MyListItem.CheckType.RadioBox,
-            Title = Lang.Text("Setup.Java.AutoSelect.Title"),
-            Info = Lang.Text("Setup.Java.AutoSelect.Info")
+            Type = MyListItem.CheckType.RadioBox
         };
+        itemAuto.TrySetLocalizedValue("Title", "Setup.Java.AutoSelect.Title");
+        itemAuto.TrySetLocalizedValue("Info", "Setup.Java.AutoSelect.Info");
         itemAuto.Check += (sender, e) => Config.Launch.SelectedJava = "";
         PanContent.Children.Add(itemAuto);
         var currentSetJava = Config.Launch.SelectedJava;
@@ -65,7 +65,13 @@ public partial class PageSetupJava
         if (string.IsNullOrEmpty(currentSetJava))
             itemAuto.SetChecked(true, false, false);
     }
-    
+
+    protected override void RefreshLocalization()
+    {
+        if (loader.State == ModBase.LoadState.Finished)
+            OnLoadFinished();
+    }
+
     private MyListItem ItemBuild(JavaEntry j)
     {
         var item = new MyListItem();

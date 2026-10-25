@@ -218,6 +218,17 @@ public static class ModLoader
         public string name;
 
         /// <summary>
+        ///     按当前语言生成显示名称的委托。为空时使用 <see cref="name" />。
+        ///     需要跟随界面语言刷新时请设置该委托。
+        /// </summary>
+        public Func<string>? DisplayNameFactory;
+
+        /// <summary>
+        ///     当前语言下的显示名称。
+        /// </summary>
+        public string DisplayName => DisplayNameFactory?.Invoke() ?? name;
+
+        /// <summary>
         ///     加载器的内部标识，不参与本地化，可用于跨语言稳定的逻辑匹配。
         ///     为空表示该加载器没有特殊的内部标识。
         /// </summary>

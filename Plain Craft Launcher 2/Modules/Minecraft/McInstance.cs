@@ -17,10 +17,15 @@ public class McInstance
         public string? CustomDesc;
 
         /// <summary>
-        ///     运行时产生的描述文本，例如加载失败、版本无法识别等错误信息。
-        ///     该字段不会被持久化，语言切换后由下一次检查重新生成。
+        ///     运行时描述文本的生成逻辑。每次访问时按当前语言求值。
         /// </summary>
-        public string? RuntimeDesc;
+        private Func<string>? _runtimeDescFactory;
+
+        /// <summary>
+        ///     运行时产生的描述文本，例如加载失败、版本无法识别等错误信息。
+        ///     该字段不会被持久化，且每次访问都会按当前语言重新生成。
+        /// </summary>
+        public string? RuntimeDesc => _runtimeDescFactory?.Invoke();
 
         /// <summary>
         ///     是否尚未加载。此时还没有可用的描述信息。
@@ -36,11 +41,44 @@ public class McInstance
         {
             get
             {
-                if (!string.IsNullOrEmpty(RuntimeDesc)) return RuntimeDesc;
+                var runtimeDesc = RuntimeDesc;
+                if (!string.IsNullOrEmpty(runtimeDesc)) return runtimeDesc;
                 if (!string.IsNullOrEmpty(CustomDesc)) return CustomDesc;
                 if (_descNotLoaded) return Lang.Text("Select.Instance.Description.NotLoaded");
                 return GetDefaultDescription();
             }
+        }
+
+        /// <summary>
+        ///     设置按资源键生成的运行时描述。
+        /// </summary>
+        private void SetRuntimeDesc(string key, params object?[] args)
+        {
+            _runtimeDescFactory = () => Lang.Text(key, args);
+        }
+
+        /// <summary>
+        ///     设置一段不参与本地化的运行时描述（例如异常消息）。
+        /// </summary>
+        private void SetRuntimeDescRaw(string text)
+        {
+            _runtimeDescFactory = () => text;
+        }
+
+        /// <summary>
+        ///     设置需要按当前语言重新计算的运行时描述。
+        /// </summary>
+        private void SetRuntimeDescFactory(Func<string> factory)
+        {
+            _runtimeDescFactory = factory;
+        }
+
+        /// <summary>
+        ///     清除运行时描述。
+        /// </summary>
+        private void ClearRuntimeDesc()
+        {
+            _runtimeDescFactory = null;
         }
 
         /// <summary>
@@ -351,13 +389,13 @@ public class McInstance
 
                     // 无法获取
                     field.VanillaName = "Unknown";
-                    RuntimeDesc = Lang.Text("Select.Instance.Description.UnknownMcVersion");
+                    SetRuntimeDesc("Select.Instance.Description.UnknownMcVersion");
                 }
                 catch (Exception ex)
                 {
                     ModBase.Log(ex, "识别 Minecraft 版本时出错");
                     field.VanillaName = "Unknown";
-                    RuntimeDesc = Lang.Text("Minecraft.Error.Unrecognizable", ex.Message);
+                    SetRuntimeDesc("Minecraft.Error.Unrecognizable", ex.Message);
                 }
 
                 #endregion
@@ -644,7 +682,7 @@ public class McInstance
             if (!Directory.Exists(PathInstance))
             {
                 state = McInstanceState.Error;
-                RuntimeDesc = Lang.Text("Select.Instance.Description.NotFound", Name);
+                SetRuntimeDesc("Select.Instance.Description.NotFound", Name);
                 return false;
             }
 
@@ -657,7 +695,7 @@ public class McInstance
             catch (Exception ex)
             {
                 state = McInstanceState.Error;
-                RuntimeDesc = Lang.Text("Select.Instance.Description.NoPermission");
+                SetRuntimeDesc("Select.Instance.Description.NoPermission");
                 ModBase.Log(ex, "没有访问实例文件夹的权限");
                 return false;
             }
@@ -672,7 +710,7 @@ public class McInstance
                 ModBase.Log(ex, "实例 JSON 可用性检查失败（" + PathInstance + "）");
                 JsonText = "";
                 JsonObject = null;
-                RuntimeDesc = ex.Message;
+                SetRuntimeDescRaw(ex.Message);
                 state = McInstanceState.Error;
                 return false;
             }
@@ -687,7 +725,7 @@ public class McInstance
             {
                 ModBase.Log(ex, "版本号获取失败（" + Name + "）");
                 state = McInstanceState.Error;
-                RuntimeDesc = Lang.Text("Minecraft.Error.VersionNumberFetchFailed", ex);
+                SetRuntimeDesc("Minecraft.Error.VersionNumberFetchFailed", ex);
                 return false;
             }
 
@@ -698,7 +736,7 @@ public class McInstance
                     if (!File.Exists(Path.Combine(ModBase.GetPathFromFullPath(PathInstance), InheritInstanceName, InheritInstanceName + ".json")))
                     {
                         state = McInstanceState.Error;
-                        RuntimeDesc = Lang.Text(
+                        SetRuntimeDesc(
                             "Select.Instance.Description.NeedInherit",
                             InheritInstanceName);
                         return false;
@@ -708,7 +746,8 @@ public class McInstance
             {
                 ModBase.Log(ex, "依赖实例检查出错（" + Name + "）");
                 state = McInstanceState.Error;
-                RuntimeDesc = $"{Lang.Text("Select.Instance.Description.UnknownError")}: {ex}";
+                SetRuntimeDescFactory(() =>
+                    $"{Lang.Text("Select.Instance.Description.UnknownError")}: {ex}");
                 return false;
             }
 
@@ -929,7 +968,7 @@ public class McInstance
                     CustomDesc = States.Instance.CustomInfo[PathInstance];
                     if (string.IsNullOrEmpty(CustomDesc))
                         CustomDesc = null;
-                    RuntimeDesc = null;
+                    ClearRuntimeDesc();
                 }
 
                 // 确定实例收藏状态
@@ -961,7 +1000,8 @@ public class McInstance
             }
             catch (Exception ex)
             {
-                RuntimeDesc = Lang.Text("Select.Instance.Description.UnknownError") + ": " + ex;
+                SetRuntimeDescFactory(() =>
+                    Lang.Text("Select.Instance.Description.UnknownError") + ": " + ex);
                 Logo = ModBase.pathImage + "Blocks/RedstoneBlock.png";
                 state = McInstanceState.Error;
                 ModBase.Log(

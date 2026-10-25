@@ -55,7 +55,8 @@ public static class ModFolder
         ///     当前语言下的显示名称。内置文件夹会按当前语言实时翻译。
         /// </summary>
         public string DisplayName =>
-            Name?.StartsWith(BuiltinNamePrefix) == true
+            Name is not null && Name.Length > BuiltinNamePrefix.Length &&
+            Name.StartsWith(BuiltinNamePrefix, StringComparison.Ordinal)
                 ? Lang.Text(Name[BuiltinNamePrefix.Length..])
                 : Name;
 
@@ -92,6 +93,21 @@ public static class ModFolder
     /// </summary>
     public static ModLoader.LoaderTask<int, int> mcFolderListLoader = new("Minecraft Folder List",
         _ => McFolderListLoadSub(), priority: ThreadPriority.AboveNormal);
+
+    /// <summary>
+    ///     旧版本把内置文件夹的译文直接写进了配置，升级后需要把这些译文迁移回资源键，
+    ///     否则内置文件夹名称会永远停留在升级时的语言。
+    /// </summary>
+    private static readonly Dictionary<string, string> LegacyBuiltinFolderNames =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["当前文件夹"] = "Select.Folder.CurrentFolder",
+            ["目前資料夾"] = "Select.Folder.CurrentFolder",
+            ["Current folder"] = "Select.Folder.CurrentFolder",
+            ["官方启动器文件夹"] = "Select.Folder.OfficialLauncherFolder",
+            ["官方啟動器資料夾"] = "Select.Folder.OfficialLauncherFolder",
+            ["Official launcher folder"] = "Select.Folder.OfficialLauncherFolder"
+        };
 
     private static void McFolderListLoadSub()
     {
@@ -172,10 +188,21 @@ public static class ModFolder
                 foreach (var cacheFolder in cacheMcFolderList)
                     if ((cacheFolder.Location ?? "") == (newOriginalFolder.Location ?? ""))
                     {
-                        if ((cacheFolder.Name ?? "") != (newOriginalFolder.Name ?? ""))
-                            cacheFolder.type = McFolder.Types.RenamedOriginal;
-                        else
-                            cacheFolder.type = McFolder.Types.Original;
+                        var newOriginalName = newOriginalFolder.Name ?? "";
+                        // 旧版本保存的是译文；仅当它确实是该内置文件夹的旧译名时才迁移，
+                        // 以免覆盖用户手动改过的名称。
+                        if (newOriginalName.StartsWith(
+                                McFolder.BuiltinNamePrefix,
+                                StringComparison.Ordinal) &&
+                            LegacyBuiltinFolderNames.TryGetValue(
+                                cacheFolder.Name ?? "",
+                                out var legacyKey) &&
+                            newOriginalName == McFolder.BuiltinNamePrefix + legacyKey)
+                            cacheFolder.Name = newOriginalName;
+
+                        cacheFolder.type = (cacheFolder.Name ?? "") != newOriginalName
+                            ? McFolder.Types.RenamedOriginal
+                            : McFolder.Types.Original;
                         unAdded = false;
                     }
 

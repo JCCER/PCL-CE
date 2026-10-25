@@ -59,6 +59,12 @@ public partial class PageDownloadCompDetail
         ModAnimation.AniEndControl();
     }
 
+    protected override void RefreshLocalization()
+    {
+        if (_compFileLoader is { State: ModBase.LoadState.Finished })
+            UpdateFilterResult();
+    }
+
     // 整合包安装
     public void Install_Click(MyListItem sender, EventArgs e)
     {
@@ -862,17 +868,21 @@ public partial class PageDownloadCompDetail
             {
                 var instanceTextBlock = new TextBlock
                 {
-                    Text = Lang.Text("Download.Comp.Detail.InstanceFilter"),
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(2d, 0d, 0d, 0d)
                 };
+                instanceTextBlock.TrySetLocalizedValue(
+                    "Text",
+                    "Download.Comp.Detail.InstanceFilter");
                 PanInstanceFilter.Children.Add(instanceTextBlock);
                 var modLoaderTextBlock = new TextBlock
                 {
-                    Text = Lang.Text("Download.Comp.Detail.LoaderFilter"),
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(2d, 0d, 0d, 0d)
                 };
+                modLoaderTextBlock.TrySetLocalizedValue(
+                    "Text",
+                    "Download.Comp.Detail.LoaderFilter");
                 PanModLoaderFilter.Children.Add(modLoaderTextBlock);
             }
 
@@ -1157,12 +1167,17 @@ public partial class PageDownloadCompDetail
 
                 // 特殊提示
                 if (currentKey == VersionGroupOther)
-                    newStack.Children.Add(new MyHint
+                {
+                    var delayHint = new MyHint
                     {
-                        Text = Lang.Text("Download.Comp.Detail.VersionRecognitionDelayHint"),
                         Theme = MyHint.Themes.Yellow,
                         Margin = new Thickness(5d, 0d, 0d, 8d)
-                    });
+                    };
+                    delayHint.TrySetLocalizedValue(
+                        "Text",
+                        "Download.Comp.Detail.VersionRecognitionDelayHint");
+                    newStack.Children.Add(delayHint);
+                }
             }
 
             // 单卡片自动展开

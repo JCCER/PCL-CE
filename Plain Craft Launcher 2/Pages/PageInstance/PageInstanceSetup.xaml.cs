@@ -102,7 +102,7 @@ public partial class PageInstanceSetup
             var _unused = PageInstanceLeft.McInstance.PathIndie; // 触发自动判定
             ComboArgumentIndieV2.SelectedIndex = Config.Instance.IndieV2[PageInstanceLeft.McInstance.PathInstance] ? 0 : 1;
             CheckArgumentTitleEmpty.Visibility = TextArgumentTitle.Text.Length > 0 ? Visibility.Collapsed : Visibility.Visible;
-            TextArgumentTitle.HintText = CheckArgumentTitleEmpty.Checked == true ? Lang.Text("Common.Option.Default") : Lang.Text("Instance.Setup.FollowGlobal");
+            BindArgumentTitleHint();
             RefreshJavaComboBox();
 
             // 游戏内存
@@ -776,31 +776,54 @@ public partial class PageInstanceSetup
 
             if (Files.IsPathWithinDirectory(absPath, Basics.ExecutableDirectory) && javaEntry is not null &&
                 javaEntry.IsEnabled)
+            {
                 // 有效路径：显示具体 Java 信息
                 relativePathItem = new MyComboBoxItem
                 {
-                    Content = Lang.Text("Instance.Setup.Options.Java.SelectRelative.WithJava", javaEntry.ToString()),
-                    Tag = new UseRelativePath(relPref.RelativePath),
-                    ToolTip = Lang.Text("Instance.Setup.Options.Java.RelativePathToolTip", relPref.RelativePath, absPath)
+                    Tag = new UseRelativePath(relPref.RelativePath)
                 };
+                var javaDisplay = javaEntry.ToString();
+                LocalizedText.TryBind(
+                    relativePathItem,
+                    "Content",
+                    () => Lang.Text("Instance.Setup.Options.Java.SelectRelative.WithJava",
+                        javaDisplay));
+                LocalizedText.TryBind(
+                    relativePathItem,
+                    "ToolTip",
+                    () => Lang.Text(
+                        "Instance.Setup.Options.Java.RelativePathToolTip",
+                        relPref.RelativePath, absPath));
+            }
             else
+            {
                 // 无效路径：提示用户重新选择
                 relativePathItem = new MyComboBoxItem
                 {
-                    Content = Lang.Text("Instance.Setup.Options.Java.SelectRelative.Invalid"),
-                    Tag = new UseRelativePath(relPref.RelativePath),
-                    ToolTip = Lang.Text("Instance.Setup.Options.Java.InvalidPathToolTip", absPath)
+                    Tag = new UseRelativePath(relPref.RelativePath)
                 };
+                relativePathItem.TrySetLocalizedValue(
+                    "Content",
+                    "Instance.Setup.Options.Java.SelectRelative.Invalid");
+                LocalizedText.TryBind(
+                    relativePathItem,
+                    "ToolTip",
+                    () => Lang.Text(
+                        "Instance.Setup.Options.Java.InvalidPathToolTip",
+                        absPath));
+            }
         }
         else
         {
             // 未配置相对路径：使用默认模板
             relativePathItem = new MyComboBoxItem
             {
-                Content = Lang.Text("Instance.Setup.Options.Java.SelectRelative"),
-                Tag = new UseRelativePath(@"jre\bin\java.exe"),
-                ToolTip = Lang.Text("Instance.Setup.Options.Java.SelectRelativeToolTip")
+                Tag = new UseRelativePath(@"jre\bin\java.exe")
             };
+            relativePathItem.TrySetLocalizedValue("Content",
+                "Instance.Setup.Options.Java.SelectRelative");
+            relativePathItem.TrySetLocalizedValue("ToolTip",
+                "Instance.Setup.Options.Java.SelectRelativeToolTip");
         }
 
         ComboArgumentJava.Items.Add(relativePathItem);
@@ -1009,10 +1032,20 @@ public partial class PageInstanceSetup
         }
     }
 
+    private void BindArgumentTitleHint()
+    {
+        LocalizedText.TryBind(
+            TextArgumentTitle,
+            "HintText",
+            () => CheckArgumentTitleEmpty.Checked == true
+                ? Lang.Text("Common.Option.Default")
+                : Lang.Text("Instance.Setup.FollowGlobal"));
+    }
+
     // 游戏窗口
     private void CheckArgumentTitleEmpty_Change(object sender, bool e)
     {
-        TextArgumentTitle.HintText = CheckArgumentTitleEmpty.Checked == true ? Lang.Text("Common.Option.Default") : Lang.Text("Instance.Setup.FollowGlobal");
+        BindArgumentTitleHint();
         CheckBoxChange(sender,e);
     }
 

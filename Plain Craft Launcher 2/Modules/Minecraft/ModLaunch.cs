@@ -25,6 +25,18 @@ public static class ModLaunch
 {
     public const string mesaLoaderWindowsVersion = "26.0.4";
 
+    public const string LaunchStageLoginId = "Launch:Login";
+    public const string LaunchStageGetJavaId = "Launch:GetJava";
+    public const string LaunchStageCompleteFilesId = "Launch:CompleteFiles";
+    public const string LaunchStageGetArgumentsId = "Launch:GetArguments";
+    public const string LaunchStageExtractNativesId = "Launch:ExtractNatives";
+    public const string LaunchStagePreLaunchId = "Launch:PreLaunch";
+    public const string LaunchStageCustomCommandId = "Launch:CustomCommand";
+    public const string LaunchStageStartProcessId = "Launch:StartProcess";
+    public const string LaunchStageWaitWindowId = "Launch:WaitWindow";
+    public const string LaunchStageEndId = "Launch:End";
+    public const string LaunchStageRootId = "Launch:Root";
+
     #region 预检测
 
     private static void McLaunchPrecheck()
@@ -346,26 +358,94 @@ public static class ModLaunch
 
             var loaders = new List<ModLoader.LoaderBase>
             {
-                new ModLoader.LoaderTask<int, int>(Lang.Text("Minecraft.Launch.Stage.GetJava"), McLaunchJava) { ProgressWeight = 4d, block = false },
+                new ModLoader.LoaderTask<int, int>(
+                    Lang.Text("Minecraft.Launch.Stage.GetJava"),
+                    McLaunchJava)
+                {
+                    ProgressWeight = 4d, block = false,
+                    Identifier = LaunchStageGetJavaId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.GetJava")
+                },
                 mcLoginLoader,
-                new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Launch.Stage.CompleteFiles"),
-                        skipClientDownloads
-                            ? new List<ModLoader.LoaderBase>()
-                            : ModDownload.DlClientFix(ModInstanceList.McMcInstanceSelected, false,
-                                ModDownload.AssetsIndexExistsBehaviour.DownloadInBackground))
-                    { ProgressWeight = 15d, show = false },
-                new ModLoader.LoaderTask<string, List<ModLibrary.McLibToken>>(Lang.Text("Minecraft.Launch.Stage.GetArguments"), McLaunchArgumentMain)
-                    { ProgressWeight = 2d },
-                new ModLoader.LoaderTask<List<ModLibrary.McLibToken>, int>(Lang.Text("Minecraft.Launch.Stage.ExtractNatives"), McLaunchNatives)
-                    { ProgressWeight = 2d },
-                new ModLoader.LoaderTask<int, int>(Lang.Text("Minecraft.Launch.Stage.PreLaunch"), _ => McLaunchPrerun()) { ProgressWeight = 1d },
-                new ModLoader.LoaderTask<int, int>(Lang.Text("Minecraft.Launch.Stage.CustomCommand"), McLaunchCustom) { ProgressWeight = 1d },
-                new ModLoader.LoaderTask<int, Process>(Lang.Text("Minecraft.Launch.Stage.StartProcess"), McLaunchRun) { ProgressWeight = 2d },
-                new ModLoader.LoaderTask<Process, int>(Lang.Text("Minecraft.Launch.Stage.WaitWindow"), McLaunchWait) { ProgressWeight = 1d },
-                new ModLoader.LoaderTask<int, int>(Lang.Text("Minecraft.Launch.Stage.End"), _ => McLaunchEnd()) { ProgressWeight = 1d }
+                new ModLoader.LoaderCombo<string>(
+                    Lang.Text("Minecraft.Launch.Stage.CompleteFiles"),
+                    skipClientDownloads
+                        ? []
+                        : ModDownload.DlClientFix(
+                            ModInstanceList.McMcInstanceSelected,
+                            false,
+                            ModDownload.AssetsIndexExistsBehaviour.DownloadInBackground))
+                {
+                    ProgressWeight = 15d, show = false,
+                    Identifier = LaunchStageCompleteFilesId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.CompleteFiles")
+                },
+                new ModLoader.LoaderTask<string, List<ModLibrary.McLibToken>>(
+                    Lang.Text("Minecraft.Launch.Stage.GetArguments"),
+                    McLaunchArgumentMain)
+                {
+                    ProgressWeight = 2d,
+                    Identifier = LaunchStageGetArgumentsId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.GetArguments")
+                },
+                new ModLoader.LoaderTask<List<ModLibrary.McLibToken>, int>(
+                    Lang.Text("Minecraft.Launch.Stage.ExtractNatives"),
+                    McLaunchNatives)
+                {
+                    ProgressWeight = 2d,
+                    Identifier = LaunchStageExtractNativesId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.ExtractNatives")
+                },
+                new ModLoader.LoaderTask<int, int>(
+                    Lang.Text("Minecraft.Launch.Stage.PreLaunch"),
+                    _ => McLaunchPrerun())
+                {
+                    ProgressWeight = 1d,
+                    Identifier = LaunchStagePreLaunchId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.PreLaunch")
+                },
+                new ModLoader.LoaderTask<int, int>(
+                    Lang.Text("Minecraft.Launch.Stage.CustomCommand"),
+                    McLaunchCustom)
+                {
+                    ProgressWeight = 1d,
+                    Identifier = LaunchStageCustomCommandId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.CustomCommand")
+                },
+                new ModLoader.LoaderTask<int, Process>(
+                    Lang.Text("Minecraft.Launch.Stage.StartProcess"),
+                    McLaunchRun)
+                {
+                    ProgressWeight = 2d,
+                    Identifier = LaunchStageStartProcessId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.StartProcess")
+                },
+                new ModLoader.LoaderTask<Process, int>(
+                    Lang.Text("Minecraft.Launch.Stage.WaitWindow"),
+                    McLaunchWait)
+                {
+                    ProgressWeight = 1d,
+                    Identifier = LaunchStageWaitWindowId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.WaitWindow")
+                },
+                new ModLoader.LoaderTask<int, int>(
+                    Lang.Text("Minecraft.Launch.Stage.End"),
+                    _ => McLaunchEnd())
+                {
+                    ProgressWeight = 1d,
+                    Identifier = LaunchStageEndId,
+                    DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.End")
+                }
             }; // .ProgressWeight = 15, .Block = False
 
-            var launchLoader = new ModLoader.LoaderCombo<object>(Lang.Text("Minecraft.Launch.Stage.Root"), loaders) { show = false };
+            var launchLoader = new ModLoader.LoaderCombo<object>(
+                Lang.Text("Minecraft.Launch.Stage.Root"),
+                loaders)
+            {
+                show = false,
+                Identifier = LaunchStageRootId,
+                DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.Root")
+            };
             if (mcLoginLoader.State == ModBase.LoadState.Finished)
                 mcLoginLoader.State = ModBase.LoadState.Waiting; // 要求重启登录主加载器，它会自行决定是否启动副加载器
             // 等待加载器执行并更新 UI
@@ -606,7 +686,13 @@ public static class ModLaunch
     // 登录主模块加载器
     public static ModLoader.LoaderTask<McLoginData, McLoginResult> mcLoginLoader =
         new(Lang.Text("Minecraft.Launch.Stage.Login"), McLoginStart, McLoginInput, ThreadPriority.BelowNormal)
-            { reloadTimeout = 1, ProgressWeight = 15d, block = false };
+        {
+            reloadTimeout = 1,
+            ProgressWeight = 15d,
+            block = false,
+            Identifier = LaunchStageLoginId,
+            DisplayNameFactory = () => Lang.Text("Minecraft.Launch.Stage.Login")
+        };
 
     public static McLoginData McLoginInput()
     {
@@ -957,9 +1043,17 @@ public static class ModLaunch
         // Cleanroom 检测
         if (ModInstanceList.McMcInstanceSelected.Info.HasCleanroom)
         {
-            if (!Version.TryParse(ModInstanceList.McMcInstanceSelected.Info.Cleanroom.Split('-')[0], out Version cleanroomVersion))
-                throw new FormatException("无法解析 Cleanroom 版本号：" + ModInstanceList.McMcInstanceSelected.Info.Cleanroom);
-            if (cleanroomVersion < new Version(0, 5, 0, 0))
+            var cleanroomVersionText = ModInstanceList.McMcInstanceSelected.Info.Cleanroom;
+            if (string.IsNullOrEmpty(cleanroomVersionText) ||
+                !Version.TryParse(
+                    cleanroomVersionText.Split('-')[0],
+                    out var cleanroomVersion))
+            {
+                ModBase.Log(
+                    $"[Launch] 无法解析 Cleanroom 版本号，跳过 Java 版本限制：{cleanroomVersionText ?? "null"}",
+                    ModBase.LogLevel.Debug);
+            }
+            else if (cleanroomVersion < new Version(0, 5, 0, 0))
             {
                 if (ModBase.modeDebug) ModBase.Log("[Launch] [Debug] Cleanroom 版本低于 0.5，要求至少 Java 21");
                 minVer = new Version(21, 0, 0, 0) > minVer ? new Version(21, 0, 0, 0) : minVer;

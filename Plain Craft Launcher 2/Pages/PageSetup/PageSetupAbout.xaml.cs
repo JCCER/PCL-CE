@@ -18,10 +18,23 @@ public partial class PageSetupAbout
     public PageSetupAbout()
     {
         InitializeComponent();
+        BindAboutInfo();
         Loaded += PageOtherAbout_Loaded;
     }
 
     public ObservableCollection<GitHubContributor> Contributors { get; set; } = new();
+
+    private void BindAboutInfo()
+    {
+        LocalizedText.TryBind(
+            ItemAboutPcl,
+            "Info",
+            () => Lang.Text("Setup.About.Version.Info")
+                .Replace("%VERSION%", ModBase.versionBaseName)
+                .Replace("%VERSIONCODE%", ModBase.versionCode.ToString())
+                .Replace("%BRANCH%", ModBase.versionBranchName)
+                .Replace("%COMMIT_HASH%", ModBase.commitHashShort));
+    }
 
     private void PageOtherAbout_Loaded(object sender, RoutedEventArgs e)
     {
@@ -32,10 +45,6 @@ public partial class PageSetupAbout
         if (isLoaded)
             return;
         isLoaded = true;
-
-        ItemAboutPcl.Info = ItemAboutPcl.Info.Replace("%VERSION%", ModBase.versionBaseName)
-            .Replace("%VERSIONCODE%", ModBase.versionCode.ToString()).Replace("%BRANCH%", ModBase.versionBranchName)
-            .Replace("%COMMIT_HASH%", ModBase.commitHashShort);
 
         if (!Lang.IsChineseMainland)
         {

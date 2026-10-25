@@ -640,15 +640,20 @@ public static class ModModpack
         });
 
         // 重复任务检查
+        var loaderIdentifier = $"Modpack:CurseForge:{instanceName}";
         var loaderName = Lang.Text("Minecraft.Download.Modpack.Task.CurseForgeInstall", instanceName);
-        if (loaderTaskbar.Any(l => (l.name ?? "") == (loaderName ?? "")))
+        if (loaderTaskbar.Any(l => l.Identifier == loaderIdentifier))
         {
             HintService.Hint(Lang.Text("Minecraft.Download.Modpack.Installing"), HintType.Error);
             throw new ModBase.CancelledException();
         }
 
         // 启动
-        var loader = new LoaderCombo<string>(loaderName, loaders) { OnStateChanged = ModDownloadLib.McInstallState };
+        var loader = new LoaderCombo<string>(loaderName, loaders)
+        {
+            OnStateChanged = ModDownloadLib.McInstallState,
+            Identifier = loaderIdentifier
+        };
         loader.Start(request.targetInstanceFolder);
         LoaderTaskbarAdd(loader);
         ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -882,15 +887,20 @@ public static class ModModpack
         });
 
         // 重复任务检查
+        var loaderIdentifier = $"Modpack:Modrinth:{instanceName}";
         var loaderName = Lang.Text("Minecraft.Download.Modpack.Task.ModrinthInstall", instanceName);
-        if (loaderTaskbar.Any(l => (l.name ?? "") == (loaderName ?? "")))
+        if (loaderTaskbar.Any(l => l.Identifier == loaderIdentifier))
         {
             HintService.Hint(Lang.Text("Minecraft.Download.Modpack.Installing"), HintType.Error);
             throw new ModBase.CancelledException();
         }
 
         // 启动
-        var loader = new LoaderCombo<string>(loaderName, loaders) { OnStateChanged = ModDownloadLib.McInstallState };
+        var loader = new LoaderCombo<string>(loaderName, loaders)
+        {
+            OnStateChanged = ModDownloadLib.McInstallState,
+            Identifier = loaderIdentifier
+        };
         loader.Start(request.targetInstanceFolder);
         LoaderTaskbarAdd(loader);
         ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -960,15 +970,20 @@ public static class ModModpack
                 { show = false, ProgressWeight = mergeLoaders.Sum(l => l.ProgressWeight) }
         };
         // 重复任务检查
+        var loaderIdentifier = $"Modpack:Hmcl:{instanceName}";
         var loaderName = Lang.Text("Minecraft.Download.Modpack.Task.HmclInstall", instanceName);
-        if (loaderTaskbar.Any(l => (l.name ?? "") == (loaderName ?? "")))
+        if (loaderTaskbar.Any(l => l.Identifier == loaderIdentifier))
         {
             HintService.Hint(Lang.Text("Minecraft.Download.Modpack.Installing"), HintType.Error);
             throw new ModBase.CancelledException();
         }
 
         // 启动
-        var loader = new LoaderCombo<string>(loaderName, loaders) { OnStateChanged = ModDownloadLib.McInstallState };
+        var loader = new LoaderCombo<string>(loaderName, loaders)
+        {
+            OnStateChanged = ModDownloadLib.McInstallState,
+            Identifier = loaderIdentifier
+        };
         loader.Start(request.targetInstanceFolder);
         LoaderTaskbarAdd(loader);
         ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -1106,8 +1121,9 @@ public static class ModModpack
         });
 
         // 重复任务检查
+        var loaderIdentifier = $"Modpack:Mcbbs:{instanceName}";
         var loaderName = Lang.Text("Minecraft.Download.Modpack.Task.McbbsInstall", instanceName);
-        if (loaderTaskbar.Any(l => l.name == loaderName))
+        if (loaderTaskbar.Any(l => l.Identifier == loaderIdentifier))
         {
             HintService.Hint(Lang.Text("Minecraft.Download.Modpack.Installing"), HintType.Error);
             throw new ModBase.CancelledException();
@@ -1754,15 +1770,20 @@ public static class ModModpack
             { show = false, ProgressWeight = mergeLoaders.Sum(l => l.ProgressWeight) });
 
         // 重复任务检查
+        var loaderIdentifier = $"Modpack:Mmc:{instanceName}";
         var loaderName = Lang.Text("Minecraft.Download.Modpack.Task.MmcInstall", instanceName);
-        if (loaderTaskbar.Any(l => (l.name ?? "") == (loaderName ?? "")))
+        if (loaderTaskbar.Any(l => l.Identifier == loaderIdentifier))
         {
             HintService.Hint(Lang.Text("Minecraft.Download.Modpack.Installing"), HintType.Error);
             throw new ModBase.CancelledException();
         }
 
         // 启动
-        var loader = new LoaderCombo<string>(loaderName, loaders) { OnStateChanged = ModDownloadLib.McInstallState };
+        var loader = new LoaderCombo<string>(loaderName, loaders)
+        {
+            OnStateChanged = ModDownloadLib.McInstallState,
+            Identifier = loaderIdentifier
+        };
         loader.Start(request.targetInstanceFolder);
         LoaderTaskbarAdd(loader);
         ModMain.frmMain.BtnExtraDownload.ShowRefresh();

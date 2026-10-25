@@ -265,6 +265,13 @@ public partial class PageInstanceCompResource : IRefreshable
         }
     }
 
+    protected override void RefreshLocalization()
+    {
+        foreach (var item in modItems.Values)
+            item.Refresh();
+        RefreshBars();
+    }
+
     // 强制刷新
     private void RefreshSelf()
     {
@@ -692,7 +699,13 @@ public partial class PageInstanceCompResource : IRefreshable
                     : "lucide/circle-check",
                 Tag = sender
             };
-            btnED.ToolTip = sender.Entry.State == ModLocalComp.LocalCompFile.LocalFileStatus.Fine ? Lang.Text("Instance.Resource.Disable") : Lang.Text("Instance.Resource.Enable");
+            // 启用状态与界面语言都可能变化，按需求值
+            LocalizedText.TryBind(
+                btnED,
+                "ToolTip",
+                () => sender.Entry.State == ModLocalComp.LocalCompFile.LocalFileStatus.Fine
+                    ? Lang.Text("Instance.Resource.Disable")
+                    : Lang.Text("Instance.Resource.Enable"));
             ToolTipService.SetPlacement(btnED, PlacementMode.Center);
             ToolTipService.SetVerticalOffset(btnED, 30d);
             ToolTipService.SetHorizontalOffset(btnED, 2d);
@@ -782,7 +795,12 @@ public partial class PageInstanceCompResource : IRefreshable
                 }
             });
             // 显示
-            BtnFilterAll.Text = IsSearching ? Lang.Text("Instance.Resource.Filter.SearchResult") : Lang.Text("Instance.Resource.Filter.AllWithCount", anyCount);
+            LocalizedText.TryBind(
+                BtnFilterAll,
+                "Text",
+                () => IsSearching
+                    ? Lang.Text("Instance.Resource.Filter.SearchResult")
+                    : Lang.Text("Instance.Resource.Filter.AllWithCount", anyCount));
             LocalizedText.TryBind(
                 BtnFilterCanUpdate,
                 "Text",
@@ -842,7 +860,10 @@ public partial class PageInstanceCompResource : IRefreshable
             var newCount = selectedMods.Count;
             var selected = newCount > 0;
             if (selected)
-                LabSelect.Text = Lang.Text("Instance.Resource.SelectedCount", newCount); // 取消所有选择时不更新数字
+                LocalizedText.TryBind(
+                    LabSelect,
+                    "Text",
+                    () => Lang.Text("Instance.Resource.SelectedCount", newCount)); // 取消所有选择时不更新数字
             // 按钮可用性
             if (selected)
             {

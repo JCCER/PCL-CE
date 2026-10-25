@@ -245,13 +245,19 @@ public partial class PageComp
         TextSearchVersion.KeyDown += EnterTrigger;
         BtnSearchReset.Click += (_, _) => ResetFilter();
         BtnSearchInstallModPack.Click += BtnSearchInstallModPack_Click;
+        // PageComp 是 MyPageRight 的子控件而非页面本身，无法通过 MyPageRight 的刷新钩子感知语言变更，
+        // 因此在重新挂载到可视树时自行检查并重建卡片（标签、版本描述等文本按新语言重新求值）。
         Loaded += (_, _) =>
         {
             if (_localizationRevision == LocalizationService.UiRevision)
                 return;
             _localizationRevision = LocalizationService.UiRevision;
-            if (storage.results.Any())
-                Load_OnFinish(false);
+            if (storage.results.Count == 0)
+                return;
+            // 重建会清空列表，先记下滚动位置以免跳回顶部
+            var savedOffset = VerticalOffset;
+            Load_OnFinish(false);
+            Dispatcher.BeginInvoke(new Action(() => ScrollToVerticalOffset(savedOffset)));
         };
     }
 

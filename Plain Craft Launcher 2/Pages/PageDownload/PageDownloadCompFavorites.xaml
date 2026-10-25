@@ -78,7 +78,7 @@
                 <TranslateTransform x:Name="TransSelect" Y="-10" />
             </local:MyCard.RenderTransform>
             <TextBlock x:Name="LabSelect"
-                       Text="{loc:Loc Download.Comp.Favorites.Selection.Placeholder}"
+                       Text=""
                        HorizontalAlignment="Center" VerticalAlignment="Top"
                        Margin="9" Foreground="{DynamicResource ColorBrush2}" />
             <StackPanel Orientation="Horizontal" Margin="5,28,5,5">

@@ -15,14 +15,14 @@ public enum McVersionCategory
 
 public static class McVersionClassifier
 {
-    public static string GetCategoryDisplayName(McVersionCategory cat)
+    public static string GetCategoryKey(McVersionCategory cat)
     {
         return cat switch
         {
-            McVersionCategory.Release => Lang.Text("Download.Version.Type.Release"),
-            McVersionCategory.Snapshot => Lang.Text("Download.Version.Type.Development"),
-            McVersionCategory.BeforeRelease => Lang.Text("Download.Version.Type.BeforeRelease"),
-            McVersionCategory.AprilFools => Lang.Text("Download.Version.Type.AprilFools"),
+            McVersionCategory.Release => "Download.Version.Type.Release",
+            McVersionCategory.Snapshot => "Download.Version.Type.Development",
+            McVersionCategory.BeforeRelease => "Download.Version.Type.BeforeRelease",
+            McVersionCategory.AprilFools => "Download.Version.Type.AprilFools",
             _ => throw new ArgumentOutOfRangeException(nameof(cat))
         };
     }

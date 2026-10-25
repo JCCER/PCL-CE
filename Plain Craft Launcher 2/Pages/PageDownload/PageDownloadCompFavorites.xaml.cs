@@ -78,18 +78,13 @@ public partial class PageDownloadCompFavorites
         Items_SetSelectAll(false);
         RefreshBar();
         if (loader.input is not null && !loader.input.Count.Equals(CurrentFavTarget.Favs.Count)) RefreshFavTargets();
-        if (_localizationRevision == LocalizationService.UiRevision)
-            return;
-        _localizationRevision = LocalizationService.UiRevision;
-        if (loader is
-            {
-                State: ModBase.LoadState.Finished,
-                output: not null
-            })
-            Load_OnFinish(true);
     }
 
-    private int _localizationRevision = LocalizationService.UiRevision;
+    protected override void RefreshLocalization()
+    {
+        if (loader is { State: ModBase.LoadState.Finished, output: not null })
+            Load_OnFinish();
+    }
 
     private List<string> LoaderInput()
     {
@@ -227,9 +222,9 @@ public partial class PageDownloadCompFavorites
     #region UI 化 - 加载主逻辑
 
     // 结果 UI 化
-    private void Load_OnFinish(bool preserveSearch = false)
+    private void Load_OnFinish()
     {
-        var searchText = preserveSearch ? PanSearchBox.Text : string.Empty;
+        var searchText = PanSearchBox.Text;
         itemList.Clear();
         try
         {
@@ -351,7 +346,12 @@ public partial class PageDownloadCompFavorites
         var newCount = selectedItemList.Count;
         var selected = newCount > 0;
         if (selected)
-            LabSelect.Text = Lang.Text("Download.Comp.Favorites.Hint.SelectedCount", newCount); // 取消所有选择时不更新数字
+            LocalizedText.TryBind(
+                LabSelect,
+                "Text",
+                () => Lang.Text(
+                    "Download.Comp.Favorites.Hint.SelectedCount",
+                    newCount));
         // 更新显示状态
         if (!ModAnimation.AniExitsAnyControl())
         {
@@ -726,7 +726,6 @@ public partial class PageDownloadCompFavorites
         var body = new ContextMenu();
         var newItem = new MyMenuItem
         {
-            Header = Lang.Text("Download.Comp.Favorites.Menu.Share"),
             SvgIcon = "lucide/share-2"
         };
         newItem.Click += (_, _) =>
@@ -750,10 +749,10 @@ public partial class PageDownloadCompFavorites
                     userSummary: Lang.Text("Download.Comp.Favorites.Error.OperationFailed"));
             }
         };
+        newItem.TrySetLocalizedValue("Header", "Download.Comp.Favorites.Menu.Share");
         body.Items.Add(newItem);
         newItem = new MyMenuItem
         {
-            Header = Lang.Text("Download.Comp.Favorites.Menu.Import"),
             SvgIcon = "lucide/circle-plus"
         };
         newItem.Click += (_, _) =>
@@ -800,10 +799,10 @@ public partial class PageDownloadCompFavorites
                     userSummary: Lang.Text("Download.Comp.Favorites.Error.OperationFailed"));
             }
         };
+        newItem.TrySetLocalizedValue("Header", "Download.Comp.Favorites.Menu.Import");
         body.Items.Add(newItem);
         newItem = new MyMenuItem
         {
-            Header = Lang.Text("Download.Comp.Favorites.Menu.New"),
             SvgIcon = "lucide/folder-plus"
         };
         newItem.Click += (_, _) =>
@@ -816,10 +815,10 @@ public partial class PageDownloadCompFavorites
             RefreshFavTargets();
             ComboTargetFav.SelectedIndex = ComboTargetFav.Items.Count - 1;
         };
+        newItem.TrySetLocalizedValue("Header", "Download.Comp.Favorites.Menu.New");
         body.Items.Add(newItem);
         newItem = new MyMenuItem
         {
-            Header = Lang.Text("Download.Comp.Favorites.Menu.Rename"),
             SvgIcon = "lucide/pencil"
         };
         newItem.Click += (_, _) =>
@@ -831,10 +830,10 @@ public partial class PageDownloadCompFavorites
             ModComp.CompFavorites.Save();
             RefreshFavTargets();
         };
+        newItem.TrySetLocalizedValue("Header", "Download.Comp.Favorites.Menu.Rename");
         body.Items.Add(newItem);
         newItem = new MyMenuItem
         {
-            Header = Lang.Text("Download.Comp.Favorites.Menu.Delete"),
             SvgIcon = "lucide/trash-2"
         };
         newItem.Click += (_, _) =>
@@ -856,6 +855,7 @@ public partial class PageDownloadCompFavorites
                 ComboTargetFav.SelectedIndex = 0;
             }
         };
+        newItem.TrySetLocalizedValue("Header", "Download.Comp.Favorites.Menu.Delete");
         body.Items.Add(newItem);
         body.PlacementTarget = (UIElement)sender;
         body.Placement = PlacementMode.Bottom;

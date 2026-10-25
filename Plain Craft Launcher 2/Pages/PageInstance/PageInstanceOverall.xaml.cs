@@ -65,6 +65,11 @@ public partial class PageInstanceOverall
         PanDisplay.TriggerForceResize();
     }
 
+    protected override void RefreshLocalization()
+    {
+        Reload();
+    }
+
     /// <summary>
     ///     确保当前页面上的信息已正确显示。
     /// </summary>
@@ -75,7 +80,12 @@ public partial class PageInstanceOverall
         var instance = PageInstanceLeft.McInstance;
         // 刷新设置项目
         ComboDisplayType.SelectedIndex = States.Instance.CardType[instance.PathInstance];
-        BtnDisplayStar.Text = instance.IsStar ? Lang.Text("Instance.Overall.Unfavorite") : Lang.Text("Instance.Overall.Favorite");
+        LocalizedText.TryBind(
+            BtnDisplayStar,
+            "Text",
+            () => instance.IsStar
+                ? Lang.Text("Instance.Overall.Unfavorite")
+                : Lang.Text("Instance.Overall.Favorite"));
         BtnFolderMods.Visibility = instance.Modable ? Visibility.Visible : Visibility.Collapsed;
         // 刷新实例显示
         PanDisplayItem.Children.Clear();
@@ -160,50 +170,64 @@ public partial class PageInstanceOverall
             if (instanceInfo.HasForge)
                 items.Add(new MyListItem
                 {
-                    Title = "Forge", Info = instanceInfo.Forge, Logo = "pack://application:,,,/images/Blocks/Anvil.png"
+                    Title = "Forge",
+                    Info = instanceInfo.Forge ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Logo = "pack://application:,,,/images/Blocks/Anvil.png"
                 });
             if (instanceInfo.HasNeoForge)
                 items.Add(new MyListItem
                 {
-                    Title = "NeoForge", Info = instanceInfo.NeoForge,
+                    Title = "NeoForge",
+                    Info = instanceInfo.NeoForge ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/NeoForge.png"
                 });
             if (instanceInfo.HasCleanroom)
                 items.Add(new MyListItem
                 {
-                    Title = "Cleanroom", Info = instanceInfo.Cleanroom,
+                    Title = "Cleanroom",
+                    Info = instanceInfo.Cleanroom ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/Cleanroom.png"
                 });
             if (instanceInfo.HasFabric)
                 items.Add(new MyListItem
                 {
-                    Title = "Fabric", Info = instanceInfo.Fabric,
+                    Title = "Fabric",
+                    Info = instanceInfo.Fabric ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/Fabric.png"
                 });
             if (instanceInfo.HasQuilt)
                 items.Add(new MyListItem
                 {
-                    Title = "Quilt", Info = instanceInfo.Quilt, Logo = "pack://application:,,,/images/Blocks/Quilt.png"
+                    Title = "Quilt",
+                    Info = instanceInfo.Quilt ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Logo = "pack://application:,,,/images/Blocks/Quilt.png"
                 });
             if (instanceInfo.HasOptiFine)
                 items.Add(new MyListItem
                 {
-                    Title = "OptiFine", Info = instanceInfo.OptiFine,
+                    Title = "OptiFine",
+                    Info = instanceInfo.OptiFine ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/GrassPath.png"
                 });
             if (instanceInfo.HasLiteLoader)
                 items.Add(new MyListItem
-                    { Title = "LiteLoader", Info = Lang.Text("Instance.Overall.Info.Installed"), Logo = "pack://application:,,,/images/Blocks/Egg.png" });
+                {
+                    Title = "LiteLoader",
+                    Info = Lang.Text("Instance.Overall.Info.Installed"),
+                    Logo = "pack://application:,,,/images/Blocks/Egg.png"
+                });
             if (instanceInfo.HasLegacyFabric)
                 items.Add(new MyListItem
                 {
-                    Title = "Legacy Fabric", Info = instanceInfo.LegacyFabric,
+                    Title = "Legacy Fabric",
+                    Info = instanceInfo.LegacyFabric ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/Fabric.png"
                 });
             if (instanceInfo.HasLabyMod)
                 items.Add(new MyListItem
                 {
-                    Title = "LabyMod", Info = instanceInfo.LabyMod,
+                    Title = "LabyMod",
+                    Info = instanceInfo.LabyMod ?? Lang.Text("Minecraft.Version.Unknown"),
                     Logo = "pack://application:,,,/images/Blocks/LabyMod.png"
                 });
             var wrapPanel = new WrapPanel { Margin = new Thickness(0, -5, -20, 7) };

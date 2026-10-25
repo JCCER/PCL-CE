@@ -49,8 +49,14 @@ public partial class PageLogLeft
             ModMain.frmLogLeft.PanList.Children.Clear();
 
             // 测试实例列表
-            ModMain.frmLogLeft.PanList.Children.Add(new TextBlock
-                { Text = Lang.Text("LogPage.Left.InstancesTitle"), Margin = new Thickness(13d, 18d, 5d, 4d), Opacity = 0.6d, FontSize = 12d });
+            var instancesTitle = new TextBlock
+            {
+                Margin = new Thickness(13d, 18d, 5d, 4d),
+                Opacity = 0.6d,
+                FontSize = 12d
+            };
+            instancesTitle.TrySetLocalizedValue("Text", "LogPage.Left.InstancesTitle");
+            ModMain.frmLogLeft.PanList.Children.Add(instancesTitle);
             foreach (var item in shownLogs)
             {
                 // 添加控件
@@ -60,8 +66,14 @@ public partial class PageLogLeft
                 var newItem = new MyListItem
                 {
                     IsScaleAnimationEnabled = false, Type = MyListItem.CheckType.RadioBox, MinPaddingRight = 30,
-                    Title = version.Name, Info = $"{version.Info} - {Lang.Date(proc.StartTime, "T")}", Height = 40d, Tag = uuid
+                    Title = version.Name, Height = 40d, Tag = uuid
                 };
+                var versionInfo = version.Info;
+                var startTime = proc.StartTime;
+                LocalizedText.TryBind(
+                    newItem,
+                    "Info",
+                    () => $"{versionInfo} - {Lang.Date(startTime, "T")}");
                 newItem.Changed += ModMain.frmLogLeft.Version_Change;
                 // Dim KillButton As New MyIconButton With {.Logo = Logo.IconButtonCross, .LogoScale = 0.85}
                 var removeButton = new MyIconButton { SvgIcon = "lucide/trash-2", LogoScale = 1.1d };

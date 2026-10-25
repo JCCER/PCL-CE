@@ -577,12 +577,11 @@ public partial class PageSetupUI
             PanMusicVolume.Visibility = Visibility.Visible;
             PanMusicDetail.Visibility = Visibility.Visible;
             BtnMusicClear.Visibility = Visibility.Visible;
+            var musicCount = ModMusic.musicAllList.Count;
             LocalizedText.TryBind(
                 CardMusic,
                 "Title",
-                () => Lang.Text(
-                    "Setup.Ui.Music.TitleWithCount",
-                    ModBase.EnumerateFiles(ModBase.exePath + @"PCL\Musics\").Count()));
+                () => Lang.Text("Setup.Ui.Music.TitleWithCount", musicCount));
         }
         else
         {

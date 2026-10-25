@@ -33,10 +33,6 @@ public partial class PageLaunchLeft
 
     private LaunchButtonAction _launchButtonAction;
 
-    private static string StageWaitWindow => Lang.Text("Minecraft.Launch.Stage.WaitWindow");
-    private static string StageEnd => Lang.Text("Minecraft.Launch.Stage.End");
-    private static string StageRoot => Lang.Text("Minecraft.Launch.Stage.Root");
-
     // 加载当前实例
     private bool isLoad;
 
@@ -418,8 +414,10 @@ public partial class PageLaunchLeft
                     foreach (var Loader in ModLaunch.mcLaunchLoaderReal.GetLoaderList(false))
                         if (Loader.State == ModBase.LoadState.Loading || Loader.State == ModBase.LoadState.Waiting)
                         {
-                            LabLaunchingStage.Text = Loader.name;
-                            isLaunched = Loader.name == StageWaitWindow || Loader.name == StageEnd;
+                            LabLaunchingStage.Text = Loader.DisplayName;
+                            isLaunched = Loader.Identifier is 
+                                ModLaunch.LaunchStageWaitWindowId or 
+                                ModLaunch.LaunchStageEndId;
                             exitTry = true;
                             break;
                         }
@@ -454,7 +452,7 @@ public partial class PageLaunchLeft
             try
             {
                 foreach (var Loader in ModNet.NetManager.Tasks)
-                    if (Loader.RealParent is not null && Loader.RealParent.name == StageRoot &&
+                    if (Loader.RealParent?.Identifier == ModLaunch.LaunchStageRootId &&
                         Loader.State == ModBase.LoadState.Loading)
                         hasLaunchDownloader = true;
             }
@@ -597,9 +595,13 @@ public partial class PageLaunchLeft
             case ProfileType.Authlib:
             case ProfileType.YggdrasilConnect:
             {
-                LabLaunchingMethod.Text = Lang.Text("Launch.Account.Type.ThirdParty") + (!string.IsNullOrEmpty(ProfileService.Current?.ServerName)
-                    ? " / " + ProfileService.Current.ServerName
-                    : "");
+                LocalizedText.TryBind(
+                    LabLaunchingMethod,
+                    "Text",
+                    () => Lang.Text("Launch.Account.Type.ThirdParty") +
+                          (!string.IsNullOrEmpty(ProfileService.Current?.ServerName)
+                              ? " / " + ProfileService.Current.ServerName
+                              : ""));
                 break;
             }
         }
