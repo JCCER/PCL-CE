@@ -49,16 +49,30 @@ public partial class MyMsgLogin
         if (data["verification_uri_complete"] is not null)
         {
             website = (string)data["verification_uri_complete"];
-            LabCaption.Text = Lang.Text("Launch.Account.LoginDialog.MicrosoftInstructions.WithAutoFill", userCode, website);
+            LocalizedText.TryBind(
+                LabCaption,
+                "Text",
+                () => Lang.Text(
+                    "Launch.Account.LoginDialog.MicrosoftInstructions.WithAutoFill",
+                    userCode,
+                    website));
         }
         else
         {
             website = (string)data["verification_uri"];
-            LabCaption.Text = Lang.Text("Launch.Account.LoginDialog.MicrosoftInstructions", userCode, website);
+            LocalizedText.TryBind(
+                LabCaption,
+                "Text",
+                () => Lang.Text(
+                    "Launch.Account.LoginDialog.MicrosoftInstructions",
+                    userCode,
+                    website));
         }
 
         // 设置 UI
-        LabTitle.Text = Lang.Text("Launch.Account.LoginDialog.MinecraftLogin");
+        LabTitle.TrySetLocalizedValue(
+            "Text",
+            "Launch.Account.LoginDialog.MinecraftLogin");
         CustomEventService.SetEventData(Btn1, website);
         CustomEventService.SetEventData(Btn2, userCode);
         // 启动工作线程

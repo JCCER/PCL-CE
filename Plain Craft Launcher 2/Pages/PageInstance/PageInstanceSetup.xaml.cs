@@ -144,7 +144,9 @@ public partial class PageInstanceSetup
             {
                 CheckAdvanceDisableJLW.Checked = true;
                 CheckAdvanceDisableJLW.IsEnabled = false;
-                CheckAdvanceDisableJLW.ToolTip = Lang.Text("Setup.Launch.Advanced.DisableJlw.Arm64ToolTip");
+                CheckAdvanceDisableJLW.TrySetLocalizedValue(
+                    "ToolTip",
+                    "Setup.Launch.Advanced.DisableJlw.Arm64ToolTip");
             }
             else
             {
@@ -699,7 +701,9 @@ public partial class PageInstanceSetup
             return;
         TextServerAuthServer.Text = "https://littleskin.cn/api/yggdrasil";
         TextServerAuthRegister.Text = "https://littleskin.cn/auth/register";
-        TextServerAuthName.Text = Lang.Text("Instance.Setup.Server.LittleSkin.Name");
+        TextServerAuthName.TrySetLocalizedValue(
+            "Text",
+            "Instance.Setup.Server.LittleSkin.Name");
     }
 
     // 锁定设置
@@ -751,18 +755,16 @@ public partial class PageInstanceSetup
         ComboArgumentJava.Items.Clear();
 
         // 选项 0: 跟随全局设置
-        ComboArgumentJava.Items.Add(new MyComboBoxItem
-        {
-            Content = Lang.Text("Instance.Setup.FollowGlobal"),
-            Tag = new UseGlobalPreference()
-        });
+        var globalItem = new MyComboBoxItem { Tag = new UseGlobalPreference() };
+        globalItem.SetLocalizedValue(ContentControl.ContentProperty, "Instance.Setup.FollowGlobal");
+        ComboArgumentJava.Items.Add(globalItem);
 
         // 选项 1: 自动选择
-        ComboArgumentJava.Items.Add(new MyComboBoxItem
-        {
-            Content = Lang.Text("Instance.Setup.Options.Java.AutoSelect"),
-            Tag = new AutoSelect() // Nothing 表示自动选择
-        });
+        var autoItem = new MyComboBoxItem { Tag = new AutoSelect() }; // Tag 表示自动选择
+        autoItem.SetLocalizedValue(
+            ContentControl.ContentProperty,
+            "Instance.Setup.Options.Java.AutoSelect");
+        ComboArgumentJava.Items.Add(autoItem);
 
         // 选项 2: 相对路径选项
         MyComboBoxItem relativePathItem;
@@ -830,11 +832,11 @@ public partial class PageInstanceSetup
                 ModBase.LogLevel.Feedback,
                 userSummary: Lang.Text("Instance.Setup.Error.OperationFailed"));
             ComboArgumentJava.Items.Clear();
-            ComboArgumentJava.Items.Add(new MyComboBoxItem
-            {
-                Content = Lang.Text("Instance.Setup.Options.Java.LoadFailed"),
-                IsEnabled = false
-            });
+            var loadFailedItem = new MyComboBoxItem { IsEnabled = false };
+            loadFailedItem.SetLocalizedValue(
+                ContentControl.ContentProperty,
+                "Instance.Setup.Options.Java.LoadFailed");
+            ComboArgumentJava.Items.Add(loadFailedItem);
             ComboArgumentJava.SelectedIndex = 0;
             RefreshRam(true);
             return;
@@ -885,12 +887,13 @@ public partial class PageInstanceSetup
         if (!ModJava.Javas.ExistAnyJava() && ComboArgumentJava.Items.Count <= 3)
         {
             ComboArgumentJava.Items.Clear();
-            var noJavaItem = new MyComboBoxItem
-            {
-                Content = Lang.Text("Instance.Setup.Options.Java.NoRuntime"),
-                ToolTip = Lang.Text("Instance.Setup.Options.Java.NoRuntime.ToolTip"),
-                IsEnabled = false
-            };
+            var noJavaItem = new MyComboBoxItem { IsEnabled = false };
+            noJavaItem.SetLocalizedValue(
+                ContentControl.ContentProperty,
+                "Instance.Setup.Options.Java.NoRuntime");
+            noJavaItem.SetLocalizedValue(
+                ToolTipProperty,
+                "Instance.Setup.Options.Java.NoRuntime.ToolTip");
             ComboArgumentJava.Items.Add(noJavaItem);
             ComboArgumentJava.SelectedItem = noJavaItem;
         }
@@ -908,10 +911,7 @@ public partial class PageInstanceSetup
             return;
         }
 
-        var firstItem = ComboArgumentJava.Items[0] as MyComboBoxItem;
-        if (firstItem is not null &&
-        ((string)firstItem.Content == Lang.Text("Instance.Setup.Options.Java.NoRuntime") ||
-        (string)firstItem.Content == Lang.Text("Instance.Setup.Options.Java.LoadFailed")))
+        if (ComboArgumentJava.Items[0] is MyComboBoxItem { IsEnabled: false })
             ComboArgumentJava.IsDropDownOpen = false;
     }
 
@@ -923,9 +923,10 @@ public partial class PageInstanceSetup
         if (ComboArgumentJava.SelectedItem is null)
             return;
 
-        var selectedItem = ComboArgumentJava.SelectedItem as MyComboBoxItem;
-        if (selectedItem is null || (selectedItem.Tag is null &&
-        (string)selectedItem.Content != Lang.Text("Instance.Setup.Options.Java.AutoSelect")))
+        if (ComboArgumentJava.SelectedItem is not MyComboBoxItem
+            {
+                Tag: null or AutoSelect
+            } selectedItem)
             return;
 
         JavaPreference preference = default;

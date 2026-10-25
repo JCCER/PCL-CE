@@ -38,8 +38,39 @@ public static class ModFolder
         /// </summary>
         public string Location;
 
+        /// <summary>
+        ///     文件夹的显示名称。<br/>
+        ///     若是内置文件夹，该字段保存本地化资源键（以 <c>$</c> 开头），显示时请使用 <see cref="DisplayName" />。
+        /// </summary>
         public string Name;
+
         public Types type;
+
+        /// <summary>
+        ///     内置文件夹名称的资源键前缀，用于区分「资源键」与「用户自定义名称」。
+        /// </summary>
+        private const string BuiltinNamePrefix = "$";
+
+        /// <summary>
+        ///     当前语言下的显示名称。内置文件夹会按当前语言实时翻译。
+        /// </summary>
+        public string DisplayName =>
+            Name?.StartsWith(BuiltinNamePrefix) == true
+                ? Lang.Text(Name[BuiltinNamePrefix.Length..])
+                : Name;
+
+        /// <summary>
+        ///     创建一个使用内置名称的文件夹。<br/>
+        ///     写入 <see cref="Name" /> 的是资源键（带前缀），因此可以安全持久化。
+        /// </summary>
+        /// <param name="nameKey">内置名称的本地化资源键。</param>
+        /// <param name="location">文件夹路径。</param>
+        /// <param name="type">文件夹类型。</param>
+        public static McFolder CreateBuiltin(string nameKey, string location, Types type)
+        {
+            return new McFolder
+                { Name = BuiltinNamePrefix + nameKey, Location = location, type = type };
+        }
 
         public override bool Equals(object obj)
         {
@@ -108,8 +139,8 @@ public static class ModFolder
             try
             {
                 if (Directory.Exists(ModBase.exePath + @"versions\"))
-                    originalMcFolderList.Add(new McFolder
-                        { Name = Lang.Text("Select.Folder.CurrentFolder"), Location = ModBase.exePath, type = McFolder.Types.Original });
+                    originalMcFolderList.Add(McFolder.CreateBuiltin("Select.Folder.CurrentFolder",
+                        ModBase.exePath, McFolder.Types.Original));
                 foreach (var folder in new DirectoryInfo(ModBase.exePath).GetDirectories())
                     if (Directory.Exists(Path.Combine(folder.FullName, "versions")) || folder.Name == ".minecraft")
                     {
@@ -129,8 +160,9 @@ public static class ModFolder
             if ((!currentMcFolderList.Any() || (mojangPath ?? "") != (currentMcFolderList[0].Location ?? "")) &&
                 Directory.Exists(Path.Combine(mojangPath, "versions"))) // 当前文件夹不是官启文件夹
                 // 具有权限且存在 versions 文件夹
-                originalMcFolderList.Add(new McFolder
-                    { Name = Lang.Text("Select.Folder.OfficialLauncherFolder"), Location = mojangPath, type = McFolder.Types.Original });
+                originalMcFolderList.Add(McFolder.CreateBuiltin(
+                    "Select.Folder.OfficialLauncherFolder",
+                    mojangPath, McFolder.Types.Original));
 
             ModBase.Log(cacheMcFolderList.Count + " 个自定义文件夹，" + originalMcFolderList.Count + " 个原始文件夹");
 
@@ -169,8 +201,9 @@ public static class ModFolder
             if (!cacheMcFolderList.Any())
             {
                 Directory.CreateDirectory(ModBase.exePath + @".minecraft\versions\");
-                cacheMcFolderList.Add(new McFolder
-                    { Name = Lang.Text("Select.Folder.CurrentFolder"), Location = ModBase.exePath + @".minecraft\", type = McFolder.Types.Original });
+                cacheMcFolderList.Add(McFolder.CreateBuiltin(
+                    "Select.Folder.CurrentFolder",
+                    ModBase.exePath + @".minecraft\", McFolder.Types.Original));
             }
 
             foreach (var Folder in cacheMcFolderList) McFolderLauncherProfilesJsonCreate(Folder.Location);

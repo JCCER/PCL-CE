@@ -17,9 +17,23 @@ public partial class PageSetupGameLink
     public PageSetupGameLink()
     {
         InitializeComponent();
-        TextUdpNatType.Text = Lang.Text("Setup.GameLink.NetworkTest.UdpNatType", Lang.Text("Setup.GameLink.NetworkTest.NotTested"));
-        TextTcpNatType.Text = Lang.Text("Setup.GameLink.NetworkTest.TcpNatType", Lang.Text("Setup.GameLink.NetworkTest.NotTested"));
-        TextIpv6Status.Text = Lang.Text("Setup.GameLink.NetworkTest.Ipv6Status", Lang.Text("Setup.GameLink.NetworkTest.NotTested"));
+        LocalizedText.TryBind(
+            TextUdpNatType,
+            "Text",
+            () => Lang.Text("Setup.GameLink.NetworkTest.UdpNatType",
+                Lang.Text("Setup.GameLink.NetworkTest.NotTested")));
+        LocalizedText.TryBind(
+            TextTcpNatType,
+            "Text",
+            () => Lang.Text(
+                "Setup.GameLink.NetworkTest.TcpNatType",
+                Lang.Text("Setup.GameLink.NetworkTest.NotTested")));
+        LocalizedText.TryBind(
+            TextIpv6Status,
+            "Text",
+            () => Lang.Text(
+                "Setup.GameLink.NetworkTest.Ipv6Status",
+                Lang.Text("Setup.GameLink.NetworkTest.NotTested")));
         Loaded += PageSetupLink_Loaded;
         Loaded += (_, _) => Reload();
     }
@@ -144,22 +158,34 @@ public partial class PageSetupGameLink
         try
         {
             BtnNetTest.IsEnabled = false;
-            BtnNetTest.Text = Lang.Text("Setup.GameLink.NetworkTest.Testing");
+            BtnNetTest.TrySetLocalizedValue("Text", "Setup.GameLink.NetworkTest.Testing");
             ModBase.RunInNewThread(() =>
             {
                 var status = CliNetTest.GetNetStatusAsync().GetAwaiter().GetResult();
                 ModBase.RunInUi(() =>
                 {
-                    TextUdpNatType.Text =
-                        Lang.Text("Setup.GameLink.NetworkTest.UdpNatType", CliNetTest.GetNatTypeString(status.UdpNatType));
-                    TextTcpNatType.Text =
-                        Lang.Text("Setup.GameLink.NetworkTest.TcpNatType", CliNetTest.GetNatTypeString(status.TcpNatType));
-                    TextIpv6Status.Text = Lang.Text("Setup.GameLink.NetworkTest.Ipv6Status",
-                        status.SupportIPv6
-                            ? Lang.Text("Setup.GameLink.NetworkTest.Supported")
-                            : Lang.Text("Setup.GameLink.NetworkTest.Unsupported"));
+                    LocalizedText.TryBind(
+                        TextUdpNatType,
+                        "Text",
+                        () => Lang.Text(
+                            "Setup.GameLink.NetworkTest.UdpNatType",
+                            CliNetTest.GetNatTypeString(status.UdpNatType)));
+                    LocalizedText.TryBind(
+                        TextTcpNatType,
+                        "Text",
+                        () => Lang.Text(
+                            "Setup.GameLink.NetworkTest.TcpNatType",
+                            CliNetTest.GetNatTypeString(status.TcpNatType)));
+                    LocalizedText.TryBind(
+                        TextIpv6Status,
+                        "Text",
+                        () => Lang.Text(
+                            "Setup.GameLink.NetworkTest.Ipv6Status",
+                            status.SupportIPv6
+                                ? Lang.Text("Setup.GameLink.NetworkTest.Supported")
+                                : Lang.Text("Setup.GameLink.NetworkTest.Unsupported")));
                     BtnNetTest.IsEnabled = true;
-                    BtnNetTest.Text = Lang.Text("Setup.GameLink.NetworkTest.Start");
+                    BtnNetTest.TrySetLocalizedValue("Text", "Setup.GameLink.NetworkTest.Start");
                 });
             });
         }
@@ -170,7 +196,7 @@ public partial class PageSetupGameLink
                 ModBase.LogLevel.Hint,
                 userSummary: Lang.Text("Setup.GameLink.Error.NetworkTestFailed"));
             BtnNetTest.IsEnabled = true;
-            BtnNetTest.Text = Lang.Text("Setup.GameLink.NetworkTest.Start");
+            BtnNetTest.TrySetLocalizedValue("Text", "Setup.GameLink.NetworkTest.Start");
         }
     }
 }

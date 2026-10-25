@@ -79,7 +79,7 @@ public partial class PageSetupJava
         displayTags.Add(displayBits);
         var displayBrand = j.Installation.Brand.ToString();
         displayTags.Add(displayBrand);
-        item.Tags = displayTags;
+        item.PlainTags = displayTags;
 
         item.Type = MyListItem.CheckType.RadioBox;
         item.Check += (sender, e) =>
@@ -100,7 +100,7 @@ public partial class PageSetupJava
         };
         var btnOpenFolder = new MyIconButton();
         btnOpenFolder.SvgIcon = "lucide/folder-open";
-        btnOpenFolder.ToolTip = Lang.Text("Common.Action.Open");
+        btnOpenFolder.TrySetLocalizedValue("ToolTip", "Common.Action.Open");
         btnOpenFolder.Click += (sender, e) =>
         {
             if (!j.Installation.IsStillAvailable)
@@ -113,7 +113,7 @@ public partial class PageSetupJava
         };
         var btnInfo = new MyIconButton();
         btnInfo.SvgIcon = "lucide/info";
-        btnInfo.ToolTip = Lang.Text("Setup.Java.Detail.ToolTip");
+        btnInfo.TrySetLocalizedValue("ToolTip", "Setup.Java.Detail.ToolTip");
         btnInfo.Click += (sender, e) =>
         {
             if (!j.Installation.IsStillAvailable)
@@ -149,14 +149,14 @@ public partial class PageSetupJava
                 item.LabTitle.TextDecorations = null;
                 item.LabTitle.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
                 btnEnableSwitch.SvgIcon = "lucide/circle-minus";
-                btnEnableSwitch.ToolTip = Lang.Text("Setup.Java.Disable");
+                btnEnableSwitch.TrySetLocalizedValue("ToolTip", "Setup.Java.Disable");
             }
             else
             {
                 item.LabTitle.TextDecorations = TextDecorations.Strikethrough;
                 item.LabTitle.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray4");
                 btnEnableSwitch.SvgIcon = "lucide/circle-check";
-                btnEnableSwitch.ToolTip = Lang.Text("Setup.Java.Enable");
+                btnEnableSwitch.TrySetLocalizedValue("ToolTip", "Setup.Java.Enable");
             }
         }
         

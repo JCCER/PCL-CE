@@ -496,7 +496,7 @@ public partial class MySkin
             .Replace("'", "");
         var key = $"Launch.Skin.Cape.Name.{safeName}";
         var name = Lang.Text(key);
-        if (name == $"!{key}!" || name == key)
+        if (string.IsNullOrEmpty(name) || name == $"!{key}!" || name == key)
             return capeAlias;
         return name;
     }

@@ -221,10 +221,8 @@ public static class ModInstanceList
                         var instance = new PCL.McInstance(versionFolder);
                         instanceList.Add(instance);
                         var instanceCfg = States.Instance;
-                        instance.Desc = instanceCfg.CustomInfo[instance.PathInstance];
+                        instance.CustomDesc = instanceCfg.CustomInfo[instance.PathInstance];
 
-                        if (string.IsNullOrEmpty(instance.Desc))
-                            instance.Desc = instanceCfg.Info[instance.PathInstance];
                         if (!instanceCfg.LogoPathConfig.IsDefault(instance.PathInstance))
                             instance.Logo = instanceCfg.LogoPath[instance.PathInstance];
                         if (!instanceCfg.ReleaseTimeConfig.IsDefault(instance.PathInstance))
@@ -268,14 +266,14 @@ public static class ModInstanceList
                         if (instance.state == McInstanceState.Error)
                         {
                             // 重新获取实例错误信息
-                            var oldDesc = instance.Desc;
+                            var oldRuntimeDesc = instance.RuntimeDesc;
                             instance.state = McInstanceState.Original;
                             instance.Check();
                             // 校验错误原因是否改变
                             var customInfo = States.Instance.CustomInfo[instance.PathInstance];
-                            if (instance.state == McInstanceState.Original || (string.IsNullOrEmpty(customInfo) &&
-                                                                               !((oldDesc ?? "") ==
-                                                                                   (instance.Desc ?? ""))))
+                            if (instance.state == McInstanceState.Original ||
+                                (string.IsNullOrEmpty(customInfo) &&
+                                 (oldRuntimeDesc ?? "") != (instance.RuntimeDesc ?? "")))
                             {
                                 ModBase.Log("[Minecraft] 实例 " + instance.Name + " 的错误状态已变更，新的状态为：" + instance.Desc);
                                 return null;

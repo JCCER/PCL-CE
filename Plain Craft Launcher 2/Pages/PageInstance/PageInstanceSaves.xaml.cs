@@ -151,11 +151,17 @@ public partial class PageInstanceSaves : IRefreshable
             if (IsSearching)
             {
                 var resultCount = _searchResult is null ? 0 : _searchResult.Count;
-                PanListBack.Title = Lang.Text("Instance.Saves.SearchResultTitle", resultCount.ToString());
+                LocalizedText.TryBind(
+                    PanListBack,
+                    "Title",
+                    () => Lang.Text("Instance.Saves.SearchResultTitle", resultCount.ToString()));
             }
             else
             {
-                PanListBack.Title = Lang.Text("Instance.Saves.SaveListTitle", saveFolders.Count.ToString());
+                LocalizedText.TryBind(
+                    PanListBack,
+                    "Title",
+                    () => Lang.Text("Instance.Saves.SaveListTitle", saveFolders.Count.ToString()));
             }
 
             if (saveFolders.Count == 0)
@@ -481,7 +487,10 @@ public partial class PageInstanceSaves : IRefreshable
     private void SetSortMethod(SortMethod target)
     {
         _currentSortMethod = target;
-        BtnSort.Text = Lang.Text("Instance.Saves.SortBy", GetSortName(target));
+        LocalizedText.TryBind(
+            BtnSort,
+            "Text",
+            () => Lang.Text("Instance.Saves.SortBy", GetSortName(target)));
         RefreshUI();
     }
 

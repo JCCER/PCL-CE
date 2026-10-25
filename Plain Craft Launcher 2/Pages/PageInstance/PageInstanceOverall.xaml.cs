@@ -14,6 +14,7 @@ using PCL.Core.UI;
 using PCL.Core.Utils.Validate;
 using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
 using PCL.Core.App.Localization;
+using PCL.Core.Minecraft.Profile.Models;
 
 namespace PCL;
 
@@ -30,7 +31,7 @@ public partial class PageInstanceOverall
     {
         InitializeComponent();
         Loaded += PageSetupLaunch_Loaded;
-        LabInfoLoading.Text = Lang.Text("Instance.Overall.Info.Loading");
+        LabInfoLoading.TrySetLocalizedValue("Text", "Instance.Overall.Info.Loading");
         // Handles
         ComboDisplayType.SelectionChanged += ComboDisplayType_SelectionChanged;
         BtnDisplayDesc.Click += BtnDisplayDesc_Click;
@@ -556,10 +557,9 @@ public partial class PageInstanceOverall
             if (ModLaunch.McLaunchStart(new ModLaunch.McLaunchOptions
                     { SaveBatch = savePath, instance = PageInstanceLeft.McInstance }))
             {
-                if (ProfileService.Current?.ProfileType == PCL.Core.Minecraft.Profile.Models.ProfileType.Offline)
-                    HintService.Hint(Lang.Text("Instance.Overall.Script.Exporting"));
-                else
-                    HintService.Hint(Lang.Text("Instance.Overall.Script.ExportingWarning"));
+                HintService.Hint(ProfileService.Current?.ProfileType == ProfileType.Offline
+                    ? Lang.Text("Instance.Overall.Script.Exporting")
+                    : Lang.Text("Instance.Overall.Script.ExportingWarning"));
             }
         }
         catch (Exception ex)

@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PCL"
+    xmlns:loc="https://ce.pclc.cc/core/localization"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PCL.Core.ViewModel.Homepage;assembly=PCL.Core"
     MinWidth="150"
@@ -100,7 +101,7 @@
                                 Margin="0,5,5,0"
                                 HorizontalAlignment="Right"
                                 Foreground="{DynamicResource ColorBrushGray2}"
-                                Text="{DynamicResource Launch.Homepage.News.ViewDetail}">
+                                Text="{loc:Loc Launch.Homepage.News.ViewDetail}">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Click">
                                         <i:InvokeCommandAction
@@ -126,7 +127,8 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <local:MyLoading Text="{DynamicResource Launch.Homepage.News.Loading}" x:Name="Load" Margin="20,20,20,17" />
+            <local:MyLoading Text="{loc:Loc Launch.Homepage.News.Loading}" x:Name="Load"
+                             Margin="20,20,20,17" />
         </local:MyCard>
     </Grid>
 </local:MyPageRight>

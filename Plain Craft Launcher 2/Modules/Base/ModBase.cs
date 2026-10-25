@@ -1293,7 +1293,7 @@ public static class ModBase
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception(Lang.Text("Common.Error.InvalidJson"), ex);
+                        throw new InvalidJsonException(ex);
                     }
                 }
 

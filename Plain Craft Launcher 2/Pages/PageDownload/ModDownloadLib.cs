@@ -76,7 +76,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var ongoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if (ongoingLoader.name != Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id))
+                if (ongoingLoader.Identifier != McDownloadStageId(id))
                     continue;
                 if (behaviour == NetPreDownloadBehaviour.ExitWhileExistsOrDownloading)
                     return (ModLoader.LoaderCombo<string>)ongoingLoader;
@@ -109,7 +109,7 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id),
                         McDownloadClientLoader(id, jsonUrl))
-                    { OnStateChanged = McInstallState };
+                    { OnStateChanged = McInstallState, Identifier = McDownloadStageId(id) };
             loader.Start(versionFolder);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -146,7 +146,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar)
             {
-                if ((OngoingLoader.name ?? "") != (Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id) ?? ""))
+                if (OngoingLoader.Identifier != McDownloadStageId(id))
                     continue;
                 if (behaviour == NetPreDownloadBehaviour.ExitWhileExistsOrDownloading)
                     return;
@@ -176,7 +176,10 @@ public static class ModDownloadLib
             // 启动
             var loader =
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id), loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = McDownloadStageId(id)
+                };
             loader.Start(id);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -220,12 +223,16 @@ public static class ModDownloadLib
                 ProgressWeight = 2d,
                 show = false
             });
-        loaders.Add(new LoaderDownload(mcDownloadClientJsonName,
+        loaders.Add(new LoaderDownload(Lang.Text("Minecraft.Download.Stage.VanillaJsonDownload"),
             new List<DownloadFile>
             {
                 new(ModDownload.DlSourceLauncherOrMetaGet(jsonUrl ?? ""), Path.Combine(instanceFolder, instanceName + ".json"),
                     new ModBase.FileChecker(canUseExistsFile: false, isJson: true))
-            }) { ProgressWeight = 3d });
+            })
+        {
+            ProgressWeight = 3d,
+            Identifier = McDownloadClientJsonId
+        });
 
         // 下载支持库文件
         var loadersLib = new List<ModLoader.LoaderBase>();
@@ -259,8 +266,15 @@ public static class ModDownloadLib
         loadersLib.Add(new LoaderDownload(Lang.Text("Minecraft.Download.Stage.DownloadVanillaLibraries.Side"),
                 new List<DownloadFile>())
             { ProgressWeight = 13d, show = false });
-        loaders.Add(new ModLoader.LoaderCombo<string>(mcDownloadClientLibName, loadersLib)
-            { block = false, ProgressWeight = 14d });
+        loaders.Add(
+            new ModLoader.LoaderCombo<string>(
+                Lang.Text("Minecraft.Download.Stage.VanillaLibrariesDownload"),
+                loadersLib)
+            {
+                block = false,
+                ProgressWeight = 14d,
+                Identifier = McDownloadClientLibId
+            });
 
         // 下载资源文件
         var loadersAssets = new List<ModLoader.LoaderBase>();
@@ -319,8 +333,25 @@ public static class ModDownloadLib
         return loaders;
     }
 
-    private static readonly string mcDownloadClientLibName = Lang.Text("Minecraft.Download.Stage.VanillaLibrariesDownload");
-    private static readonly string mcDownloadClientJsonName = Lang.Text("Minecraft.Download.Stage.VanillaJsonDownload");
+    private static MyIconButton CreateChangelogButton(
+        double logoScale = 1.05d,
+        string toolTipKey = "Download.Version.Changelog")
+    {
+        var button = new MyIconButton { LogoScale = logoScale, SvgIcon = "lucide/info" };
+        button.SetLocalizedValue(FrameworkElement.ToolTipProperty, toolTipKey);
+        return button;
+    }
+
+    private const string McDownloadStageIdPrefix = "McDownload:";
+
+    private static string McDownloadStageId(string id)
+    {
+        return McDownloadStageIdPrefix + id;
+    }
+
+    private const string McDownloadClientLibId = "VanillaLibrariesDownload";
+
+    private const string McDownloadClientJsonId = "VanillaJsonDownload";
 
     #endregion
 
@@ -347,23 +378,44 @@ public static class ModDownloadLib
         };
         if (entry["lore"] is null)
         {
-            if (formattedVersion != (string)entry["id"])
-                newItem.Info = Lang.Date(entry["releaseTime"].ToObject<DateTime>(), "g") + " | " +
-                               entry["id"];
-            else
-                newItem.Info = Lang.Date(entry["releaseTime"].ToObject<DateTime>(), "g");
-        }
-        else if (formattedVersion != (string)entry["id"])
-        {
-            newItem.Info = entry["lore"] + " | " + entry["id"];
+            var releaseTime = entry["releaseTime"].ToObject<DateTime>();
+            var versionId = (string)entry["id"];
+            LocalizedText.TryBind(
+                newItem,
+                "Info",
+                () => formattedVersion != versionId
+                    ? $"{Lang.Date(releaseTime, "g")} | {versionId}"
+                    : Lang.Date(releaseTime, "g"));
         }
         else
         {
-            newItem.Info = entry["lore"].ToString();
+            var loreKey = entry["lore"].ToString();
+            var loreRawArgs = (entry["loreArgs"] as JsonArray)
+                ?.Select(object? (node) => node?.ToString())
+                .ToArray() ?? [];
+            var isDateArg = (string)entry["loreArgsType"] == "date";
+            var versionId = (string)entry["id"];
+            LocalizedText.TryBind(
+                newItem,
+                "Info",
+                () =>
+                {
+                    var loreArgs = isDateArg &&
+                                   loreRawArgs.Length == 1 &&
+                                   DateTime.TryParse(
+                                       loreRawArgs[0]?.ToString(),
+                                       CultureInfo.InvariantCulture,
+                                       DateTimeStyles.RoundtripKind, out var loreDate)
+                        ? [Lang.Date(loreDate, "g")]
+                        : loreRawArgs;
+                    return formattedVersion != versionId
+                        ? $"{Lang.Text(loreKey, loreArgs)} | {versionId}"
+                        : Lang.Text(loreKey, loreArgs);
+                });
         }
 
         if (entry["url"].ToString().Contains("unlisted-versions-of-minecraft"))
-            newItem.Tags = Lang.Text("Download.Source.Tag.Uvmc");
+            newItem.Tags = "Download.Source.Tag.Uvmc";
         newItem.Click += onClick;
         // 建立菜单
         if (isSaveOnly)
@@ -376,7 +428,7 @@ public static class ModDownloadLib
 
     private static void McDownloadSaveMenuBuild(object sender, EventArgs _)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -396,7 +448,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         btnSave.Click += (a, b) => McDownloadMenuSave(a, (dynamic)b); // dynamic!
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -551,7 +603,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") != (Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id) ?? ""))
+                if (OngoingLoader.Identifier != McDownloadStageId(id))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -579,7 +631,10 @@ public static class ModDownloadLib
             // 启动
             var loader =
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Download.Stage.MinecraftDownload", id), loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = McDownloadStageId(id)
+                };
             loader.Start(id);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -963,7 +1018,7 @@ public static class ModDownloadLib
             if (clientDownloadLoader is null)
                 return;
             var targetLoaders = clientDownloadLoader.GetLoaderList()
-                .Where(l => (l.name ?? "") == mcDownloadClientLibName || (l.name ?? "") == mcDownloadClientJsonName)
+                .Where(l => l.Identifier is McDownloadClientLibId or McDownloadClientJsonId)
                 .Where(l => l.State != ModBase.LoadState.Finished).ToList();
             if (targetLoaders.Any())
                 ModBase.Log("[Download] OptiFine 安装正在等待原版文件下载完成");
@@ -1207,21 +1262,6 @@ public static class ModDownloadLib
     public static MyListItem OptiFineDownloadListItem(ModDownload.DlOptiFineListEntry entry,
         MyListItem.ClickEventHandler onClick, bool isSaveOnly)
     {
-        var infoParts = new List<string>
-        {
-            entry.IsPreview
-                ? Lang.Text("Download.Version.Type.Preview")
-                : Lang.Text("Download.Version.Type.Release")
-        };
-
-        if (!string.IsNullOrEmpty(entry.ReleaseTime))
-            infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
-
-        if (entry.RequiredForgeVersion is null)
-            infoParts.Add(Lang.Text("Download.Version.Optifine.IncompatibleForge"));
-        else if (!string.IsNullOrEmpty(entry.RequiredForgeVersion))
-            infoParts.Add(Lang.Text("Download.Version.Optifine.CompatibleForge", entry.RequiredForgeVersion));
-
         var newItem = new MyListItem
         {
             Title = entry.DisplayName,
@@ -1229,9 +1269,28 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = string.Join("  |  ", infoParts),
-            Logo = ModBase.pathImage + "Blocks/GrassPath.png"
+            Logo = $"{ModBase.pathImage}Blocks/GrassPath.png"
         };
+        LocalizedText.TryBind(newItem, "Info", () =>
+        {
+            var infoParts = new List<string>
+            {
+                entry.IsPreview
+                    ? Lang.Text("Download.Version.Type.Preview")
+                    : Lang.Text("Download.Version.Type.Release")
+            };
+
+            if (!string.IsNullOrEmpty(entry.ReleaseTime))
+                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+
+            if (entry.RequiredForgeVersion is null)
+                infoParts.Add(Lang.Text("Download.Version.Optifine.IncompatibleForge"));
+            else if (!string.IsNullOrEmpty(entry.RequiredForgeVersion))
+                infoParts.Add(Lang.Text("Download.Version.Optifine.CompatibleForge",
+                    entry.RequiredForgeVersion));
+
+            return string.Join("  |  ", infoParts);
+        });
 
         newItem.Click += onClick;
         // 建立菜单
@@ -1244,7 +1303,7 @@ public static class ModDownloadLib
 
     private static void OptiFineSaveContMenuBuild(object sender, EventArgs e)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -1259,7 +1318,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         //btnSave.Click += () ModDownloadLib.OptiFineSave_Click;
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -1528,16 +1587,6 @@ public static class ModDownloadLib
     public static MyListItem LiteLoaderDownloadListItem(ModDownload.DlLiteLoaderListEntry entry,
         MyListItem.ClickEventHandler onClick, bool isSaveOnly)
     {
-        var infoParts = new List<string>
-        {
-            entry.IsPreview
-                ? Lang.Text("Download.Version.Type.Preview")
-                : Lang.Text("Download.Version.Type.Stable")
-        };
-
-        if (!string.IsNullOrEmpty(entry.ReleaseTime))
-            infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
-
         // 建立控件
         var newItem = new MyListItem
         {
@@ -1546,9 +1595,22 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = string.Join("  |  ", infoParts),
             Logo = ModBase.pathImage + "Blocks/Egg.png"
         };
+        LocalizedText.TryBind(newItem, "Info", () =>
+        {
+            var infoParts = new List<string>
+            {
+                entry.IsPreview
+                    ? Lang.Text("Download.Version.Type.Preview")
+                    : Lang.Text("Download.Version.Type.Stable")
+            };
+
+            if (!string.IsNullOrEmpty(entry.ReleaseTime))
+                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+
+            return string.Join("  |  ", infoParts);
+        });
 
         newItem.Click += onClick;
         // 建立菜单
@@ -2191,7 +2253,7 @@ public static class ModDownloadLib
                 if (clientDownloadLoader is null)
                     return;
                 var targetLoaders = clientDownloadLoader.GetLoaderList()
-                    .Where(l => (l.name ?? "") == mcDownloadClientLibName || (l.name ?? "") == mcDownloadClientJsonName)
+                    .Where(l => l.Identifier is McDownloadClientLibId or McDownloadClientJsonId)
                     .Where(l => l.State != ModBase.LoadState.Finished).ToList();
                 if (targetLoaders.Any())
                     ModBase.Log($"[Download] {loaderName} 安装正在等待原版文件下载完成");
@@ -2445,14 +2507,22 @@ public static class ModDownloadLib
         if (recommendedVersion is not null)
         {
             var recommended = ForgeDownloadListItem(recommendedVersion, onClick, isSaveOnly);
-            recommended.Info = Lang.Text("Download.Version.Type.Recommended") + (string.IsNullOrEmpty(recommended.Info) ? "" : "  |  " + recommended.Info);
+            LocalizedText.TryBind(
+                recommended,
+                "Info",
+                () => Lang.Text("Download.Version.Type.Recommended") + "  |  " +
+                      Lang.Text("Download.Version.Type.Stable"));
             stack.Children.Add(recommended);
         }
 
         if (freshVersion is not null)
         {
             var fresh = ForgeDownloadListItem(freshVersion, onClick, isSaveOnly);
-            fresh.Info = Lang.Text("Download.Version.Latest.Title") + (string.IsNullOrEmpty(fresh.Info) ? "" : "  |  " + fresh.Info);
+            LocalizedText.TryBind(
+                fresh,
+                "Info",
+                () => Lang.Text("Download.Version.Latest.Title") + "  |  " +
+                      Lang.Text("Download.Version.Type.Stable"));
             stack.Children.Add(fresh);
         }
 
@@ -2467,14 +2537,6 @@ public static class ModDownloadLib
     public static MyListItem ForgeDownloadListItem(ModDownload.DlForgeVersionEntry entry,
         MyListItem.ClickEventHandler onClick, bool isSaveOnly)
     {
-        var infoParts = new List<string>();
-
-        if (!string.IsNullOrEmpty(entry.ReleaseTime))
-            infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
-
-        if (ModBase.modeDebug)
-            infoParts.Add(Lang.Text("Download.Version.Forge.Type", entry.Category));
-
         // 建立控件
         var newItem = new MyListItem
         {
@@ -2483,9 +2545,17 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = string.Join("  |  ", infoParts),
             Logo = ModBase.pathImage + "Blocks/Anvil.png"
         };
+        LocalizedText.TryBind(newItem, "Info", () =>
+        {
+            var infoParts = new List<string>();
+            if (!string.IsNullOrEmpty(entry.ReleaseTime))
+                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+            if (ModBase.modeDebug)
+                infoParts.Add(Lang.Text("Download.Version.Forge.Type", entry.Category));
+            return string.Join("  |  ", infoParts);
+        });
 
         newItem.Click += onClick;
         // 建立菜单
@@ -2504,7 +2574,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         btnSave.Click += (ss, ee) => ForgeSave_Click(ss, (dynamic)ee);
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -2514,7 +2584,7 @@ public static class ModDownloadLib
 
     private static void ForgeSaveContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -2659,18 +2729,22 @@ public static class ModDownloadLib
         if (freshStableVersion is not null)
         {
             var fresh = NeoForgeDownloadListItem(freshStableVersion, onClick, isSaveOnly);
-            fresh.Info = string.IsNullOrEmpty(fresh.Info)
-                ? Lang.Text("Download.Version.Fresh.Stable")
-                : Lang.Text("Download.Version.Fresh.Latest") + "  |  " + fresh.Info;
+            LocalizedText.TryBind(
+                fresh,
+                "Info",
+                () => Lang.Text("Download.Version.Fresh.Latest") + "  |  " +
+                      Lang.Text("Download.Version.Type.Stable"));
             stack.Children.Add(fresh);
         }
 
         if (freshBetaVersion is not null)
         {
             var fresh = NeoForgeDownloadListItem(freshBetaVersion, onClick, isSaveOnly);
-            fresh.Info = string.IsNullOrEmpty(fresh.Info)
-                ? Lang.Text("Download.Version.Fresh.Development")
-                : Lang.Text("Download.Version.Fresh.Latest") + "  |  " + fresh.Info;
+            LocalizedText.TryBind(
+                fresh,
+                "Info",
+                () => Lang.Text("Download.Version.Fresh.Latest") + "  |  " +
+                      Lang.Text("Download.Version.Type.Preview"));
             stack.Children.Add(fresh);
         }
 
@@ -2693,9 +2767,13 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = info,
-            Info = info.IsBeta ? Lang.Text("Download.Version.Type.Preview") : Lang.Text("Download.Version.Type.Stable"),
             Logo = ModBase.pathImage + "Blocks/NeoForge.png"
         };
+        newItem.SetLocalizedValue(
+            MyListItem.InfoProperty,
+            info.IsBeta
+                ? "Download.Version.Type.Preview"
+                : "Download.Version.Type.Stable");
         newItem.Click += onClick;
         // 建立菜单
         if (isSaveOnly)
@@ -2713,7 +2791,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         btnSave.Click += (sender, e) => NeoForgeSave_Click(sender, (RoutedEventArgs)e);
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -2723,7 +2801,7 @@ public static class ModDownloadLib
 
     private static void NeoForgeSaveContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -2772,7 +2850,11 @@ public static class ModDownloadLib
         if (freshBetaVersion is not null)
         {
             var fresh = CleanroomDownloadListItem(freshBetaVersion, onClick, isSaveOnly);
-            fresh.Info = string.IsNullOrEmpty(fresh.Info) ? Lang.Text("Download.Version.Fresh.Development") : Lang.Text("Download.Version.Fresh.Latest") + "  |  " + fresh.Info;
+            LocalizedText.TryBind(
+                fresh,
+                "Info",
+                () => Lang.Text("Download.Version.Fresh.Latest") + "  |  " +
+                      Lang.Text("Download.Version.Type.Preview"));
             stack.Children.Add(fresh);
         }
 
@@ -2795,9 +2877,13 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = info,
-            Info = info.IsBeta ? Lang.Text("Download.Version.Type.Preview") : Lang.Text("Download.Version.Type.Stable"),
             Logo = ModBase.pathImage + "Blocks/Cleanroom.png"
         };
+        newItem.SetLocalizedValue(
+            MyListItem.InfoProperty,
+            info.IsBeta
+                ? "Download.Version.Type.Preview"
+                : "Download.Version.Type.Stable");
         newItem.Click += onClick;
         // 建立菜单
         if (isSaveOnly)
@@ -2815,7 +2901,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         btnSave.Click += (sender, _e) => CleanroomSave_Click(sender, (RoutedEventArgs)e);
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -2825,7 +2911,7 @@ public static class ModDownloadLib
 
     private static void CleanroomSaveContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -3107,9 +3193,13 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry["stable"].ToObject<bool>() ? Lang.Text("Download.Version.Type.Stable") : Lang.Text("Download.Version.Type.Preview"),
             Logo = ModBase.pathImage + "Blocks/Fabric.png"
         };
+        newItem.SetLocalizedValue(
+            MyListItem.InfoProperty,
+            entry["stable"].ToObject<bool>()
+                ? "Download.Version.Type.Stable"
+                : "Download.Version.Type.Preview");
         newItem.Click += onClick;
         newItem.ContentHandler = FabricContMenuBuild;
         // 结束
@@ -3118,7 +3208,7 @@ public static class ModDownloadLib
 
     private static void FabricContMenuBuild(object sender, EventArgs e)
     {
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
@@ -3141,9 +3231,14 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry.StatusDescription + Lang.Text("Download.Version.ReleaseDate", Lang.Date(entry.ReleaseDate, "g")),
             Logo = ModBase.pathImage + "Blocks/Fabric.png"
         };
+        LocalizedText.TryBind(
+            newItem,
+            "Info",
+            () => entry.StatusDescription + Lang.Text(
+                "Download.Version.ReleaseDate",
+                Lang.Date(entry.ReleaseDate, "g")));
         newItem.Click += onClick;
         // 结束
         return newItem;
@@ -3159,9 +3254,14 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry.StatusDescription + Lang.Text("Download.Version.ReleaseDate", Lang.Date(entry.ReleaseDate, "g")),
             Logo = ModBase.pathImage + "Blocks/OptiFabric.png"
         };
+        LocalizedText.TryBind(
+            newItem,
+            "Info",
+            () => entry.StatusDescription + Lang.Text(
+                "Download.Version.ReleaseDate",
+                Lang.Date(entry.ReleaseDate, "g")));
         newItem.Click += onClick;
         // 结束
         return newItem;
@@ -3181,9 +3281,15 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry["stable"].ToObject<bool>() ? Lang.Text("Download.Version.Type.Stable") : Lang.Text("Download.Version.Type.Preview"),
             Logo = ModBase.pathImage + "Blocks/Fabric.png"
         };
+        // 发布状态按当前语言实时求值，切换语言后自动刷新
+        LocalizedText.TryBind(
+            newItem,
+            "Info",
+            () => entry["stable"]?.ToObject<bool>() == true
+                ? Lang.Text("Download.Version.Type.Stable")
+                : Lang.Text("Download.Version.Type.Preview"));
         newItem.Click += onClick;
         // 结束
         return newItem;
@@ -3200,9 +3306,14 @@ public static class ModDownloadLib
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry.StatusDescription + Lang.Text("Download.Version.ReleaseDate", Lang.Date(entry.ReleaseDate, "g")),
             Logo = ModBase.pathImage + "Blocks/Fabric.png"
         };
+        LocalizedText.TryBind(
+            newItem,
+            "Info",
+            () => entry.StatusDescription + Lang.Text(
+                "Download.Version.ReleaseDate",
+                Lang.Date(entry.ReleaseDate, "g")));
         newItem.Click += onClick;
         // 结束
         return newItem;
@@ -3392,8 +3503,15 @@ public static class ModDownloadLib
         loadersLib.Add(new LoaderDownload(Lang.Text("Minecraft.Download.Stage.DownloadVanillaAndLabyModLibrariesSide"),
                 new List<DownloadFile>())
             { ProgressWeight = 13d, show = false });
-        loaders.Add(new ModLoader.LoaderCombo<string>(mcDownloadClientLibName, loadersLib)
-            { block = false, ProgressWeight = 14d });
+        loaders.Add(
+            new ModLoader.LoaderCombo<string>(
+                Lang.Text("Minecraft.Download.Stage.VanillaLibrariesDownload"),
+                loadersLib)
+            {
+                block = false,
+                ProgressWeight = 14d,
+                Identifier = McDownloadClientLibId
+            });
 
         // 下载资源文件
         var loadersAssets = new List<ModLoader.LoaderBase>();
@@ -3458,16 +3576,26 @@ public static class ModDownloadLib
     public static MyListItem LabyModDownloadListItem(JsonObject entry, MyListItem.ClickEventHandler onClick)
     {
         // 建立控件
+        var isSnapshot = entry["channel"].ToString().Contains("snapshot");
         var newItem = new MyListItem
         {
-            Title = entry["version"] + " " + (entry["channel"].ToString().Contains("snapshot") ? Lang.Text("Download.Version.Type.Snapshot") : Lang.Text("Download.Version.Type.Stable")),
             SnapsToDevicePixels = true,
             Height = 42d,
             Type = MyListItem.CheckType.Clickable,
             Tag = entry,
-            Info = entry["channel"].ToString().Contains("snapshot") ? Lang.Text("Download.Version.Type.Snapshot") : Lang.Text("Download.Version.Type.Stable"),
             Logo = ModBase.pathImage + "Blocks/LabyMod.png"
         };
+        newItem.SetLocalizedValue(
+            MyListItem.InfoProperty,
+            isSnapshot
+                ? "Download.Version.Type.Snapshot"
+                : "Download.Version.Type.Stable");
+        LocalizedText.TryBind(
+            newItem,
+            "Title",
+            () => entry["version"] + " " + (isSnapshot
+                ? Lang.Text("Download.Version.Type.Snapshot")
+                : Lang.Text("Download.Version.Type.Stable")));
         newItem.Click += onClick;
         newItem.ContentHandler = LabyModContMenuBuild;
         // 结束
@@ -3481,7 +3609,7 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
         btnSave.Click += (a, b) => LabyModSave_Click(a, (dynamic)b);
-        var btnInfo = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/info", ToolTip = Lang.Text("Download.Version.Changelog") };
+        var btnInfo = CreateChangelogButton();
         ToolTipService.SetPlacement(btnInfo, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);

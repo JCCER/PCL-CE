@@ -123,8 +123,13 @@ public static class UpdateManager
                         isUpdateWaitingRestart = true;
                         ModBase.RunInUi(() =>
                         {
-                            ModMain.frmMain.BtnExtraUpdateRestart.ToolTip =
-                                Lang.Text("Main.Extra.UpdateRestart.ToolTipWithVersion", ModBase.versionBaseName, version.VersionName);
+                            LocalizedText.TryBind(
+                                ModMain.frmMain.BtnExtraUpdateRestart,
+                                "ToolTip",
+                                () => Lang.Text(
+                                    "Main.Extra.UpdateRestart.ToolTipWithVersion",
+                                    ModBase.versionBaseName,
+                                    version.VersionName));
                             ModMain.frmMain.BtnExtraUpdateRestart.ShowRefresh();
                             ModMain.frmMain.BtnExtraUpdateRestart.Ribble();
                         });
@@ -137,7 +142,9 @@ public static class UpdateManager
                     if (ModMain.frmSetupUpdate is not null)
                         ModBase.RunInUi(() =>
                         {
-                            ModMain.frmSetupUpdate.BtnUpdate.Text = Lang.Text("Update.Task.RestartInstall");
+                            ModMain.frmSetupUpdate.BtnUpdate.TrySetLocalizedValue(
+                                "Text",
+                                "Update.Task.RestartInstall");
                             ModMain.frmSetupUpdate.BtnUpdate.IsEnabled = true;
                         });
                 })

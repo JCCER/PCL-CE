@@ -198,7 +198,7 @@ public partial class PageLoginAuth
         BtnUseOAuth.IsEnabled = true;
         BtnWebsite.IsEnabled = true;
         BtnPasswordWebsite.IsEnabled = true;
-        BtnLogin.Text = Lang.Text("Launch.Account.Auth.Login");
+        BtnLogin.TrySetLocalizedValue("Text", "Launch.Account.Auth.Login");
     }
 
     private void _SetLoginMode(bool useOAuth)

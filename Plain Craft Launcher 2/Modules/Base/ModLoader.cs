@@ -213,9 +213,15 @@ public static class ModLoader
         public bool isForceRestarting;
 
         /// <summary>
-        ///     加载器的名称。
+        ///     加载器的名称。该值面向用户显示，可能被本地化。
         /// </summary>
         public string name;
+
+        /// <summary>
+        ///     加载器的内部标识，不参与本地化，可用于跨语言稳定的逻辑匹配。
+        ///     为空表示该加载器没有特殊的内部标识。
+        /// </summary>
+        public string? Identifier;
 
         /// <summary>
         ///     父加载器。

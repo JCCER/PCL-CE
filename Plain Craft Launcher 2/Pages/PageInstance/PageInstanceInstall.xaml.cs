@@ -10,6 +10,7 @@ using PCL.Core.App;
 using PCL.Core.App.Localization;
 using PCL.Core.UI;
 using PCL.Core.Utils;
+using Path = System.IO.Path;
 
 namespace PCL;
 
@@ -30,7 +31,23 @@ public partial class PageInstanceInstall
         Initialized += (a, b) => LoaderInit();
         Loaded += (a, b) => Init();
         InitializeComponent();
-        LoadMinecraft.Text = Lang.Text("Download.Version.LoadingList");
+        LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
+        WeakLanguageChanged.Add(this, OnLanguageChanged);
+    }
+
+    private static void OnLanguageChanged(PageInstanceInstall page)
+    {
+        page._OnLanguageChanged();
+    }
+
+    private void _OnLanguageChanged()
+    {
+        ModBase.RunInUi(() =>
+        {
+            LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
+            if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray)
+                LoadMinecraft_OnFinish();
+        });
     }
 
     private void LoaderInit()
@@ -126,7 +143,7 @@ public partial class PageInstanceInstall
         // 删除 LabyMod Neo 文件
         if ((PageInstanceLeft.McInstance.PathIndie ?? "") != (PageInstanceLeft.McInstance.PathInstance ?? "") &&
             PageInstanceLeft.McInstance.Info.HasLabyMod)
-            Directory.Delete(System.IO.Path.Combine(PageInstanceLeft.McInstance.PathIndie, "labymod-neo"), true);
+            Directory.Delete(Path.Combine(PageInstanceLeft.McInstance.PathIndie, "labymod-neo"), true);
         // 备份实例核心文件
         ModBase.CopyFile(PageInstanceLeft.McInstance.PathInstance + PageInstanceLeft.McInstance.Name + ".json",
             PageInstanceLeft.McInstance.PathInstance + @"PCLInstallBackups\" + PageInstanceLeft.McInstance.Name + ".json");
@@ -192,7 +209,7 @@ public partial class PageInstanceInstall
             case MyLoading.MyLoadingState.Error:
             {
                 var message = ((ModLoader.LoaderBase)loader.State).Error.Message;
-                return message == Lang.Text("Download.Install.State.NoVersion") ? Lang.Text("Download.Install.State.NoVersion") : Lang.Text("Download.Install.State.GetFailed", message);
+                return Lang.Text("Download.Install.State.GetFailed", message);
             }
             case MyLoading.MyLoadingState.Unloaded:
             {
@@ -447,14 +464,14 @@ public partial class PageInstanceInstall
         if ((selectedInfo ?? "") == (currentInfo ?? ""))
         {
             ItemSelect.Info = selectedInfo;
-            BtnSelectStart.Text = Lang.Text("Instance.Install.Action.StartReset");
+            BtnSelectStart.TrySetLocalizedValue("Text", "Instance.Install.Action.StartReset");
             _installAction = InstallAction.Reset;
             BtnSelectStart.SvgIcon = "lucide/rotate-ccw";
         }
         else
         {
             ItemSelect.Info = currentInfo + " → " + selectedInfo;
-            BtnSelectStart.Text = Lang.Text("Instance.Install.Action.StartModify");
+            BtnSelectStart.TrySetLocalizedValue("Text", "Instance.Install.Action.StartModify");
             _installAction = InstallAction.Modify;
             BtnSelectStart.SvgIcon = "lucide/pencil";
         }
@@ -1215,7 +1232,8 @@ public partial class PageInstanceInstall
                                     type = "愚人节版";
                                     Version["id"] = Version["id"].ToString().Replace("point", ".");
                                     Version["type"] = "special";
-                                    Version.Add("lore", McVersionClassifier.GetMcFoolName((string)Version["id"]));
+                                    Version["lore"] =
+                                        McVersionClassifier.GetMcFoolNameKey((string)Version["id"]);
                                     break;
                                 }
                                 case "20w14infinite":
@@ -1224,7 +1242,8 @@ public partial class PageInstanceInstall
                                     type = "愚人节版";
                                     Version["id"] = "20w14∞";
                                     Version["type"] = "special";
-                                    Version.Add("lore", McVersionClassifier.GetMcFoolName((string)Version["id"]));
+                                    Version["lore"] =
+                                        McVersionClassifier.GetMcFoolNameKey((string)Version["id"]);
                                     break;
                                 }
                                 case "3d shareware v1.34":
@@ -1239,8 +1258,9 @@ public partial class PageInstanceInstall
                                 {
                                     type = "愚人节版";
                                     Version["type"] = "special";
-                                    Version.Add("lore",
-                                        McVersionClassifier.GetMcFoolName((string)Version["id"])); // 4/1 自动视作愚人节版
+                                    Version["lore"] =
+                                        McVersionClassifier.GetMcFoolNameKey(
+                                            (string)Version["id"]); // 4/1 自动视作愚人节版
                                     break;
                                 }
 
@@ -1283,15 +1303,25 @@ public partial class PageInstanceInstall
                 // 清空当前
                 PanMinecraft.Children.Clear();
                 // 添加最新版本
-                var cardInfo = new MyCard { Title = Lang.Text("Download.Version.Latest.Title"), Margin = new Thickness(0d, 15d, 0d, 15d) };
+                var cardInfo = new MyCard { Margin = new Thickness(0d, 15d, 0d, 15d) };
+                LocalizedText.TryBind(
+                    cardInfo,
+                    "Title",
+                    () => Lang.Text("Download.Version.Latest.Title"));
                 var topestVersions = new List<JsonObject>();
                 var release = (JsonObject)dict["正式版"][0].DeepClone();
-                release["lore"] = Lang.Text("Download.Version.Latest.Release", Lang.Date(release["releaseTime"].ToObject<DateTime>(), "g"));
+                release["lore"] = "Download.Version.Latest.Release";
+                release["loreArgs"] =
+                    new JsonArray(release["releaseTime"].ToObject<DateTime>().ToString("O"));
+                release["loreArgsType"] = "date";
                 topestVersions.Add(release);
                 if (dict["正式版"][0]["releaseTime"].ToObject<DateTime>() < dict["预览版"][0]["releaseTime"].ToObject<DateTime>())
                 {
                     var snapshot = (JsonObject)dict["预览版"][0].DeepClone();
-                    snapshot["lore"] = Lang.Text("Download.Version.Latest.Development", Lang.Date(snapshot["releaseTime"].ToObject<DateTime>(), "g"));
+                    snapshot["lore"] = "Download.Version.Latest.Development";
+                    snapshot["loreArgs"] =
+                        new JsonArray(snapshot["releaseTime"].ToObject<DateTime>().ToString("O"));
+                    snapshot["loreArgsType"] = "date";
                     topestVersions.Add(snapshot);
                 }
 

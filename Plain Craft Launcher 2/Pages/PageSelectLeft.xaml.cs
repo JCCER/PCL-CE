@@ -29,11 +29,16 @@ public partial class PageSelectLeft : IRefreshable
         RefreshCurrent();
     }
 
+    protected override void RefreshLocalization()
+    {
+        McFolderListUI(true);
+    }
+
     private void PageSelectLeft_Initialized(object sender, EventArgs e)
     {
         ModFolder.mcFolderListLoader.PreviewFinish += _ =>
         {
-            if (ModMain.frmSelectLeft is not null) ModBase.RunInUiWait(McFolderListUI);
+            if (ModMain.frmSelectLeft is not null) ModBase.RunInUiWait(() => McFolderListUI());
         };
     }
 
@@ -44,12 +49,13 @@ public partial class PageSelectLeft : IRefreshable
         isFirstLoad = false;
     }
 
-    private void McFolderListUI()
+    private void McFolderListUI(bool force = false)
     {
         try
         {
             // 确认数据有变化
-            if (mcFolderListLast is not null && mcFolderListLast.SequenceEqual(ModFolder.mcFolderList))
+            if (!force && mcFolderListLast is not null &&
+                mcFolderListLast.SequenceEqual(ModFolder.mcFolderList))
                 return;
 
             mcFolderListLast = new List<ModFolder.McFolder>(ModFolder.mcFolderList);
@@ -171,7 +177,7 @@ public partial class PageSelectLeft : IRefreshable
                     IsScaleAnimationEnabled = false,
                     Type = MyListItem.CheckType.RadioBox,
                     MinPaddingRight = 30,
-                    Title = folder.Name,
+                    Title = folder.DisplayName,
                     Info = folder.Location,
                     Height = 40,
                     ContextMenu = contMenu,
@@ -334,7 +340,7 @@ public partial class PageSelectLeft : IRefreshable
             .Tag;
         var index = ModFolder.mcFolderList.IndexOf(folder);
         ModFolder.mcFolderList[index].type = ModFolder.McFolder.Types.Original;
-        ModFolder.mcFolderList[index].Name = Lang.Text("Select.Folder.OfficialLauncherFolder");
+        ModFolder.mcFolderList[index].Name = "$Select.Folder.OfficialLauncherFolder";
         UpdateFolderOrder();
     }
 
@@ -594,10 +600,16 @@ public partial class PageSelectLeft : IRefreshable
             Lang.Text(isClearing ? "Select.Folder.Clear.FinalWarning" : "Select.Folder.Delete.FinalWarning",
                 folder.Location);
         var confirmTitle = Lang.Text(isClearing ? "Select.Folder.Clear.Confirm" : "Select.Folder.Delete.Confirm");
-        var inProgress = Lang.Text(isClearing ? "Select.Folder.Clear.InProgress" : "Select.Folder.Delete.InProgress",
-            folder.Name);
-        var success = Lang.Text(isClearing ? "Select.Folder.Clear.Success" : "Select.Folder.Delete.Success",
-            folder.Name);
+        var inProgress = Lang.Text(
+            isClearing
+                ? "Select.Folder.Clear.InProgress"
+                : "Select.Folder.Delete.InProgress",
+            folder.DisplayName);
+        var success = Lang.Text(
+            isClearing
+                ? "Select.Folder.Clear.Success"
+                : "Select.Folder.Delete.Success",
+            folder.DisplayName);
 
         if (ModMain.MyMsgBox(firstWarning, Lang.Text("Select.Folder.Delete.WarningTitle"),
                 Lang.Text("Common.Action.Cancel"), Lang.Text("Common.Action.Confirm"),
@@ -629,9 +641,12 @@ public partial class PageSelectLeft : IRefreshable
             {
                 ModBase.Log(
                     ex,
-                    Lang.Text("Select.Folder.Error.Operate", deleteText, folder.Name),
+                    Lang.Text("Select.Folder.Error.Operate", deleteText, folder.DisplayName),
                     ModBase.LogLevel.Hint,
-                    userSummary: Lang.Text("Select.Folder.Error.Operate", deleteText, folder.Name));
+                    userSummary: Lang.Text(
+                        "Select.Folder.Error.Operate",
+                        deleteText,
+                        folder.DisplayName));
             }
             finally
             {
@@ -675,11 +690,14 @@ public partial class PageSelectLeft : IRefreshable
         try
         {
             // 获取输入
-            var newName = ModMain.MyMsgBoxInput(Lang.Text("Select.Folder.Rename.Title"), "", folder.Name,
-            [
-                new NullOrWhiteSpaceValidator(), new StringLengthValidator(1, 30),
-                new BlacklistValidator([">", "|"])
-            ]);
+            var newName = ModMain.MyMsgBoxInput(
+                Lang.Text("Select.Folder.Rename.Title"),
+                "",
+                folder.DisplayName,
+                [
+                    new NullOrWhiteSpaceValidator(), new StringLengthValidator(1, 30),
+                    new BlacklistValidator([">", "|"])
+                ]);
             if (string.IsNullOrWhiteSpace(newName))
                 return;
             // 修改自定义名

@@ -1071,7 +1071,7 @@ public static class ModDownload
         }
         catch (Exception ex)
         {
-            if (ex.Message.Contains("(404)")) throw new Exception(Lang.Text("Minecraft.Download.Error.NotFound"));
+            if (ex.Message.Contains("(404)")) throw new NotFoundException();
 
             throw;
         }
@@ -1155,7 +1155,7 @@ public static class ModDownload
         }
 
         if (!versions.Any())
-            throw new Exception(Lang.Text("Minecraft.Download.Error.NotFound"));
+            throw new NotFoundException();
         loader.output = versions;
     }
 
@@ -1237,7 +1237,7 @@ public static class ModDownload
         }
 
         if (!versions.Any())
-            throw new Exception(Lang.Text("Minecraft.Download.Error.NotFound"));
+            throw new NotFoundException();
         loader.output = versions;
     }
 
@@ -1449,7 +1449,7 @@ public static class ModDownload
         var versions = versionNames.Where(name => name != "47.1.82").Select(name => new DlNeoForgeListEntry(name))
             .OrderByDescending(a => a).ToList(); // 这个版本虽然在版本列表中，但不能下载
         if (!versions.Any())
-            throw new Exception(Lang.Text("Minecraft.Download.Error.NotFound"));
+            throw new NotFoundException();
         return versions;
     }
 
@@ -2361,8 +2361,7 @@ public static class ModDownload
                     {
                         loaderList[ii].Key.input = default; // 重置输入，以免以同样的输入“重试加载”时直接失败
                         if (loaderList[ii].Key.Error is null) continue;
-                        if (errorInfo is null || loaderList[ii].Key.Error.Message
-                                .Contains(Lang.Text("Minecraft.Download.Error.NotFound")))
+                        if (errorInfo is null || loaderList[ii].Key.Error is NotFoundException)
                             errorInfo = loaderList[ii].Key.Error;
                     }
 

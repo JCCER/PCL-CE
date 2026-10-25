@@ -268,7 +268,10 @@ public partial class PageSetupUI
             PanBackgroundSuit.Visibility = Visibility.Visible;
             BtnBackgroundClear.Visibility = Visibility.Visible;
             CheckAutoPauseVideo.Visibility = Visibility.Visible;
-            CardBackground.Title = Lang.Text("Setup.Ui.Background.TitleWithCount", count);
+            LocalizedText.TryBind(
+                CardBackground,
+                "Title",
+                () => Lang.Text("Setup.Ui.Background.TitleWithCount", count));
         }
         else
         {
@@ -277,7 +280,10 @@ public partial class PageSetupUI
             PanBackgroundSuit.Visibility = Visibility.Collapsed;
             BtnBackgroundClear.Visibility = Visibility.Collapsed;
             CheckAutoPauseVideo.Visibility = Visibility.Collapsed;
-            CardBackground.Title = Lang.Text("Setup.Ui.Background.TitleDefault");
+            LocalizedText.TryBind(
+                CardBackground,
+                "Title",
+                () => Lang.Text("Setup.Ui.Background.TitleDefault"));
         }
 
         CardBackground.TriggerForceResize();
@@ -571,14 +577,22 @@ public partial class PageSetupUI
             PanMusicVolume.Visibility = Visibility.Visible;
             PanMusicDetail.Visibility = Visibility.Visible;
             BtnMusicClear.Visibility = Visibility.Visible;
-            CardMusic.Title = Lang.Text("Setup.Ui.Music.TitleWithCount", ModBase.EnumerateFiles(ModBase.exePath + @"PCL\Musics\").Count());
+            LocalizedText.TryBind(
+                CardMusic,
+                "Title",
+                () => Lang.Text(
+                    "Setup.Ui.Music.TitleWithCount",
+                    ModBase.EnumerateFiles(ModBase.exePath + @"PCL\Musics\").Count()));
         }
         else
         {
             PanMusicVolume.Visibility = Visibility.Collapsed;
             PanMusicDetail.Visibility = Visibility.Collapsed;
             BtnMusicClear.Visibility = Visibility.Collapsed;
-            CardMusic.Title = Lang.Text("Setup.Ui.Music.Title");
+            LocalizedText.TryBind(
+                CardMusic,
+                "Title",
+                () => Lang.Text("Setup.Ui.Music.Title"));
         }
 
         CardMusic.TriggerForceResize();
@@ -751,7 +765,12 @@ public partial class PageSetupUI
                 ModMain.frmSetupUI.CardSwitch.Visibility = !HiddenForceShow && conf.FunctionHidden
                     ? Visibility.Collapsed
                     : Visibility.Visible;
-                ModMain.frmSetupUI.CardSwitch.Title = HiddenForceShow ? Lang.Text("Setup.Ui.FeatureHide.TitleTemporarilyDisabled") : Lang.Text("Setup.Ui.FeatureHide.Title");
+                LocalizedText.TryBind(
+                    ModMain.frmSetupUI.CardSwitch,
+                    "Title",
+                    () => HiddenForceShow
+                        ? Lang.Text("Setup.Ui.FeatureHide.TitleTemporarilyDisabled")
+                        : Lang.Text("Setup.Ui.FeatureHide.Title"));
             }
 
             // 设置子页面 (FrmSetupLeft)

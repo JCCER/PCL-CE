@@ -69,9 +69,11 @@ public partial class PageInstanceSavesInfo : IRefreshable
                 AddInfoRow(Lang.Text("Instance.Saves.Info.Version"), $"{save.VersionName} ({save.VersionId})");
 
             AddInfoRow(Lang.Text("Instance.Saves.Info.LevelName"), save.LevelName);
-            AddInfoRow(Lang.Text("Instance.Saves.Info.Seed"),
-                save.Seed?.ToString() ?? Lang.Text("Instance.Saves.Info.GetFailed"),
-                isSeed: true, versionName: save.VersionName);
+            AddInfoRow(
+                Lang.Text("Instance.Saves.Info.Seed"),
+                save.Seed?.ToString(),
+                isSeed: true,
+                versionName: save.VersionName);
             AddInfoRow(Lang.Text("Instance.Saves.Info.LastPlayed"),
                 Lang.Date(save.LastPlayedUtc.ToLocalTime(), "g"));
 
@@ -248,12 +250,12 @@ public partial class PageInstanceSavesInfo : IRefreshable
         PanList.RowDefinitions.Clear();
     }
 
-    private void AddInfoRow(string head, string content, bool isSeed = false, string? versionName = null)
+    private void AddInfoRow(string head, string? content, bool isSeed = false, string? versionName = null)
     {
         var headBlock = new TextBlock { Text = head, Margin = new Thickness(0d, 3d, 0d, 3d) };
         var contentStack = new StackPanel { Orientation = Orientation.Horizontal };
 
-        if (isSeed && content != Lang.Text("Instance.Saves.Info.GetFailed"))
+        if (isSeed && content is not null)
         {
             var seedBtn = new MyTextButton { Text = content, Margin = new Thickness(0d, 3d, 0d, 3d) };
             seedBtn.Click += (_, _) =>
@@ -285,7 +287,17 @@ public partial class PageInstanceSavesInfo : IRefreshable
         }
         else
         {
-            contentStack.Children.Add(new TextBlock { Text = content, Margin = new Thickness(0d, 3d, 0d, 3d) });
+            var contentBlock = new TextBlock
+            {
+                Margin = new Thickness(0d, 3d, 0d, 3d)
+            };
+            if (isSeed && content is null)
+                contentBlock.SetLocalizedValue(
+                    TextBlock.TextProperty,
+                    "Instance.Saves.Info.GetFailed");
+            else
+                contentBlock.Text = content;
+            contentStack.Children.Add(contentBlock);
         }
 
         PanList.Children.Add(headBlock);

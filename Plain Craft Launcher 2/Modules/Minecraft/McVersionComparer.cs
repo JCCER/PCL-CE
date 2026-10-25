@@ -22,20 +22,18 @@ public static class McVersionComparer
     ///     无法比较两个预发布版的大小。
     ///     支持的格式：未知版本, 26.1-snapshot-1，1.13.2, 1.7.10-pre4, 1.8_pre, 1.14 Pre-Release 2, 1.14.4 C6
     /// </summary>
-    public static int CompareVersion(string left, string right)
+    public static int CompareVersion(string? left, string? right)
     {
-        if (left == Lang.Text("Minecraft.Version.Unknown") || right == Lang.Text("Minecraft.Version.Unknown"))
+        var leftUnknown = string.IsNullOrEmpty(left);
+        var rightUnknown = string.IsNullOrEmpty(right);
+        if (leftUnknown || rightUnknown)
         {
-            if (left == Lang.Text("Minecraft.Version.Unknown") && right != Lang.Text("Minecraft.Version.Unknown"))
-                return 1;
-            if (left == Lang.Text("Minecraft.Version.Unknown") && right == Lang.Text("Minecraft.Version.Unknown"))
-                return 0;
-            if (left != Lang.Text("Minecraft.Version.Unknown") && right == Lang.Text("Minecraft.Version.Unknown"))
-                return -1;
+            if (leftUnknown && rightUnknown) return 0;
+            return leftUnknown ? 1 : -1;
         }
 
-        left = left.ToLowerInvariant();
-        right = right.ToLowerInvariant();
+        left = left!.ToLowerInvariant();
+        right = right!.ToLowerInvariant();
         var lefts = left.Replace("快照", "snapshot").Replace("预览版", "pre").RegexSearch("[a-z]+|[0-9]+");
         var rights = right.Replace("快照", "snapshot").Replace("预览版", "pre").RegexSearch("[a-z]+|[0-9]+");
         var i = 0;

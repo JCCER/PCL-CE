@@ -288,9 +288,13 @@ public partial class PageLaunchLeft
             {
                 _launchButtonAction = LaunchButtonAction.Loading;
                 ModBase.Log("[Minecraft] 启动按钮：正在加载 Minecraft 实例");
-                ModMain.frmLaunchLeft.BtnLaunch.Text = Lang.Text("Launch.Home.Button.Loading");
+                ModMain.frmLaunchLeft.BtnLaunch.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Button.Loading");
                 ModMain.frmLaunchLeft.BtnLaunch.IsEnabled = false;
-                ModMain.frmLaunchLeft.LabVersion.Text = Lang.Text("Launch.Home.Instance.Loading");
+                ModMain.frmLaunchLeft.LabVersion.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Instance.Loading");
                 ModMain.frmLaunchLeft.BtnInstance.IsEnabled = false;
                 ModMain.frmLaunchLeft.BtnMore.Visibility = Visibility.Collapsed;
                 break;
@@ -299,9 +303,13 @@ public partial class PageLaunchLeft
             {
                 _launchButtonAction = LaunchButtonAction.Disabled;
                 ModBase.Log("[Minecraft] 启动按钮：无 Minecraft 实例，下载已禁用");
-                ModMain.frmLaunchLeft.BtnLaunch.Text = Lang.Text("Launch.Home.Button.Launch");
+                ModMain.frmLaunchLeft.BtnLaunch.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Button.Launch");
                 ModMain.frmLaunchLeft.BtnLaunch.IsEnabled = false;
-                ModMain.frmLaunchLeft.LabVersion.Text = Lang.Text("Launch.Home.Instance.NotFound");
+                ModMain.frmLaunchLeft.LabVersion.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Instance.NotFound");
                 ModMain.frmLaunchLeft.BtnInstance.IsEnabled = true;
                 ModMain.frmLaunchLeft.BtnMore.Visibility = Visibility.Collapsed;
                 break;
@@ -310,9 +318,13 @@ public partial class PageLaunchLeft
             {
                 _launchButtonAction = LaunchButtonAction.Download;
                 ModBase.Log("[Minecraft] 启动按钮：无 Minecraft 实例，要求下载");
-                ModMain.frmLaunchLeft.BtnLaunch.Text = Lang.Text("Launch.Home.Button.Download");
+                ModMain.frmLaunchLeft.BtnLaunch.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Button.Download");
                 ModMain.frmLaunchLeft.BtnLaunch.IsEnabled = true;
-                ModMain.frmLaunchLeft.LabVersion.Text = Lang.Text("Launch.Home.Instance.NotFound");
+                ModMain.frmLaunchLeft.LabVersion.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Instance.NotFound");
                 ModMain.frmLaunchLeft.BtnInstance.IsEnabled = true;
                 ModMain.frmLaunchLeft.BtnMore.Visibility = Visibility.Collapsed;
                 break;
@@ -321,7 +333,9 @@ public partial class PageLaunchLeft
             {
                 _launchButtonAction = LaunchButtonAction.Launch;
                 ModBase.Log("[Minecraft] 启动按钮：Minecraft 实例：" + ModInstanceList.McMcInstanceSelected.PathInstance);
-                ModMain.frmLaunchLeft.BtnLaunch.Text = Lang.Text("Launch.Home.Button.Launch");
+                ModMain.frmLaunchLeft.BtnLaunch.TrySetLocalizedValue(
+                    "Text",
+                    "Launch.Home.Button.Launch");
                 ModMain.frmLaunchLeft.BtnInstance.IsEnabled = true;
                 if (ProfileService.Current is not null)
                     BtnLaunch.IsEnabled = true;
@@ -411,7 +425,9 @@ public partial class PageLaunchLeft
                         }
 
                     if (exitTry) break;
-                    LabLaunchingStage.Text = Lang.Text("Launch.Status.Completed");
+                    LabLaunchingStage.TrySetLocalizedValue(
+                        "Text",
+                        "Launch.Status.Completed");
                 }
                 catch (Exception ex)
                 {
@@ -570,12 +586,12 @@ public partial class PageLaunchLeft
         {
             case ProfileType.Offline:
             {
-                LabLaunchingMethod.Text = Lang.Text("Launch.Account.Type.Offline");
+                LabLaunchingMethod.TrySetLocalizedValue("Text", "Launch.Account.Type.Offline");
                 break;
             }
             case ProfileType.Microsoft:
             {
-                LabLaunchingMethod.Text = Lang.Text("Launch.Account.Type.Microsoft");
+                LabLaunchingMethod.TrySetLocalizedValue("Text", "Launch.Account.Type.Microsoft");
                 break;
             }
             case ProfileType.Authlib:
@@ -590,7 +606,7 @@ public partial class PageLaunchLeft
 
         // 初始化页面
         LabLaunchingName.Text = ModInstanceList.McMcInstanceSelected.Name;
-        LabLaunchingStage.Text = Lang.Text("Common.Action.Initialize");
+        LabLaunchingStage.TrySetLocalizedValue("Text", "Common.Action.Initialize");
         LabLaunchingTitle.Text = ModLaunch.currentLaunchOptions?.SaveBatch is null
             ? Lang.Text("Launch.Status.Title.Launching")
             : Lang.Text("Launch.Status.Title.ExportingScript");

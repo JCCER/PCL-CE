@@ -22,6 +22,8 @@ public class ExportOption : DependencyObject
         nameof(Description), typeof(string), typeof(ExportOption)
     );
 
+    public Func<string> DescriptionFactory { get; set; }
+
     public string Title
     {
         get => (string)GetValue(TitleProperty);
@@ -30,7 +32,9 @@ public class ExportOption : DependencyObject
 
     public string Description
     {
-        get => (string)GetValue(DescriptionProperty);
+        get => DescriptionFactory is not null
+            ? DescriptionFactory()
+            : (string)GetValue(DescriptionProperty);
         set => SetValue(DescriptionProperty, value);
     }
 
@@ -256,7 +260,8 @@ public partial class PageInstanceExport : IRefreshable
                                 Tag = new ExportOption
                                 {
                                     Title = $"{shaderConfig.Name}", DefaultChecked = true,
-                                    Description = Lang.Text("Instance.Export.Config.ShaderConfigSuffix"),
+                                    DescriptionFactory =
+                                        () => Lang.Text("Instance.Export.Config.ShaderConfigSuffix"),
                                     Rules = ModBase.EscapeLikePattern($"{Folder}/{shaderConfig.Name}")
                                 }
                             });
@@ -279,8 +284,12 @@ public partial class PageInstanceExport : IRefreshable
                         }
                     };
                     if (ReferenceEquals(panel, PanOptionsSaves))
-                        GetExportOption(newCheckBox).Description =
-                            Lang.Date(SubFolder.LastWriteTime, "g");
+                    {
+                        var lastWriteTime = SubFolder.LastWriteTime;
+                        GetExportOption(newCheckBox).DescriptionFactory =
+                            () => Lang.Date(lastWriteTime, "g");
+                    }
+
                     panel.Children.Add(newCheckBox);
                     if (Folder == "shaderpacks") // 处理文件夹形式光影包的配置文件
                     {
@@ -293,7 +302,8 @@ public partial class PageInstanceExport : IRefreshable
                                 Tag = new ExportOption
                                 {
                                     Title = $"{shaderConfig.Name}", DefaultChecked = true,
-                                    Description = Lang.Text("Instance.Export.Config.ShaderConfigSuffix"),
+                                    DescriptionFactory =
+                                        () => Lang.Text("Instance.Export.Config.ShaderConfigSuffix"),
                                     Rules = ModBase.EscapeLikePattern($"{Folder}/{shaderConfig.Name}")
                                 }
                             });
@@ -305,6 +315,27 @@ public partial class PageInstanceExport : IRefreshable
     #endregion
 
     #region 选项
+
+    protected override void RefreshLocalization()
+    {
+        RefreshOptionTexts();
+    }
+
+    private void RefreshOptionTexts()
+    {
+        foreach (var checkBox in GetAllOptions(true))
+        {
+            var targetOption = GetExportOption(checkBox);
+            checkBox.Inlines.Clear();
+            checkBox.Inlines.Add(new Run(targetOption.Title));
+            if (!string.IsNullOrEmpty(targetOption.Description))
+                checkBox.Inlines.Add(
+                    new Run($"   {targetOption.Description}")
+                    {
+                        Foreground = ThemeManager.colorGray5
+                    });
+        }
+    }
 
     /// <summary>
     ///     重新确认是否应该显示每个选项，并将 ExportOption 同步到 UI。

@@ -66,7 +66,7 @@ public partial class PageSetupUpdate
         ModBase.Log("[Update] 开始检查更新");
         CardUpdate.Visibility = Visibility.Collapsed;
         CardCheck.Visibility = Visibility.Visible;
-        TextCurrentDesc.Text = Lang.Text("Setup.Update.Checking");
+        TextCurrentDesc.TrySetLocalizedValue("Text", "Setup.Update.Checking");
         BtnCheckAgain.IsEnabled = false;
         switch (await IsLatestAsync())
         {
@@ -82,7 +82,7 @@ public partial class PageSetupUpdate
                     TextUpdateName.Text = "PCL CE " + VersionNameFormat(updateInfo.VersionName);
                     var summary = updateInfo.Changelog.Between("<summary>", "</summary>");
                     if (!updateInfo.Changelog.Contains("<summary>") || string.IsNullOrWhiteSpace(summary.Trim()))
-                        TextChangelog.Text = Lang.Text("Setup.Update.Changelog.Empty");
+                        TextChangelog.TrySetLocalizedValue("Text", "Setup.Update.Changelog.Empty");
                     else
                         TextChangelog.Text = summary;
                 }
@@ -94,7 +94,7 @@ public partial class PageSetupUpdate
                 BtnCheckAgain.IsEnabled = true;
                 if (updateInfo is null)
                 {
-                    TextCurrentDesc.Text = Lang.Text("Setup.Update.CheckFailed");
+                    TextCurrentDesc.TrySetLocalizedValue("Text", "Setup.Update.CheckFailed");
                     if (checkUpdateEx is not null)
                         ModBase.Log(
                             checkUpdateEx,
@@ -116,12 +116,12 @@ public partial class PageSetupUpdate
                 }
                 else if (UpdateManager.isUpdateWaitingRestart)
                 {
-                    BtnUpdate.Text = Lang.Text("Setup.Update.RestartInstall");
+                    BtnUpdate.TrySetLocalizedValue("Text", "Setup.Update.RestartInstall");
                     BtnUpdate.IsEnabled = true;
                 }
                 else
                 {
-                    BtnUpdate.Text = Lang.Text("Setup.Update.Install");
+                    BtnUpdate.TrySetLocalizedValue("Text", "Setup.Update.Install");
                     BtnUpdate.IsEnabled = true;
                 }
 
@@ -134,7 +134,7 @@ public partial class PageSetupUpdate
                 CardUpdate.Visibility = Visibility.Collapsed;
                 CardCheck.Visibility = Visibility.Visible;
                 BtnCheckAgain.IsEnabled = true;
-                TextCurrentDesc.Text = Lang.Text("Setup.Update.Latest");
+                TextCurrentDesc.TrySetLocalizedValue("Text", "Setup.Update.Latest");
                 break;
             }
             case UpdateStatus.Error:
@@ -142,7 +142,7 @@ public partial class PageSetupUpdate
                 CardUpdate.Visibility = Visibility.Collapsed;
                 CardCheck.Visibility = Visibility.Visible;
                 BtnCheckAgain.IsEnabled = true;
-                TextCurrentDesc.Text = Lang.Text("Setup.Update.CheckFailed");
+                TextCurrentDesc.TrySetLocalizedValue("Text", "Setup.Update.CheckFailed");
                 break;
             }
         }

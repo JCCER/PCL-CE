@@ -138,6 +138,12 @@ public partial class PageSetupFeedback
         card.Visibility = panel.Children.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
+    protected override void RefreshLocalization()
+    {
+        if (Loader.State == ModBase.LoadState.Finished)
+            RefreshList();
+    }
+
     public void RefreshList()
     {
         PanListProcessing.Children.Clear();

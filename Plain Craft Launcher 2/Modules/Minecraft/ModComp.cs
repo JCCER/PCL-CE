@@ -229,7 +229,11 @@ public static class ModComp
         _ => "Download.Comp.Type.Unknown"
     });
 
-    public static string GetCompLoadingName(CompType type) => Lang.Text(type switch
+    /// <summary>
+    ///     获取该资源类型的「加载中」提示所对应的本地化资源键。
+    /// </summary>
+    /// <param name="type">资源类型。</param>
+    public static string GetCompLoadingKey(CompType type) => type switch
     {
         CompType.Mod => "Download.Comp.List.Loading.Mod",
         CompType.ModPack => "Download.Comp.List.Loading.Modpack",
@@ -240,9 +244,13 @@ public static class ModComp
         CompType.World => "Download.Comp.List.Loading.World",
         CompType.Schematic => "Download.Comp.List.Loading.Schematic",
         _ => "Download.Comp.List.Loading.Unknown"
-    });
+    };
 
-    public static string GetCompSearchName(CompType type) => Lang.Text(type switch
+    /// <summary>
+    ///     获取该资源类型的搜索框提示所对应的本地化资源键。
+    /// </summary>
+    /// <param name="type">资源类型。</param>
+    public static string GetCompSearchKey(CompType type) => type switch
     {
         CompType.Mod => "Download.Comp.List.Search.Mod",
         CompType.ModPack => "Download.Comp.List.Search.Modpack",
@@ -253,7 +261,19 @@ public static class ModComp
         CompType.World => "Download.Comp.List.Search.World",
         CompType.Schematic => "Download.Comp.List.Search.Schematic",
         _ => "Download.Comp.List.Search.Unknown"
-    });
+    };
+
+    /// <summary>
+    ///     获取该资源类型的「加载中」提示文本。
+    /// </summary>
+    /// <param name="type">资源类型。</param>
+    public static string GetCompLoadingName(CompType type) => Lang.Text(GetCompLoadingKey(type));
+
+    /// <summary>
+    ///     获取该资源类型的搜索框提示文本。
+    /// </summary>
+    /// <param name="type">资源类型。</param>
+    public static string GetCompSearchName(CompType type) => Lang.Text(GetCompSearchKey(type));
 
     #region CompFavorites | 收藏
 
@@ -352,12 +372,12 @@ public static class ModComp
                 var hasFavs = i.Favs.Contains(project.Id);
                 if (hasFavs)
                 {
-                    item.Header = Lang.Text("Download.Comp.Detail.Favorites.UnfavoriteContextMenu", i.Name);
+                    LocalizedText.TryBind(item, "Header", () => Lang.Text("Download.Comp.Detail.Favorites.UnfavoriteContextMenu", i.Name));
                     item.SvgIcon = "lucide/heart-filled";
                 }
                 else
                 {
-                    item.Header = Lang.Text("Download.Comp.Detail.Favorites.FavoriteContextMenu", i.Name);
+                    LocalizedText.TryBind(item, "Header", () => Lang.Text("Download.Comp.Detail.Favorites.FavoriteContextMenu", i.Name));
                     item.SvgIcon = "lucide/heart";
                 }
 
@@ -921,9 +941,20 @@ public static class ModComp
         public readonly string Slug;
 
         /// <summary>
-        ///     描述性标签的内容。已转换为中文。
+        ///     描述性标签的资源键列表，未翻译。需要显示文本时请使用 <see cref="DisplayTags" />。
         /// </summary>
         public readonly List<string> Tags;
+
+        /// <summary>
+        ///     按当前界面语言翻译并排序后的描述性标签，用于显示。
+        ///     每次访问都会重新求值，因此切换语言后会立即反映新语言。
+        /// </summary>
+        public List<string> DisplayTags =>
+            Tags.Select(Lang.Text)
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+                .Distinct()
+                .Order(StringComparer.CurrentCulture)
+                .ToList();
 
         /// <summary>
         ///     工程的种类。
@@ -966,10 +997,10 @@ public static class ModComp
             if (!data.ContainsKey("Tags"))
             {
                 if (result.Tags.Count == 0)
-                    result.Tags.Add(Lang.Text("Download.Comp.Category.Other"));
+                    result.Tags.Add("Download.Comp.Category.Other");
 
+                // 排序交由 DisplayTags 按当前界面语言的显示文本进行，这里只需去重。
                 result.Tags = result.Tags.Distinct().ToList();
-                result.Tags.Sort();
 
                 result.ModLoaders = result.ModLoaders
                     .Distinct()
@@ -1234,10 +1265,11 @@ public static class ModComp
 
         private static void _AddTag(List<string> tags, string langKey)
         {
-            var tag = Lang.Text(langKey);
+            if (string.IsNullOrWhiteSpace(langKey))
+                return;
 
-            if (!tags.Contains(tag))
-                tags.Add(tag);
+            if (!tags.Contains(langKey))
+                tags.Add(langKey);
         }
 
         private static readonly Dictionary<string, CompLoaderType> modrinthLoaderTypes =
@@ -1531,11 +1563,12 @@ public static class ModComp
         }
 
         /// <summary>
-        ///     将当前工程信息实例化为控件。
+        ///     按当前界面语言生成卡片下边栏的版本描述文本。
         /// </summary>
-        /// <param name="showQuickDownload">是否在卡片右侧显示快速下载按钮（仅搜索结果页应传 true）。</param>
-        public MyVirtualizingElement<MyCompItem> ToCompItem(bool showMcVersionDesc, bool showLoaderDesc,
-            bool showQuickDownload = false)
+        /// <param name="showMcVersionDesc">是否显示 Minecraft 版本范围（也会显示加载器全名）。</param>
+        /// <param name="showLoaderDesc">是否显示加载器描述。</param>
+        /// <returns>应当显示的版本描述；两者都为 <see langword="false" /> 时返回空字符串。</returns>
+        private string BuildVersionDescription(bool showMcVersionDesc, bool showLoaderDesc)
         {
             // --- 1. 获取版本描述 (核心算法优化) ---
             string gameVersionDescription;
@@ -1630,7 +1663,25 @@ public static class ModComp
                 return isAny ? (Lang.Text("Download.Comp.Type.Any"), "") : (joined, joined);
             }
 
-            // --- 3. 实例化 UI (精简布局逻辑) ---
+            return (showMcVersionDesc, showLoaderDesc) switch
+            {
+                (true, true) => $"{(string.IsNullOrEmpty(partDesc) ? "" : partDesc + " ")}{gameVersionDescription}",
+                (true, false) => gameVersionDescription,
+                (false, true) => fullDesc,
+                _ => ""
+            };
+        }
+
+        /// <summary>
+        ///     将当前工程信息实例化为控件。
+        /// </summary>
+        /// <param name="showQuickDownload">是否在卡片右侧显示快速下载按钮（仅搜索结果页应传 true）。</param>
+        public MyVirtualizingElement<MyCompItem> ToCompItem(
+            bool showMcVersionDesc,
+            bool showLoaderDesc,
+            bool showQuickDownload = false)
+        {
+            // --- 实例化 UI (精简布局逻辑) ---
             return new MyVirtualizingElement<MyCompItem>(() =>
                 {
                     var newItem = new MyCompItem { Tag = this };
@@ -1644,19 +1695,16 @@ public static class ModComp
                     else
                         newItem.SubTitle = title.Value;
 
+                    // 传未翻译的资源键，由 MyCompItem 按当前语言渲染，切换语言后自动刷新。
                     newItem.Tags = Tags;
                     newItem.Description = Description.Replace("\r", "").Replace("\n", "");
                     newItem.ShowDownloadBtn = showQuickDownload;
 
-                    // 下边栏逻辑切换
-                    newItem.LabVersion.Text = (showMcVersionDesc, showLoaderDesc) switch
-                    {
-                        (true, true) =>
-                            $"{(string.IsNullOrEmpty(partDesc) ? "" : partDesc + " ")}{gameVersionDescription}",
-                        (true, false) => gameVersionDescription,
-                        (false, true) => fullDesc,
-                        _ => "" // 处理隐藏逻辑见下
-                    };
+                    // 下边栏逻辑切换：版本描述随语言实时求值
+                    LocalizedText.TryBind(
+                        newItem.LabVersion,
+                        "Text",
+                        () => BuildVersionDescription(showMcVersionDesc, showLoaderDesc));
 
                     if (!showMcVersionDesc && !showLoaderDesc)
                     {
@@ -1671,7 +1719,12 @@ public static class ModComp
 
                     if (LastUpdate is not null)
                     {
-                        newItem.LabTime.Text = Lang.TimeSpan(LastUpdate.Value - DateTime.Now, 1);
+                        // 相对时间依赖“现在”，且格式随展示区域性变化，按需求值
+                        var lastUpdate = LastUpdate.Value;
+                        LocalizedText.TryBind(
+                            newItem.LabTime,
+                            "Text",
+                            () => Lang.TimeSpan(lastUpdate - DateTime.Now, 1));
                     }
                     else
                     {
@@ -1681,7 +1734,10 @@ public static class ModComp
                     }
 
                     // 下载量数值缩写
-                    newItem.LabDownload.Text = Lang.CompactNumber(DownloadCount);
+                    LocalizedText.TryBind(
+                        newItem.LabDownload,
+                        "Text",
+                        () => Lang.CompactNumber(DownloadCount));
 
                     return newItem;
                 })
@@ -2580,7 +2636,7 @@ public static class ModComp
                         LogWrapper.Info("[Comp] 开始从 CurseForge 获取列表：" + curseForgeUrl);
                         var json = ModDownload.DlModRequest<JsonObject>(curseForgeUrl);
                         var projects = json["data"].AsArray().Select(j => new CompProject((JsonObject)j))
-                            .Where(p => !(request.type == CompType.ResourcePack && p.Tags.Contains(Lang.Text("Download.Comp.Type.DataPack"))))
+                            .Where(p => !(request.type == CompType.ResourcePack && p.Tags.Contains("Download.Comp.Type.DataPack")))
                             .ToList();
                         lock (resultsLock)
                         {

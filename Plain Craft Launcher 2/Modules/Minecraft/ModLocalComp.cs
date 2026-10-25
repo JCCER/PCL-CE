@@ -15,7 +15,7 @@ namespace PCL;
 
 public static class ModLocalComp
 {
-    private const int localModCacheVersion = 7;
+    private const int localModCacheVersion = 8;
 
     private static readonly Lazy<HashCache> _hashCache = new(() =>
         new HashCache(ModBase.pathTemp + @"Cache\HashCache.db"));
@@ -496,7 +496,7 @@ public static class ModLocalComp
         private string _Description;
 
         /// <summary>
-        ///     文件类型标签。
+        ///     文件类型标签的资源键列表，未翻译。需要显示文本时请按当前语言求值。
         /// </summary>
         public List<string> Tags
         {
@@ -507,7 +507,7 @@ public static class ModLocalComp
                     field = new List<string>();
                     if (IsFolder)
                     {
-                        field.Add("文件夹");
+                        field.Add("Instance.Resource.Item.FolderTag");
                     }
                     else
                     {
@@ -516,18 +516,18 @@ public static class ModLocalComp
                         {
                             case ".litematic":
                             {
-                                field.Add("原理图");
+                                field.Add("Instance.Resource.Item.LitematicTag");
                                 break;
                             }
                             case ".schem":
                             case ".schematic":
                             {
-                                field.Add("Schematic结构");
+                                field.Add("Instance.Resource.Item.SchematicTag");
                                 break;
                             }
                             case ".nbt":
                             {
-                                field.Add("原版结构");
+                                field.Add("Instance.Resource.Item.StructureTag");
                                 break;
                             }
                         }
@@ -2415,7 +2415,9 @@ public static class ModLocalComp
                     ModBase.RunInUiWait(() =>
                     {
                         if (loader.input.frm is not null)
-                            loader.input.frm.Load.Text = Lang.Text("Instance.Resource.Update.WaitingForUpdate");
+                            loader.input.frm.Load.TrySetLocalizedValue(
+                                "Text",
+                                "Instance.Resource.Update.WaitingForUpdate");
                     });
                     while (PageInstanceCompResource.updatingVersions.Contains(loader.input.compPath))
                     {
@@ -2429,7 +2431,9 @@ public static class ModLocalComp
                     ModBase.RunInUiWait(() =>
                     {
                         if (loader.input.frm is not null)
-                            loader.input.frm.Load.Text = Lang.Text("Instance.Resource.List.Loading");
+                            loader.input.frm.Load.TrySetLocalizedValue(
+                                "Text",
+                                "Instance.Resource.List.Loading");
                     });
                 }
 

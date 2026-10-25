@@ -207,8 +207,12 @@ public partial class PageInstanceSavesDatapack : IRefreshable
             else
             {
                 // 根据组件类型设置 PanEmpty 的文本内容
-                TxtEmptyTitle.Text = Lang.Text("Instance.Resource.Datapack.Empty.Title");
-                TxtEmptyDescription.Text = Lang.Text("Instance.Resource.Datapack.Empty.Description");
+                TxtEmptyTitle.TrySetLocalizedValue(
+                    "Text",
+                    "Instance.Resource.Datapack.Empty.Title");
+                TxtEmptyDescription.TrySetLocalizedValue(
+                    "Text",
+                    "Instance.Resource.Datapack.Empty.Description");
 
                 PanEmpty.Visibility = Visibility.Visible;
                 PanBack.Visibility = Visibility.Collapsed;
@@ -282,14 +286,14 @@ public partial class PageInstanceSavesDatapack : IRefreshable
 
         // 图标按钮
         var btnOpen = new MyIconButton { LogoScale = 1.05d, SvgIcon = "lucide/folder-open", Tag = sender };
-        btnOpen.ToolTip = Lang.Text("Instance.Saves.OpenFileLocation");
+        btnOpen.TrySetLocalizedValue("ToolTip", "Instance.Saves.OpenFileLocation");
         ToolTipService.SetPlacement(btnOpen, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnOpen, 30d);
         ToolTipService.SetHorizontalOffset(btnOpen, 2d);
         btnOpen.Click += (sender, e) => Open_Click((MyIconButton)sender, e);
 
         var btnCont = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/info", Tag = sender };
-        btnCont.ToolTip = Lang.Text("Instance.Saves.Detail");
+        btnCont.TrySetLocalizedValue("ToolTip", "Instance.Saves.Detail");
         ToolTipService.SetPlacement(btnCont, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnCont, 30d);
         ToolTipService.SetHorizontalOffset(btnCont, 2d);
@@ -297,7 +301,7 @@ public partial class PageInstanceSavesDatapack : IRefreshable
         sender.MouseRightButtonUp += Info_Click;
 
         var btnDelete = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/trash-2", Tag = sender };
-        btnDelete.ToolTip = Lang.Text("Common.Action.Delete");
+        btnDelete.TrySetLocalizedValue("ToolTip", "Common.Action.Delete");
         ToolTipService.SetPlacement(btnDelete, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnDelete, 30d);
         ToolTipService.SetHorizontalOffset(btnDelete, 2d);
@@ -306,7 +310,7 @@ public partial class PageInstanceSavesDatapack : IRefreshable
         if (sender.Entry.State == ModLocalComp.LocalCompFile.LocalFileStatus.Fine)
         {
             var btnDisable = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/circle-minus", Tag = sender };
-            btnDisable.ToolTip = Lang.Text("Instance.Resource.Disable");
+            btnDisable.TrySetLocalizedValue("ToolTip", "Instance.Resource.Disable");
             ToolTipService.SetPlacement(btnDisable, PlacementMode.Center);
             ToolTipService.SetVerticalOffset(btnDisable, 30d);
             ToolTipService.SetHorizontalOffset(btnDisable, 2d);
@@ -316,7 +320,7 @@ public partial class PageInstanceSavesDatapack : IRefreshable
         else if (sender.Entry.State == ModLocalComp.LocalCompFile.LocalFileStatus.Disabled)
         {
             var btnEnable = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/circle-check", Tag = sender };
-            btnEnable.ToolTip = Lang.Text("Instance.Resource.Enable");
+            btnEnable.TrySetLocalizedValue("ToolTip", "Instance.Resource.Enable");
             ToolTipService.SetPlacement(btnEnable, PlacementMode.Center);
             ToolTipService.SetVerticalOffset(btnEnable, 30d);
             ToolTipService.SetHorizontalOffset(btnEnable, 2d);
@@ -412,19 +416,31 @@ public partial class PageInstanceSavesDatapack : IRefreshable
             });
             // 显示
             BtnFilterAll.Text = IsSearching ? Lang.Text("Instance.Resource.Filter.SearchResult") : Lang.Text("Instance.Resource.Filter.AllWithCount", anyCount);
-            BtnFilterCanUpdate.Text = Lang.Text("Instance.Resource.Filter.UpdatableWithCount", updateCount);
+            LocalizedText.TryBind(
+                BtnFilterCanUpdate,
+                "Text",
+                () => Lang.Text("Instance.Resource.Filter.UpdatableWithCount", updateCount));
             BtnFilterCanUpdate.Visibility = Filter == FilterType.CanUpdate || updateCount > 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            BtnFilterEnabled.Text = Lang.Text("Instance.Resource.Filter.EnabledWithCount", enabledCount);
+            LocalizedText.TryBind(
+                BtnFilterEnabled,
+                "Text",
+                () => Lang.Text("Instance.Resource.Filter.EnabledWithCount", enabledCount));
             BtnFilterEnabled.Visibility = Filter == FilterType.Enabled || (enabledCount > 0 && enabledCount < anyCount)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            BtnFilterDisabled.Text = Lang.Text("Instance.Resource.Filter.DisabledWithCount", disabledCount);
+            LocalizedText.TryBind(
+                BtnFilterDisabled,
+                "Text",
+                () => Lang.Text("Instance.Resource.Filter.DisabledWithCount", disabledCount));
             BtnFilterDisabled.Visibility = Filter == FilterType.Disabled || disabledCount > 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-            BtnFilterError.Text = Lang.Text("Instance.Resource.Filter.ErrorWithCount", unavalialeCount);
+            LocalizedText.TryBind(
+                BtnFilterError,
+                "Text",
+                () => Lang.Text("Instance.Resource.Filter.ErrorWithCount", unavalialeCount));
             BtnFilterError.Visibility = Filter == FilterType.Unavailable || unavalialeCount > 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
@@ -437,7 +453,10 @@ public partial class PageInstanceSavesDatapack : IRefreshable
             var newCount = selectedDatapacks.Count;
             var selected = newCount > 0;
             if (selected)
-                LabSelect.Text = Lang.Text("Instance.Resource.SelectedCount", newCount);
+                LocalizedText.TryBind(
+                    LabSelect,
+                    "Text",
+                    () => Lang.Text("Instance.Resource.SelectedCount", newCount));
 
             // 按钮可用性
             if (selected)
@@ -899,7 +918,10 @@ public partial class PageInstanceSavesDatapack : IRefreshable
     private void SetSortMethod(SortMethod target)
     {
         currentSortMethod = target;
-        BtnSort.Text = Lang.Text("Instance.Resource.Sort.Text", GetSortName(target));
+        LocalizedText.TryBind(
+            BtnSort,
+            "Text",
+            () => Lang.Text("Instance.Resource.Sort.Text", GetSortName(target)));
         DoSort();
     }
 

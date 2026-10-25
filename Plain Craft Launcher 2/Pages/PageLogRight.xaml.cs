@@ -102,11 +102,16 @@ public partial class PageLogRight
     {
         // 刷新计数器
 
-        labFatal.Text = $"{ModMain.frmLogLeft.currentLog.countFatal} {Lang.Text("LogPage.Level.Fatal")}";
-        labError.Text = $"{ModMain.frmLogLeft.currentLog.countError} {Lang.Text("LogPage.Level.Error")}";
-        labWarn.Text = $"{ModMain.frmLogLeft.currentLog.countWarn} {Lang.Text("LogPage.Level.Warn")}";
-        labInfo.Text = $"{ModMain.frmLogLeft.currentLog.countInfo} {Lang.Text("LogPage.Level.Info")}";
-        labDebug.Text = $"{ModMain.frmLogLeft.currentLog.countDebug} {Lang.Text("LogPage.Level.Debug")}";
+        LocalizedText.TryBind(labFatal, "Text",
+            () => $"{ModMain.frmLogLeft.currentLog.countFatal} {Lang.Text("LogPage.Level.Fatal")}");
+        LocalizedText.TryBind(labError, "Text",
+            () => $"{ModMain.frmLogLeft.currentLog.countError} {Lang.Text("LogPage.Level.Error")}");
+        LocalizedText.TryBind(labWarn, "Text",
+            () => $"{ModMain.frmLogLeft.currentLog.countWarn} {Lang.Text("LogPage.Level.Warn")}");
+        LocalizedText.TryBind(labInfo, "Text",
+            () => $"{ModMain.frmLogLeft.currentLog.countInfo} {Lang.Text("LogPage.Level.Info")}");
+        LocalizedText.TryBind(labDebug, "Text",
+            () => $"{ModMain.frmLogLeft.currentLog.countDebug} {Lang.Text("LogPage.Level.Debug")}");
     }
 
     private void OnLogOutput(ModWatcher.Watcher sender, ModWatcher.LogOutputEventArgs e)

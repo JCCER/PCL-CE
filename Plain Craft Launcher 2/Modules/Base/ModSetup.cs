@@ -416,8 +416,7 @@ public class ModSetup
                 ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Visible;
                 ModMain.frmSetupUI.HintCustomWarn.Visibility =
                     States.Hint.UntrustedHomepage ? Visibility.Collapsed : Visibility.Visible;
-                ModMain.frmSetupUI.HintCustom.Text =
-                    Lang.Text("Setup.Ui.Homepage.LocalFile.Hint");
+                ModMain.frmSetupUI.HintCustom.TrySetLocalizedValue("Text", "Setup.Ui.Homepage.LocalFile.Hint");
                 CustomEventService.SetEventType(ModMain.frmSetupUI.HintCustom, EventType.None);
                 break;
             }
@@ -429,8 +428,7 @@ public class ModSetup
                 ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Visible;
                 ModMain.frmSetupUI.HintCustomWarn.Visibility =
                     States.Hint.UntrustedHomepage ? Visibility.Collapsed : Visibility.Visible;
-                ModMain.frmSetupUI.HintCustom.Text =
-                    Lang.Text("Setup.Ui.Homepage.NetUpdate.Hint");
+                ModMain.frmSetupUI.HintCustom.TrySetLocalizedValue("Text", "Setup.Ui.Homepage.NetUpdate.Hint");
                 CustomEventService.SetEventType(ModMain.frmSetupUI.HintCustom, EventType.OpenUrl);
                 CustomEventService.SetEventData(ModMain.frmSetupUI.HintCustom,
                     "https://github.com/PCL-Community/PCL-CE/discussions");

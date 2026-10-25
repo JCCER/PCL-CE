@@ -22,7 +22,7 @@ public partial class PageDownloadInstall
         Loaded += (_, _) => Init();
         InitializeComponent();
         PanScroll = PanBack;
-        LoadMinecraft.Text = Lang.Text("Download.Version.LoadingList");
+        LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
         WeakLanguageChanged.Add(this, OnLanguageChanged);
         BtnBack.Click += (_, _) => ExitSelectPage();
         CardOptiFine.Swap += (_, _) => ReloadSelected();
@@ -138,9 +138,7 @@ public partial class PageDownloadInstall
             case MyLoading.MyLoadingState.Error:
             {
                 var message = ((ModLoader.LoaderBase)loader.State).Error.Message;
-                return message == Lang.Text("Download.Install.State.NoVersion")
-                    ? Lang.Text("Download.Install.State.NoVersion")
-                    : Lang.Text("Download.Install.State.GetFailed", message);
+                return Lang.Text("Download.Install.State.GetFailed", message);
             }
             case MyLoading.MyLoadingState.Unloaded:
             {
@@ -1010,7 +1008,7 @@ public partial class PageDownloadInstall
 
     private void _OnLanguageChanged() => ModBase.RunInUi(() =>
     {
-        LoadMinecraft.Text = Lang.Text("Download.Version.LoadingList");
+        LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
         if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray versions)
             _RebuildVersionCards(versions);
     });
@@ -1025,10 +1023,10 @@ public partial class PageDownloadInstall
         if (latestRelease is not null)
         {
             var release = (JsonObject)latestRelease.DeepClone();
-            release["lore"] = Lang.Text(
-                "Download.Version.Latest.Release",
-                Lang.Date(McVersionClassifier.GetReleaseTime(release), "g")
-            );
+            release["lore"] = "Download.Version.Latest.Release";
+            release["loreArgs"] =
+                new JsonArray(McVersionClassifier.GetReleaseTime(release).ToString("O"));
+            release["loreArgsType"] = "date";
             latestVersions.Add(release);
         }
 
@@ -1037,10 +1035,10 @@ public partial class PageDownloadInstall
                 McVersionClassifier.GetReleaseTime(latestSnapshot)))
         {
             var snapshot = (JsonObject)latestSnapshot.DeepClone();
-            snapshot["lore"] = Lang.Text(
-                "Download.Version.Latest.Development",
-                Lang.Date(McVersionClassifier.GetReleaseTime(snapshot), "g")
-            );
+            snapshot["lore"] = "Download.Version.Latest.Development";
+            snapshot["loreArgs"] =
+                new JsonArray(McVersionClassifier.GetReleaseTime(snapshot).ToString("O"));
+            snapshot["loreArgsType"] = "date";
             latestVersions.Add(snapshot);
         }
 
@@ -1049,9 +1047,9 @@ public partial class PageDownloadInstall
 
         var cardInfo = new MyCard
         {
-            Title = Lang.Text("Download.Version.Latest.Title"),
             Margin = new Thickness(0d, 15d, 0d, 15d)
         };
+        LocalizedText.TryBind(cardInfo, "Title", () => Lang.Text("Download.Version.Latest.Title"));
 
         var panInfo = _CreateVersionStack(latestVersions);
         MyCard.StackInstall(ref panInfo, _StackInstall);
