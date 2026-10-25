@@ -340,8 +340,38 @@ public partial class PageSelectLeft : IRefreshable
             .Tag;
         var index = ModFolder.mcFolderList.IndexOf(folder);
         ModFolder.mcFolderList[index].type = ModFolder.McFolder.Types.Original;
-        ModFolder.mcFolderList[index].Name = "$Select.Folder.OfficialLauncherFolder";
+        ModFolder.mcFolderList[index].Name = GetOriginalFolderName(folder.Location);
         UpdateFolderOrder();
+    }
+
+    /// <summary>
+    ///     取回指定路径对应的默认显示名称。<br/>
+    ///     内置文件夹返回带 <c>$</c> 前缀的资源键，其余文件夹返回目录名。
+    /// </summary>
+    private static string GetOriginalFolderName(string? location)
+    {
+        var normalized = Normalize(location);
+        if (string.Equals(
+                normalized,
+                Normalize(ModBase.exePath),
+                StringComparison.OrdinalIgnoreCase))
+            return ModFolder.McFolder.BuiltinNamePrefix + "Select.Folder.CurrentFolder";
+
+        var mojangPath = Normalize(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            ".minecraft"));
+        if (string.Equals(normalized, mojangPath, StringComparison.OrdinalIgnoreCase))
+            return ModFolder.McFolder.BuiltinNamePrefix + "Select.Folder.OfficialLauncherFolder";
+
+        var directoryName = Path.GetFileName(normalized);
+        return string.IsNullOrEmpty(directoryName)
+            ? ModFolder.McFolder.BuiltinNamePrefix + "Select.Folder.OfficialLauncherFolder"
+            : directoryName;
+
+        static string Normalize(string? path)
+        {
+            return (path ?? "").TrimEnd('\\', '/');
+        }
     }
 
     // 添加文件夹

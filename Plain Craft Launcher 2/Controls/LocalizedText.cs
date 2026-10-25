@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -14,7 +15,9 @@ namespace PCL;
 /// </summary>
 public sealed class LocalizedText : INotifyPropertyChanged
 {
-    private static readonly ConditionalWeakTable<DependencyObject, LocalizedText> Instances = new();
+    private static readonly ConditionalWeakTable<DependencyObject,
+            Dictionary<DependencyProperty, LocalizedText>>
+        Instances = new();
 
     private Func<string> _factory = () => string.Empty;
 
@@ -46,7 +49,12 @@ public sealed class LocalizedText : INotifyPropertyChanged
         DependencyProperty property,
         Func<string> factory)
     {
-        var source = Instances.GetValue(target, _ => new LocalizedText());
+        var sources = Instances.GetOrCreateValue(target);
+        if (!sources.TryGetValue(property, out var source))
+        {
+            source = new LocalizedText();
+            sources[property] = source;
+        }
         source._factory = factory;
         BindingOperations.SetBinding(
             target,

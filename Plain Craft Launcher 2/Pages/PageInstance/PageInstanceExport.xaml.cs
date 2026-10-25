@@ -94,7 +94,8 @@ public partial class PageInstanceExport : IRefreshable
         TextExportVersion.HintText = "1.0.0";
         CheckAdvancedInclude.Checked = false;
         CheckAdvancedModrinth.Checked = false;
-        GetExportOption(CheckOptionsBasic).Description = PageInstanceLeft.McInstance.GetDefaultDescription();
+        GetExportOption(CheckOptionsBasic).DescriptionFactory =
+            () => PageInstanceLeft.McInstance.GetDefaultDescription();
         ResetConfigOverrides();
         ReloadAllSubOptions();
         RefreshAllOptionsUI();
@@ -1200,7 +1201,8 @@ public partial class PageInstanceExport : IRefreshable
                 var resultJson = new JsonObject
                 {
                     { "game", "minecraft" }, { "formatVersion", 1 }, { "versionId", packVersion }, { "name", packName },
-                    { "summary", mcInstance.Desc }, { "files", files }, { "dependencies", dependencies }
+                    { "summary", mcInstance.CustomDesc ?? "" }, { "files", files },
+                    { "dependencies", dependencies }
                 };
                 File.WriteAllText(Path.Combine(cacheFolder, "modpack", "modrinth.index.json"),
                     resultJson.ToJsonString(new JsonSerializerOptions(JsonCompat.SerializerOptions) { WriteIndented = true }));

@@ -75,40 +75,4 @@ public static class LocalizationBindingExtensions
             Mode = BindingMode.OneWay
         };
     }
-
-    /// <summary>
-    ///     将 <see cref="System.Windows.Controls.ContentControl" /> 的内容绑定到指定本地化资源键。
-    /// </summary>
-    /// <param name="target">目标控件。</param>
-    /// <param name="key">本地化资源键。</param>
-    public static void SetLocalizedContent(
-        this System.Windows.Controls.ContentControl target,
-        string key)
-    {
-        target.SetLocalizedValue(System.Windows.Controls.ContentControl.ContentProperty, key);
-    }
-
-    extension(System.Windows.Controls.TextBlock target)
-    {
-        /// <summary>
-        ///     将 <see cref="System.Windows.Controls.TextBlock" /> 的文本绑定到指定本地化资源键。
-        /// </summary>
-        /// <param name="key">本地化资源键。</param>
-        public void SetLocalizedText(string key)
-        {
-            target.SetLocalizedValue(System.Windows.Controls.TextBlock.TextProperty, key);
-        }
-    }
-
-    extension(FrameworkElement target)
-    {
-        /// <summary>
-        ///     将 <see cref="FrameworkElement" /> 的工具提示绑定到指定本地化资源键。
-        /// </summary>
-        /// <param name="key">本地化资源键。</param>
-        public void SetLocalizedToolTip(string key)
-        {
-            target.SetLocalizedValue(FrameworkElement.ToolTipProperty, key);
-        }
-    }
 }

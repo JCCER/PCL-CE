@@ -108,7 +108,7 @@ public partial class PageSetupFeedback
             Type = MyListItem.CheckType.Clickable,
             Info = $"{item.User} | {Lang.Date(item.Time)}",
             Logo = ModBase.pathImage + logo,
-            Tags = item.Type
+            PlainTags = [item.Type]
         };
 
         li.Click += (_, _) => ShowFeedbackDetail(item);

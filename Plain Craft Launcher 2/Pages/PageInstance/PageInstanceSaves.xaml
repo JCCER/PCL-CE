@@ -85,7 +85,7 @@
                         <StackPanel Margin="0,13,15,0" Orientation="Horizontal" VerticalAlignment="Top"
                                     HorizontalAlignment="Right" Height="28">
                             <local:MyIconTextButton x:Name="BtnSort"
-                                                    Text="{loc:Loc Instance.Saves.SortBy}"
+                                                    Text=""
                                                     SvgIcon="lucide/arrow-up-down" />
                         </StackPanel>
                     </Grid>

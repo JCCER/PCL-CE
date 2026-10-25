@@ -2526,12 +2526,16 @@ public static class ModDownloadLib
             stack.Children.Add(fresh);
         }
 
-        // 添加间隔
-        stack.Children.Add(new TextBlock
+        var allVersionsLabel = new TextBlock
         {
-            Text = Lang.Text("Download.Version.AllVersions", entries.Count), HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(6d, 13d, 0d, 4d)
-        });
+        };
+        LocalizedText.TryBind(
+            allVersionsLabel,
+            "Text",
+            () => Lang.Text("Download.Version.AllVersions", entries.Count));
+        stack.Children.Add(allVersionsLabel);
     }
 
     public static MyListItem ForgeDownloadListItem(ModDownload.DlForgeVersionEntry entry,
@@ -2748,12 +2752,16 @@ public static class ModDownloadLib
             stack.Children.Add(fresh);
         }
 
-        // 添加间隔
-        stack.Children.Add(new TextBlock
+        var allVersionsLabel = new TextBlock
         {
-            Text = Lang.Text("Download.Version.AllVersions", entries.Count), HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(6d, 13d, 0d, 4d)
-        });
+        };
+        LocalizedText.TryBind(
+            allVersionsLabel,
+            "Text",
+            () => Lang.Text("Download.Version.AllVersions", entries.Count));
+        stack.Children.Add(allVersionsLabel);
     }
 
     public static MyListItem NeoForgeDownloadListItem(ModDownload.DlNeoForgeListEntry info,
@@ -2858,12 +2866,16 @@ public static class ModDownloadLib
             stack.Children.Add(fresh);
         }
 
-        // 添加间隔
-        stack.Children.Add(new TextBlock
+        var allVersionsLabel = new TextBlock
         {
-            Text = Lang.Text("Download.Version.AllVersions", entries.Count), HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(6d, 13d, 0d, 4d)
-        });
+        };
+        LocalizedText.TryBind(
+            allVersionsLabel,
+            "Text",
+            () => Lang.Text("Download.Version.AllVersions", entries.Count));
+        stack.Children.Add(allVersionsLabel);
     }
 
     public static MyListItem CleanroomDownloadListItem(ModDownload.DlCleanroomListEntry info,

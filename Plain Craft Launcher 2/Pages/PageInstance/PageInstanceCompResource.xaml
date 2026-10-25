@@ -81,7 +81,7 @@
                         <StackPanel Margin="0,13,15,0" Orientation="Horizontal" VerticalAlignment="Top"
                                     HorizontalAlignment="Right" Height="28">
                             <local:MyIconTextButton x:Name="BtnSort"
-                                                    Text="{loc:Loc Instance.Resource.Sort.Text}"
+                                                    Text=""
                                                     SvgIcon="lucide/arrow-up-down" />
                         </StackPanel>
                         <StackPanel Margin="20,48,18,22" Name="PanList" VerticalAlignment="Top" />

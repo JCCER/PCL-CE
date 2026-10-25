@@ -86,7 +86,7 @@ public partial class PageDownloadCompFavorites
                 State: ModBase.LoadState.Finished,
                 output: not null
             })
-            Load_OnFinish();
+            Load_OnFinish(true);
     }
 
     private int _localizationRevision = LocalizationService.UiRevision;
@@ -227,8 +227,9 @@ public partial class PageDownloadCompFavorites
     #region UI 化 - 加载主逻辑
 
     // 结果 UI 化
-    private void Load_OnFinish()
+    private void Load_OnFinish(bool preserveSearch = false)
     {
+        var searchText = preserveSearch ? PanSearchBox.Text : string.Empty;
         itemList.Clear();
         try
         {
@@ -263,6 +264,8 @@ public partial class PageDownloadCompFavorites
 
             RefreshContent();
             RefreshCardTitle();
+            if (!string.IsNullOrEmpty(searchText))
+                PanSearchBox.Text = searchText;
         }
         catch (Exception ex)
         {

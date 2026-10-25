@@ -49,7 +49,7 @@ public static class ModFolder
         /// <summary>
         ///     内置文件夹名称的资源键前缀，用于区分「资源键」与「用户自定义名称」。
         /// </summary>
-        private const string BuiltinNamePrefix = "$";
+        internal const string BuiltinNamePrefix = "$";
 
         /// <summary>
         ///     当前语言下的显示名称。内置文件夹会按当前语言实时翻译。

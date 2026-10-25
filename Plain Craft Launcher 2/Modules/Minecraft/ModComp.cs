@@ -941,20 +941,9 @@ public static class ModComp
         public readonly string Slug;
 
         /// <summary>
-        ///     描述性标签的资源键列表，未翻译。需要显示文本时请使用 <see cref="DisplayTags" />。
+        ///     描述性标签的资源键列表，未翻译。显示时由标签面板按当前语言实时求值。
         /// </summary>
         public readonly List<string> Tags;
-
-        /// <summary>
-        ///     按当前界面语言翻译并排序后的描述性标签，用于显示。
-        ///     每次访问都会重新求值，因此切换语言后会立即反映新语言。
-        /// </summary>
-        public List<string> DisplayTags =>
-            Tags.Select(Lang.Text)
-                .Where(text => !string.IsNullOrWhiteSpace(text))
-                .Distinct()
-                .Order(StringComparer.CurrentCulture)
-                .ToList();
 
         /// <summary>
         ///     工程的种类。
@@ -999,7 +988,6 @@ public static class ModComp
                 if (result.Tags.Count == 0)
                     result.Tags.Add("Download.Comp.Category.Other");
 
-                // 排序交由 DisplayTags 按当前界面语言的显示文本进行，这里只需去重。
                 result.Tags = result.Tags.Distinct().ToList();
 
                 result.ModLoaders = result.ModLoaders
