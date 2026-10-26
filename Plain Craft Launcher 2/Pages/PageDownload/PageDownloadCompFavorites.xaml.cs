@@ -82,8 +82,11 @@ public partial class PageDownloadCompFavorites
 
     protected override void RefreshLocalization()
     {
-        if (loader is { State: ModBase.LoadState.Finished, output: not null })
-            Load_OnFinish();
+        if (loader is not { State: ModBase.LoadState.Finished, output: not null })
+            return;
+        var savedOffset = PanBack.VerticalOffset;
+        Load_OnFinish(true);
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
     }
 
     private List<string> LoaderInput()
@@ -222,9 +225,15 @@ public partial class PageDownloadCompFavorites
     #region UI 化 - 加载主逻辑
 
     // 结果 UI 化
-    private void Load_OnFinish()
+    /// <summary>
+    ///     将加载结果渲染为界面。
+    /// </summary>
+    /// <param name="preserveSearch">
+    ///     是否保留搜索框内容。语言刷新时保留，普通加载（例如切换收藏夹）时清空。
+    /// </param>
+    private void Load_OnFinish(bool preserveSearch = false)
     {
-        var searchText = PanSearchBox.Text;
+        var searchText = preserveSearch ? PanSearchBox.Text : string.Empty;
         itemList.Clear();
         try
         {
@@ -617,12 +626,14 @@ public partial class PageDownloadCompFavorites
                 {
                     List<IMyRadio> selection = [];
                     foreach (var i in suitVersion)
-                        selection.Add(new MyRadioBox { Text = i });
+                        selection.Add(new MyRadioBox { Text = ModComp.FormatGameVersion(i) });
                     selectedVersion = ModMain.MyMsgBoxSelect(selection, Lang.Text("Download.Comp.Favorites.Dialog.SelectVersion.Title"), button2: Lang.Text("Common.Action.Cancel"));
                     if (selectedVersion is null) ts.Abort();
                 });
                 string selectedVersionStr = suitVersion[(int)selectedVersion];
-                HintService.Hint(Lang.Text("Download.Comp.Favorites.Hint.SelectSaveLocation", selectedVersionStr));
+                HintService.Hint(Lang.Text(
+                    "Download.Comp.Favorites.Hint.SelectSaveLocation",
+                    ModComp.FormatGameVersion(selectedVersionStr)));
                 var saveFolder = SystemDialogs.SelectFolder();
                 if (string.IsNullOrWhiteSpace(saveFolder))
                 {
@@ -636,7 +647,9 @@ public partial class PageDownloadCompFavorites
                 foreach (var Target in allFiles)
                 {
                     // 按照发布日期排序
-                    var finalChoices = Target.Where(i => i.GameVersions.Contains(selectedVersionStr)).ToList();
+                    var finalChoices = Target
+                        .Where(i => ModComp.ContainsGameVersion(i.GameVersions, selectedVersionStr))
+                        .ToList();
                     finalChoices.Sort((a, b) => a.ReleaseDate > b.ReleaseDate);
                     // 获取文件名
                     var targetProject = ModComp.compProjectCache[finalChoices.First().ProjectId];
@@ -914,7 +927,9 @@ public partial class PageDownloadCompFavorites
                     searchSource.Add(new ModBase.SearchSource(entry.Description, 0.4d));
                 if ((entry.TranslatedName ?? "") != (entry.RawName ?? ""))
                     searchSource.Add(new ModBase.SearchSource(entry.TranslatedName, 1d));
-                searchSource.Add(new ModBase.SearchSource(string.Join("", entry.Tags), 0.2d));
+                searchSource.Add(new ModBase.SearchSource(
+                    string.Join("", ModComp.GetLocalizedTags(entry.Tags)),
+                    0.2d));
                 queryList.Add(new ModBase.SearchEntry<MyListItem> { item = Item, searchSource = searchSource });
             }
 

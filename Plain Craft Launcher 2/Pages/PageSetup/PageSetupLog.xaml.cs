@@ -41,6 +41,13 @@ public partial class PageSetupLog
             return;
     }
 
+    protected override void RefreshLocalization()
+    {
+        var savedOffset = PanBack.VerticalOffset;
+        LoadList();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
+    }
+
     public void LoadList()
     {
         PanList.Children.Clear();

@@ -1708,7 +1708,9 @@ public partial class PageInstanceSavesDatapack : IRefreshable
                             searchSource.Add(new ModBase.SearchSource(Entry.Comp.TranslatedName, 1d));
                         if ((Entry.Comp.Description ?? "") != (Entry.Description ?? ""))
                             searchSource.Add(new ModBase.SearchSource(Entry.Comp.Description, 0.4d));
-                        searchSource.Add(new ModBase.SearchSource(string.Join("", Entry.Comp.Tags), 0.2d));
+                        searchSource.Add(new ModBase.SearchSource(
+                            string.Join("", ModComp.GetLocalizedTags(Entry.Comp.Tags)),
+                            0.2d));
                     }
 
                     queryList.Add(new ModBase.SearchEntry<ModLocalComp.LocalCompFile>

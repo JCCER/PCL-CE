@@ -146,7 +146,9 @@ public partial class PageInstanceSaves : IRefreshable
 
     protected override void RefreshLocalization()
     {
+        var savedOffset = PanBack.VerticalOffset;
         RefreshUI();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
     }
 
     private void RefreshUI()

@@ -42,6 +42,11 @@ public partial class PageLaunchLeft
     private bool isWidthAnimating;
     private double showProgress;
 
+    /// <summary>
+    ///     当前正在显示名称的启动阶段加载器。用于避免每次刷新都重建绑定。
+    /// </summary>
+    private ModLoader.LoaderBase? _launchingStageLoader;
+
     public PageLaunchLeft()
     {
         InitializeComponent();
@@ -414,9 +419,18 @@ public partial class PageLaunchLeft
                     foreach (var Loader in ModLaunch.mcLaunchLoaderReal.GetLoaderList(false))
                         if (Loader.State == ModBase.LoadState.Loading || Loader.State == ModBase.LoadState.Waiting)
                         {
-                            LabLaunchingStage.Text = Loader.DisplayName;
-                            isLaunched = Loader.Identifier is 
-                                ModLaunch.LaunchStageWaitWindowId or 
+                            if (!ReferenceEquals(_launchingStageLoader, Loader))
+                            {
+                                _launchingStageLoader = Loader;
+                                var stageLoader = Loader;
+                                LocalizedText.TryBind(
+                                    LabLaunchingStage,
+                                    "Text",
+                                    () => stageLoader.DisplayName);
+                            }
+
+                            isLaunched = Loader.Identifier is
+                                ModLaunch.LaunchStageWaitWindowId or
                                 ModLaunch.LaunchStageEndId;
                             exitTry = true;
                             break;
@@ -445,8 +459,14 @@ public partial class PageLaunchLeft
             if (isLaunched)
                 showProgress = 1d; // 如果已经完成了，就不卖关子了
             // 文本
-            LabLaunchingTitle.Text = isLaunched ? Lang.Text("Launch.Status.Title.Launched") :
-                ModLaunch.currentLaunchOptions.SaveBatch is null ? Lang.Text("Launch.Status.Title.Launching") : Lang.Text("Launch.Status.Title.ExportingScript");
+            LocalizedText.TryBind(
+                LabLaunchingTitle,
+                "Text",
+                () => isLaunched
+                    ? Lang.Text("Launch.Status.Title.Launched")
+                    : ModLaunch.currentLaunchOptions?.SaveBatch is null
+                        ? Lang.Text("Launch.Status.Title.Launching")
+                        : Lang.Text("Launch.Status.Title.ExportingScript"));
             LabLaunchingProgress.Text = Lang.Number(showProgress, "P2");
             var hasLaunchDownloader = false;
             try
@@ -609,9 +629,12 @@ public partial class PageLaunchLeft
         // 初始化页面
         LabLaunchingName.Text = ModInstanceList.McMcInstanceSelected.Name;
         LabLaunchingStage.TrySetLocalizedValue("Text", "Common.Action.Initialize");
-        LabLaunchingTitle.Text = ModLaunch.currentLaunchOptions?.SaveBatch is null
-            ? Lang.Text("Launch.Status.Title.Launching")
-            : Lang.Text("Launch.Status.Title.ExportingScript");
+        LocalizedText.TryBind(
+            LabLaunchingTitle,
+            "Text",
+            () => ModLaunch.currentLaunchOptions?.SaveBatch is null
+                ? Lang.Text("Launch.Status.Title.Launching")
+                : Lang.Text("Launch.Status.Title.ExportingScript"));
         LabLaunchingProgress.Text = Lang.Number(0d, "P2");
         LabLaunchingProgress.Opacity = 1d;
         LabLaunchingDownload.Visibility = Visibility.Visible;

@@ -342,6 +342,11 @@ public static class ModDownloadLib
         return button;
     }
 
+    private static void McDownloadContMenuLocalize(MyIconButton button, string toolTipKey)
+    {
+        button.SetLocalizedValue(FrameworkElement.ToolTipProperty, toolTipKey);
+    }
+
     private const string McDownloadStageIdPrefix = "McDownload:";
 
     private static string McDownloadStageId(string id)
@@ -433,7 +438,8 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
         btnInfo.Click += (ss, ee) => McDownloadMenuLog(ss, (dynamic)ee);
-        var btnServer = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/server", ToolTip = Lang.Text("Download.Version.DownloadServer") };
+        var btnServer = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/server" };
+        McDownloadContMenuLocalize(btnServer, "Download.Version.DownloadServer");
         ToolTipService.SetPlacement(btnServer, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnServer, 30d);
         ToolTipService.SetHorizontalOffset(btnServer, 2d);
@@ -443,7 +449,8 @@ public static class ModDownloadLib
 
     private static void McDownloadMenuBuild(object sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -453,7 +460,8 @@ public static class ModDownloadLib
         ToolTipService.SetVerticalOffset(btnInfo, 30d);
         ToolTipService.SetHorizontalOffset(btnInfo, 2d);
         btnInfo.Click += (a, b) => McDownloadMenuLog(a, (dynamic)b); // dynamic!
-        var btnServer = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/server", ToolTip = Lang.Text("Download.Version.DownloadServer") };
+        var btnServer = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/server" };
+        McDownloadContMenuLocalize(btnServer, "Download.Version.DownloadServer");
         ToolTipService.SetPlacement(btnServer, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnServer, 30d);
         ToolTipService.SetHorizontalOffset(btnServer, 2d);
@@ -1131,43 +1139,52 @@ public static class ModDownloadLib
                         task.Progress = 0.7d;
                         var inheritInstance =
                             new McInstance(Path.Combine(mcFolder, "versions", downloadInfo.Inherit));
-                        var json = @"{
-    ""id"": """ + id + @""",
-    ""inheritsFrom"": """ + downloadInfo.Inherit + @""",
-    ""time"": """ +
-                                   (string.IsNullOrEmpty(downloadInfo.ReleaseTime)
-                                       ? inheritInstance.releaseTime.ToString("yyyy'-'MM'-'dd", CultureInfo.InvariantCulture)
-                                       : downloadInfo.ReleaseTime.Replace("/", "-")) + @"T23:33:33+08:00"",
-    ""releaseTime"": """ +
-                                   (string.IsNullOrEmpty(downloadInfo.ReleaseTime)
-                                       ? inheritInstance.releaseTime.ToString("yyyy'-'MM'-'dd", CultureInfo.InvariantCulture)
-                                       : downloadInfo.ReleaseTime.Replace("/", "-")) + @"T23:33:33+08:00"",
-    ""type"": ""release"",
-    ""libraries"": [
-        {""name"": ""optifine:OptiFine:" +
-                                   downloadInfo.NameFile.Replace("OptiFine_", "").Replace(".jar", "")
-                                       .Replace("preview_", "") + // 输出旧版 Json 格式
-                                   @"""},
-        {""name"": ""net.minecraft:launchwrapper:1.12""}
-    ],
-    ""mainClass"": ""net.minecraft.launchwrapper.Launch"",";
+                        var releaseDate = (downloadInfo.ReleaseTime ?? inheritInstance.releaseTime)
+                            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        var optiFineVersion = downloadInfo.NameFile
+                            .Replace("OptiFine_", "")
+                            .Replace(".jar", "")
+                            .Replace("preview_", "");
+                        var jsonObject = new Dictionary<string, object?>
+                        {
+                            ["id"] = id,
+                            ["inheritsFrom"] = downloadInfo.Inherit,
+                            ["time"] = $"{releaseDate}T23:33:33+08:00",
+                            ["releaseTime"] = $"{releaseDate}T23:33:33+08:00",
+                            ["type"] = "release",
+                            ["libraries"] = new object[]
+                            {
+                                new { name = $"optifine:OptiFine:{optiFineVersion}" },
+                                new { name = "net.minecraft:launchwrapper:1.12" }
+                            },
+                            ["mainClass"] = "net.minecraft.launchwrapper.Launch"
+                        };
                         task.Progress = 0.8d;
                         if (inheritInstance.IsOldJson)
-                            json += @"
-    ""minimumLauncherVersion"": 18,
-    ""minecraftArguments"": """ + inheritInstance.JsonObject["minecraftArguments"] + // 输出新版 Json 格式
-                                    @"  --tweakClass optifine.OptiFineTweaker""
-}";
+                        {
+                            jsonObject["minimumLauncherVersion"] = 18;
+                            jsonObject["minecraftArguments"] =
+                                $"{inheritInstance.JsonObject["minecraftArguments"]}  --tweakClass optifine.OptiFineTweaker";
+                        }
                         else
-                            json += @"
-    ""minimumLauncherVersion"": ""21"",
-    ""arguments"": {
-        ""game"": [
-            ""--tweakClass"",
-            ""optifine.OptiFineTweaker""
-        ]
-    }
-}";
+                        {
+                            jsonObject["minimumLauncherVersion"] = "21";
+                            jsonObject["arguments"] = new
+                            {
+                                game = (string[])
+                                [
+                                    "--tweakClass",
+                                    "optifine.OptiFineTweaker"
+                                ]
+                            };
+                        }
+
+                        var json = JsonSerializer.Serialize(
+                            jsonObject,
+                            new JsonSerializerOptions
+                            {
+                                WriteIndented = true
+                            });
                         ModBase.WriteFile(Path.Combine(versionFolder, id + ".json"), json);
                     }
                     catch (Exception ex)
@@ -1280,8 +1297,9 @@ public static class ModDownloadLib
                     : Lang.Text("Download.Version.Type.Release")
             };
 
-            if (!string.IsNullOrEmpty(entry.ReleaseTime))
-                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+            if (entry.ReleaseTime is not null)
+                infoParts.Add(Lang.Text("Download.Version.ReleaseDate",
+                    Lang.Date(entry.ReleaseTime.Value, "d")));
 
             if (entry.RequiredForgeVersion is null)
                 infoParts.Add(Lang.Text("Download.Version.Optifine.IncompatibleForge"));
@@ -1313,7 +1331,8 @@ public static class ModDownloadLib
 
     private static void OptiFineContMenuBuild(object sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -1542,7 +1561,12 @@ public static class ModDownloadLib
                 Directory.CreateDirectory(versionFolder);
                 var versionJson = new JsonObject();
                 versionJson.Add("id", versionName);
-                var releaseDate = DateTime.Parse(downloadInfo.ReleaseTime, Lang.Culture);
+                var releaseDate = downloadInfo.ReleaseTime
+                                  ?? new McInstance(Path.Combine(
+                                          mcFolder,
+                                          "versions",
+                                          downloadInfo.Inherit))
+                                      .releaseTime;
                 versionJson.Add("time", releaseDate);
                 versionJson.Add("releaseTime", releaseDate);
                 versionJson.Add("type", "release");
@@ -1606,8 +1630,9 @@ public static class ModDownloadLib
                     : Lang.Text("Download.Version.Type.Stable")
             };
 
-            if (!string.IsNullOrEmpty(entry.ReleaseTime))
-                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+            if (entry.ReleaseTime is not null)
+                infoParts.Add(Lang.Text("Download.Version.ReleaseDate",
+                    Lang.Date(entry.ReleaseTime.Value, "d")));
 
             return string.Join("  |  ", infoParts);
         });
@@ -1629,7 +1654,8 @@ public static class ModDownloadLib
         }
         else
         {
-            var btnList = new MyIconButton { SvgIcon = "lucide/list", ToolTip = Lang.Text("Download.Version.ViewAllVersions"), Tag = sender };
+            var btnList = new MyIconButton { SvgIcon = "lucide/list", Tag = sender };
+            McDownloadContMenuLocalize(btnList, "Download.Version.ViewAllVersions");
             ToolTipService.SetPlacement(btnList, PlacementMode.Center);
             ToolTipService.SetVerticalOffset(btnList, 30d);
             ToolTipService.SetHorizontalOffset(btnList, 2d);
@@ -1640,7 +1666,8 @@ public static class ModDownloadLib
 
     private static void LiteLoaderContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveInstaller"), Tag = sender };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save", Tag = sender };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveInstaller");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -1651,7 +1678,8 @@ public static class ModDownloadLib
         }
         else
         {
-            var btnList = new MyIconButton { SvgIcon = "lucide/list", ToolTip = Lang.Text("Download.Version.ViewAllVersions"), Tag = sender };
+            var btnList = new MyIconButton { SvgIcon = "lucide/list", Tag = sender };
+            McDownloadContMenuLocalize(btnList, "Download.Version.ViewAllVersions");
             ToolTipService.SetPlacement(btnList, PlacementMode.Center);
             ToolTipService.SetVerticalOffset(btnList, 30d);
             ToolTipService.SetHorizontalOffset(btnList, 2d);
@@ -2554,8 +2582,10 @@ public static class ModDownloadLib
         LocalizedText.TryBind(newItem, "Info", () =>
         {
             var infoParts = new List<string>();
-            if (!string.IsNullOrEmpty(entry.ReleaseTime))
-                infoParts.Add(Lang.Text("Download.Version.ReleaseDate", entry.ReleaseTime));
+            if (entry.ReleaseTime is not null)
+                infoParts.Add(Lang.Text(
+                    "Download.Version.ReleaseDate",
+                    Lang.Date(entry.ReleaseTime.Value, "d")));
             if (ModBase.modeDebug)
                 infoParts.Add(Lang.Text("Download.Version.Forge.Type", entry.Category));
             return string.Join("  |  ", infoParts);
@@ -2573,7 +2603,8 @@ public static class ModDownloadLib
 
     private static void ForgeContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -2794,7 +2825,8 @@ public static class ModDownloadLib
 
     private static void NeoForgeContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -2908,7 +2940,8 @@ public static class ModDownloadLib
 
     private static void CleanroomContMenuBuild(MyListItem sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);
@@ -3616,7 +3649,8 @@ public static class ModDownloadLib
 
     private static void LabyModContMenuBuild(object sender, EventArgs e)
     {
-        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+        McDownloadContMenuLocalize(btnSave, "Download.Version.SaveAs");
         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnSave, 30d);
         ToolTipService.SetHorizontalOffset(btnSave, 2d);

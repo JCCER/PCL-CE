@@ -69,7 +69,11 @@ public partial class PageSetupJava
     protected override void RefreshLocalization()
     {
         if (loader.State == ModBase.LoadState.Finished)
+        {
+            var savedOffset = PanBack.VerticalOffset;
             OnLoadFinished();
+            Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
+        }
     }
 
     private MyListItem ItemBuild(JavaEntry j)

@@ -34,6 +34,8 @@ public partial class PageInstanceSavesInfo : IRefreshable
         t => LogWrapper.Warn(t.Exception, "Saves", "刷新存档信息异常"), //only 兜底
         CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
 
+    protected override void RefreshLocalization() => Refresh();
+
     private async Task RefreshInfoAsync()
     {
         _cts?.Cancel();

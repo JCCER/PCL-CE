@@ -349,9 +349,10 @@ public partial class PageSelectRight
                     LabEmptySearchTitle.TrySetLocalizedValue(
                         "Text",
                         "Select.Instance.Hidden.EmptySearchTitle");
-                    LabEmptySearchContent.Text = string.IsNullOrWhiteSpace(searchText)
-                        ? Lang.Text("Select.Instance.Search.EmptyInput")
-                        : Lang.Text("Select.Instance.Search.NoHiddenResult", searchText);
+                    LocalizedText.TryBind(
+                        LabEmptySearchContent,
+                        "Text",
+                        () => Lang.Text("Select.Instance.Search.NoHiddenResult", PanVerSearchBox.Text));
                 }
                 else if (showHidden)
                 {
@@ -375,9 +376,12 @@ public partial class PageSelectRight
                     LabEmptySearchTitle.TrySetLocalizedValue(
                         "Text",
                         "Select.Instance.EmptySearch.Title");
-                    LabEmptySearchContent.Text = string.IsNullOrWhiteSpace(searchText)
-                        ? Lang.Text("Select.Instance.Search.EmptyInput")
-                        : Lang.Text("Select.Instance.Search.NoResult", searchText);
+                    LocalizedText.TryBind(
+                        LabEmptySearchContent,
+                        "Text",
+                        () => string.IsNullOrWhiteSpace(PanVerSearchBox.Text)
+                            ? Lang.Text("Select.Instance.Search.EmptyInput")
+                            : Lang.Text("Select.Instance.Search.NoResult", PanVerSearchBox.Text));
                 }
             }
             else
@@ -412,7 +416,7 @@ public partial class PageSelectRight
         LocalizedText.TryBind(newItem, "Info", () => mcInstance.Desc);
         var instanceInfo = mcInstance.Info;
         var tags = new List<string>();
-        tags.Add(instanceInfo.VanillaName);
+        tags.Add(McInstanceInfo.GetVanillaNameDisplay(instanceInfo.VanillaName));
         if (instanceInfo.HasForge)
             tags.Add("Forge" + McInstanceInfo.FormatVersion(instanceInfo.Forge));
         else if (instanceInfo.HasNeoForge)

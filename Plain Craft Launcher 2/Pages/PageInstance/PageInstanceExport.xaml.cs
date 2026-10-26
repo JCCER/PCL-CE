@@ -319,7 +319,9 @@ public partial class PageInstanceExport : IRefreshable
 
     protected override void RefreshLocalization()
     {
+        var savedOffset = PanBack.VerticalOffset;
         RefreshOptionTexts();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
     }
 
     private void RefreshOptionTexts()

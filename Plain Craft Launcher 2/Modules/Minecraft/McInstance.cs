@@ -388,13 +388,13 @@ public class McInstance
                     }
 
                     // 无法获取
-                    field.VanillaName = "Unknown";
+                    field.VanillaName = McInstanceInfo.UnknownVanillaName;
                     SetRuntimeDesc("Select.Instance.Description.UnknownMcVersion");
                 }
                 catch (Exception ex)
                 {
                     ModBase.Log(ex, "识别 Minecraft 版本时出错");
-                    field.VanillaName = "Unknown";
+                    field.VanillaName = McInstanceInfo.UnknownVanillaName;
                     SetRuntimeDesc("Minecraft.Error.Unrecognizable", ex.Message);
                 }
 
@@ -752,6 +752,7 @@ public class McInstance
             }
 
             state = McInstanceState.Original;
+            ClearRuntimeDesc();
             return true;
         }
 
@@ -770,7 +771,7 @@ public class McInstance
 
                 switch (Info.VanillaName ?? "") // 在获取 Version.Original 对象时会完成它的加载
                 {
-                    case "Unknown":
+                    case McInstanceInfo.UnknownVanillaName:
                     {
                         state = McInstanceState.Error;
                         break;

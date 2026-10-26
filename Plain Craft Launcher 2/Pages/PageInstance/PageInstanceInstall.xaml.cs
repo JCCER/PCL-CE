@@ -46,7 +46,12 @@ public partial class PageInstanceInstall
         {
             LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
             if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray)
+            {
+                var savedOffset = PanBack.VerticalOffset;
                 LoadMinecraft_OnFinish(true);
+                Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
+            }
+
             ReloadSelected();
         });
     }
@@ -2458,7 +2463,7 @@ public partial class PageInstanceInstall
         {
             if (_vanillaName is null)
                 return false;
-            return modFile.GameVersions.Contains(_vanillaName);
+            return ModComp.ContainsGameVersion(modFile.GameVersions, _vanillaName);
         }
         catch (Exception ex)
         {

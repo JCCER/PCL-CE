@@ -269,9 +269,10 @@ public partial class MyCompItem
         if (ModMain.frmMain.pageCurrent.page == FormMain.PageType.CompDetail)
         {
             foreach (MyCard Card in ModMain.frmDownloadCompDetail.PanResults.Children)
-                if (!string.IsNullOrEmpty(Card.Title) && !Card.IsSwapped)
-                    titles.Add(Card.Title);
-            ModBase.Log("[Comp] 记录当前已展开的卡片：" + string.Join("、", titles));
+                if (Card.Tag is string cardKey && !string.IsNullOrEmpty(cardKey) && !Card.IsSwapped)
+                    titles.Add(cardKey);
+            ModBase.Log(
+                $"[Comp] 记录当前已展开的卡片：{string.Join("、", titles.Select(PageDownloadCompDetail.GetVersionGroupTitleForLog))}");
             var additional = ModMain.frmMain.pageCurrent.additional.Value;
             ModMain.frmMain.pageCurrent.additional = additional with { ExpandedTitles = titles };
         }

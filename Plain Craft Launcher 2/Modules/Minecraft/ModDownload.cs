@@ -600,9 +600,10 @@ public static class ModDownload
         public string NameVersion;
 
         /// <summary>
-        ///     发布时间，格式为“yyyy/mm/dd”。OptiFine 源无此数据。
+        ///     发布时间。OptiFine 源（BMCLAPI）无此数据，为 <see langword="null" />。<br/>
+        ///     该字段保存原始时间，展示时请使用 <see cref="Lang.Date" /> 按当前区域性格式化。
         /// </summary>
-        public string ReleaseTime;
+        public DateTime? ReleaseTime;
 
         /// <summary>
         ///     需要的最低 Forge 版本。空字符串为无限制，Nothing 为不兼容，“28.1.56” 表示版本号，“1161” 表示版本号的最后一位。
@@ -706,7 +707,7 @@ public static class ModDownload
                 var entry = new DlOptiFineListEntry
                 {
                     DisplayName = name[i].Replace("HD U ", "").Replace(".0 ", " "),
-                    ReleaseTime = Lang.Date(releaseDate, "d"),
+                    ReleaseTime = releaseDate,
                     IsPreview = name[i].ContainsF("pre", true),
                     Inherit = name[i].Split(" ")[0],
                     NameFile = (name[i].ContainsF("pre", true) ? "preview_" : "") + "OptiFine_" +
@@ -749,7 +750,7 @@ public static class ModDownload
                     DisplayName =
                         (Token["mcversion"] + Token["type"].ToString().Replace("HD_U", "").Replace("_", " ") + " " +
                          Token["patch"]).Replace(".0 ", " "),
-                    ReleaseTime = "",
+                    ReleaseTime = null,
                     IsPreview = Token["patch"].ToString().ContainsF("pre", true),
                     Inherit = Token["mcversion"].ToString(),
                     NameFile = Token["filename"].ToString(),
@@ -989,9 +990,10 @@ public static class ModDownload
         public bool IsRecommended;
 
         /// <summary>
-        ///     发布时间，格式为“yyyy/MM/dd HH:mm”。
+        ///     发布时间。<br/>
+        ///     该字段保存原始时间，展示时请使用 <see cref="Lang.Date" /> 按当前区域性格式化。
         /// </summary>
-        public string ReleaseTime;
+        public DateTime? ReleaseTime;
 
         public DlForgeVersionEntry(string version, string branch, string inherit)
         {
@@ -1103,7 +1105,7 @@ public static class ModDownload
                     // Dim ReleaseTimeSplit = ReleaseTimeOriginal.Split(" -:".ToCharArray) '原格式："2021-02-15 03:24:02"
                     var releaseDate =
                         DateTime.Parse(releaseTimeOriginal, null, DateTimeStyles.AssumeUniversal); // 以 UTC 时间作为标准
-                    var releaseTime = Lang.Date(releaseDate.ToLocalTime(), "g"); // 时区与格式转换
+                    var releaseTime = releaseDate.ToLocalTime(); // 时区转换，格式在展示时处理
                     // 分类与 MD5 获取
                     string mD5;
                     string category;
@@ -1224,8 +1226,7 @@ public static class ModDownload
                 // 基础信息获取
                 var entry = new DlForgeVersionEntry(name, branch, loader.input)
                     { Hash = hash, Category = category, IsRecommended = (recommended ?? "") == (name ?? "") };
-                var timeSplit = Token["modified"].ToString().Split('-', 'T', ':', '.', ' ', '/');
-                entry.ReleaseTime = Lang.Date(Token["modified"].ToObject<DateTime>().ToLocalTime(), "g");
+                entry.ReleaseTime = Token["modified"].ToObject<DateTime>().ToLocalTime();
                 // 添加项
                 versions.Add(entry);
             }
@@ -1646,9 +1647,10 @@ public static class ModDownload
         public string MD5;
 
         /// <summary>
-        ///     发布时间，格式为“yyyy/mm/dd HH:mm”。
+        ///     发布时间。<br/>
+        ///     该字段保存原始时间，展示时请使用 <see cref="Lang.Date" /> 按当前区域性格式化。
         /// </summary>
-        public string ReleaseTime;
+        public DateTime? ReleaseTime;
     }
 
     /// <summary>
@@ -1720,7 +1722,9 @@ public static class ModDownload
                     FileName = "liteloader-installer-" + Pair.Key +
                                (Pair.Key == "1.8" || Pair.Key == "1.9" ? ".0" : "") + "-00-SNAPSHOT.jar",
                     MD5 = (string)realEntry["md5"],
-                    ReleaseTime = TimeUtils.FormatUnixTimestamp(long.Parse(realEntry["timestamp"].ToString())),
+                    ReleaseTime = TimeUtils
+                        .FromUnixTimestamp(long.Parse(realEntry["timestamp"].ToString()))
+                        .LocalDateTime,
                     jsonToken = realEntry
                 });
             }
@@ -1764,7 +1768,9 @@ public static class ModDownload
                     FileName = "liteloader-installer-" + Pair.Key +
                                (Pair.Key == "1.8" || Pair.Key == "1.9" ? ".0" : "") + "-00-SNAPSHOT.jar",
                     MD5 = (string)realEntry["md5"],
-                    ReleaseTime = TimeUtils.FormatUnixTimestamp(long.Parse((string)realEntry["timestamp"])),
+                    ReleaseTime = TimeUtils
+                        .FromUnixTimestamp(long.Parse((string)realEntry["timestamp"]))
+                        .LocalDateTime,
                     jsonToken = realEntry
                 });
             }

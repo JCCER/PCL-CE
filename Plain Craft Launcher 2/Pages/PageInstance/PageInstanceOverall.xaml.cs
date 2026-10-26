@@ -67,7 +67,10 @@ public partial class PageInstanceOverall
 
     protected override void RefreshLocalization()
     {
+        // 重建信息卡片前记录滚动位置，避免切语言时跳回顶部
+        var savedOffset = PanBack.VerticalOffset;
         Reload();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
     }
 
     /// <summary>
@@ -112,13 +115,22 @@ public partial class PageInstanceOverall
         ModAnimation.AniEndControl();
     }
 
+    private static string FormatLoaderVersion(string? version)
+    {
+        return string.IsNullOrEmpty(version)
+            ? Lang.Text("Minecraft.Version.Unknown")
+            : version;
+    }
+
     private void GetInstanceInfo()
     {
         modpackCompItem = null;
         ModBase.RunInUi(() =>
         {
             PanInfo.Children.Clear();
-            PanInfo.Children.Add(new MyLoading { Text = Lang.Text("Instance.Overall.Info.Loading"), Margin = new Thickness(0d, 0d, 0d, 10d) });
+            var loading = new MyLoading { Margin = new Thickness(0d, 0d, 0d, 10d) };
+            loading.TrySetLocalizedValue("Text", "Instance.Overall.Info.Loading");
+            PanInfo.Children.Add(loading);
         });
         var loaders = new List<ModLoader.LoaderBase>();
         loaders.Add(new ModLoader.LoaderTask<int, int>(Lang.Text("Instance.Overall.Info.LoadModpackInfoTask"), _ =>
@@ -145,89 +157,112 @@ public partial class PageInstanceOverall
             List<MyListItem> items = [];
             var launchCount = States.Instance.LaunchCount[instance.PathInstance];
             if (launchCount == 0)
-                items.Add(new MyListItem
+            {
+                var item = new MyListItem
                 {
-                    Title = Lang.Text("Instance.Overall.Info.LaunchCount.Title"), Info = Lang.Text("Instance.Overall.Info.LaunchCount.Never"), Logo = "pack://application:,,,/images/Blocks/RedstoneLampOff.png"
-                });
+                    Logo = "pack://application:,,,/images/Blocks/RedstoneLampOff.png"
+                };
+                item.TrySetLocalizedValue("Title", "Instance.Overall.Info.LaunchCount.Title");
+                item.TrySetLocalizedValue("Info", "Instance.Overall.Info.LaunchCount.Never");
+                items.Add(item);
+            }
             else
-                items.Add(new MyListItem
+            {
+                var item = new MyListItem
                 {
-                    Title = Lang.Text("Instance.Overall.Info.LaunchCount.Title"),
-                    Info = Lang.Text("Instance.Overall.Info.LaunchCount.Count", States.Instance.LaunchCount[instance.PathInstance]),
                     Logo = "pack://application:,,,/images/Blocks/RedstoneLampOn.png"
-                });
+                };
+                item.TrySetLocalizedValue("Title", "Instance.Overall.Info.LaunchCount.Title");
+                var path = instance.PathInstance;
+                LocalizedText.TryBind(
+                    item,
+                    "Info",
+                    () => Lang.Text(
+                        "Instance.Overall.Info.LaunchCount.Count",
+                        States.Instance.LaunchCount[path]));
+                items.Add(item);
+            }
+
             if (!string.IsNullOrWhiteSpace(States.Instance.ModpackVersion[instance.PathInstance]))
-                items.Add(new MyListItem
+            {
+                var item = new MyListItem
                 {
-                    Title = Lang.Text("Instance.Overall.Info.ModpackVersion"), Info = States.Instance.ModpackVersion[instance.PathInstance],
+                    Info = States.Instance.ModpackVersion[instance.PathInstance],
                     Logo = "pack://application:,,,/images/Blocks/CommandBlock.png"
-                });
+                };
+                item.TrySetLocalizedValue("Title", "Instance.Overall.Info.ModpackVersion");
+                items.Add(item);
+            }
             items.Add(new MyListItem
             {
-                Title = "Minecraft", Info = instanceInfo.VanillaName,
+                Title = "Minecraft",
+                Info = McInstanceInfo.GetVanillaNameDisplay(instanceInfo.VanillaName),
                 Logo = "pack://application:,,,/images/Blocks/Grass.png"
             });
             if (instanceInfo.HasForge)
                 items.Add(new MyListItem
                 {
                     Title = "Forge",
-                    Info = instanceInfo.Forge ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.Forge),
                     Logo = "pack://application:,,,/images/Blocks/Anvil.png"
                 });
             if (instanceInfo.HasNeoForge)
                 items.Add(new MyListItem
                 {
                     Title = "NeoForge",
-                    Info = instanceInfo.NeoForge ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.NeoForge),
                     Logo = "pack://application:,,,/images/Blocks/NeoForge.png"
                 });
             if (instanceInfo.HasCleanroom)
                 items.Add(new MyListItem
                 {
                     Title = "Cleanroom",
-                    Info = instanceInfo.Cleanroom ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.Cleanroom),
                     Logo = "pack://application:,,,/images/Blocks/Cleanroom.png"
                 });
             if (instanceInfo.HasFabric)
                 items.Add(new MyListItem
                 {
                     Title = "Fabric",
-                    Info = instanceInfo.Fabric ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.Fabric),
                     Logo = "pack://application:,,,/images/Blocks/Fabric.png"
                 });
             if (instanceInfo.HasQuilt)
                 items.Add(new MyListItem
                 {
                     Title = "Quilt",
-                    Info = instanceInfo.Quilt ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.Quilt),
                     Logo = "pack://application:,,,/images/Blocks/Quilt.png"
                 });
             if (instanceInfo.HasOptiFine)
                 items.Add(new MyListItem
                 {
                     Title = "OptiFine",
-                    Info = instanceInfo.OptiFine ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.OptiFine),
                     Logo = "pack://application:,,,/images/Blocks/GrassPath.png"
                 });
             if (instanceInfo.HasLiteLoader)
-                items.Add(new MyListItem
+            {
+                var item = new MyListItem
                 {
                     Title = "LiteLoader",
-                    Info = Lang.Text("Instance.Overall.Info.Installed"),
                     Logo = "pack://application:,,,/images/Blocks/Egg.png"
-                });
+                };
+                item.TrySetLocalizedValue("Info", "Instance.Overall.Info.Installed");
+                items.Add(item);
+            }
             if (instanceInfo.HasLegacyFabric)
                 items.Add(new MyListItem
                 {
                     Title = "Legacy Fabric",
-                    Info = instanceInfo.LegacyFabric ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.LegacyFabric),
                     Logo = "pack://application:,,,/images/Blocks/Fabric.png"
                 });
             if (instanceInfo.HasLabyMod)
                 items.Add(new MyListItem
                 {
                     Title = "LabyMod",
-                    Info = instanceInfo.LabyMod ?? Lang.Text("Minecraft.Version.Unknown"),
+                    Info = FormatLoaderVersion(instanceInfo.LabyMod),
                     Logo = "pack://application:,,,/images/Blocks/LabyMod.png"
                 });
             var wrapPanel = new WrapPanel { Margin = new Thickness(0, -5, -20, 7) };

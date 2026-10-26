@@ -334,6 +334,19 @@ namespace PCL;
             return -1;
         }
 
+        public const string UnknownVanillaName = "Unknown";
+
+        /// <summary>
+        ///     获取原版版本名用于展示；无法识别时返回当前语言的「未知版本」。
+        /// </summary>
+        /// <param name="vanillaName">原版版本名。</param>
+        public static string GetVanillaNameDisplay(string? vanillaName)
+        {
+            return string.IsNullOrEmpty(vanillaName) || vanillaName == UnknownVanillaName
+                ? Lang.Text("Minecraft.Version.Unknown")
+                : vanillaName;
+        }
+
         /// <summary>
         ///     将 Drop 序数转换为版本字符串。
         /// </summary>

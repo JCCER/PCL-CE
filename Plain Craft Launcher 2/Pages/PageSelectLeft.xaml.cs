@@ -31,7 +31,10 @@ public partial class PageSelectLeft : IRefreshable
 
     protected override void RefreshLocalization()
     {
+        // 重建文件夹列表前记录滚动位置，避免切语言时跳回顶部
+        var savedOffset = PanScroll.VerticalOffset;
         McFolderListUI(true);
+        Dispatcher.BeginInvoke(new Action(() => PanScroll.ScrollToVerticalOffset(savedOffset)));
     }
 
     private void PageSelectLeft_Initialized(object sender, EventArgs e)
@@ -81,16 +84,18 @@ public partial class PageSelectLeft : IRefreshable
                 var contMenu = new ContextMenu();
 
                 // 添加菜单项
-                void AddMenuItem(string name, string header, string svgIcon = null, Thickness? padding = null,
+                void AddMenuItem(string name, string headerKey, string svgIcon = null,
+                    Thickness? padding = null,
                     RoutedEventHandler clickHandler = null)
                 {
                     var item = new MyMenuItem
                     {
                         Name = name,
-                        Header = header,
                         SvgIcon = svgIcon,
                         Padding = padding ?? new Thickness(0)
                     };
+                    // 菜单会随页面缓存长期存活，标题需要按当前语言求值
+                    item.SetLocalizedValue(HeaderedItemsControl.HeaderProperty, headerKey);
                     if (clickHandler is not null)
                         item.Click += clickHandler;
                     contMenu.Items.Add(item);
@@ -108,56 +113,86 @@ public partial class PageSelectLeft : IRefreshable
                 switch (folder.type)
                 {
                     case ModFolder.McFolder.Types.Original:
-                        AddMenuItem("Rename", Lang.Text("Select.Folder.Rename"), iconRename, new Thickness(0, 2, 0, 0),
+                        AddMenuItem("Rename", "Select.Folder.Rename", iconRename,
+                            new Thickness(0, 2, 0, 0),
                             ModMain.frmSelectLeft.Rename_Click);
-                        AddMenuItem("MoveUp", Lang.Text("Select.Folder.MoveUp"), iconMoveup, null,
+                        AddMenuItem("MoveUp", "Select.Folder.MoveUp", iconMoveup, null,
                             ModMain.frmSelectLeft.MoveUp_Click);
-                        AddMenuItem("MoveDown", Lang.Text("Select.Folder.MoveDown"), iconMovedown, null,
+                        AddMenuItem("MoveDown", "Select.Folder.MoveDown", iconMovedown, null,
                             ModMain.frmSelectLeft.MoveDown_Click);
-                        AddMenuItem("Open", Lang.Text("Common.Action.Open"), iconOpen, null,
+                        AddMenuItem("Open", "Common.Action.Open", iconOpen, null,
                             ModMain.frmSelectLeft.Open_Click);
-                        AddMenuItem("Refresh", Lang.Text("Common.Action.Refresh"), iconRefresh, null,
+                        AddMenuItem("Refresh", "Common.Action.Refresh", iconRefresh, null,
                             ModMain.frmSelectLeft.Refresh_Click);
                         AddMenuItem("Delete",
                             ModFolder.mcFolderList.Count == 1 &&
                             folder.Location == Path.Combine(ModBase.exePath, ".minecraft") + @"\"
-                                ? Lang.Text("Select.Folder.Clear")
-                                : Lang.Text("Common.Action.Delete"), iconDelete, new Thickness(0, 0, 0, 2),
+                                ? "Select.Folder.Clear"
+                                : "Common.Action.Delete", iconDelete, new Thickness(0, 0, 0, 2),
                             ModMain.frmSelectLeft.Delete_Click);
                         break;
 
                     case ModFolder.McFolder.Types.RenamedOriginal:
-                        AddMenuItem("Restore", Lang.Text("Select.Folder.RestoreName"), iconRestore,
+                        AddMenuItem("Restore", "Select.Folder.RestoreName", iconRestore,
                             new Thickness(0, 2, 0, 0),
                             ModMain.frmSelectLeft.Restore_Click);
-                        AddMenuItem("Rename", Lang.Text("Select.Folder.Rename"), iconRename, null,
+                        AddMenuItem("Rename", "Select.Folder.Rename", iconRename, null,
                             ModMain.frmSelectLeft.Rename_Click);
-                        AddMenuItem("MoveUp", Lang.Text("Select.Folder.MoveUp"), iconMoveup, null,
+                        AddMenuItem("MoveUp", "Select.Folder.MoveUp", iconMoveup, null,
                             ModMain.frmSelectLeft.MoveUp_Click);
-                        AddMenuItem("MoveDown", Lang.Text("Select.Folder.MoveDown"), iconMovedown, null,
+                        AddMenuItem("MoveDown", "Select.Folder.MoveDown", iconMovedown, null,
                             ModMain.frmSelectLeft.MoveDown_Click);
-                        AddMenuItem("Open", Lang.Text("Common.Action.Open"), iconOpen, null,
+                        AddMenuItem("Open", "Common.Action.Open", iconOpen, null,
                             ModMain.frmSelectLeft.Open_Click);
-                        AddMenuItem("Refresh", Lang.Text("Common.Action.Refresh"), iconRefresh, null,
+                        AddMenuItem("Refresh", "Common.Action.Refresh", iconRefresh, null,
                             ModMain.frmSelectLeft.Refresh_Click);
-                        AddMenuItem("Delete", Lang.Text("Common.Action.Delete"), iconDelete, new Thickness(0, 0, 0, 2),
+                        AddMenuItem("Delete", "Common.Action.Delete", iconDelete,
+                            new Thickness(0, 0, 0, 2),
                             ModMain.frmSelectLeft.Delete_Click);
                         break;
 
                     case ModFolder.McFolder.Types.Custom:
-                        AddMenuItem("Rename", Lang.Text("Select.Folder.Rename"), iconRename, new Thickness(0, 2, 0, 0),
+                        AddMenuItem(
+                            "Rename",
+                            "Select.Folder.Rename",
+                            iconRename,
+                            new Thickness(0, 2, 0, 0),
                             ModMain.frmSelectLeft.Rename_Click);
-                        AddMenuItem("MoveUp", Lang.Text("Select.Folder.MoveUp"), iconMoveup, null,
+                        AddMenuItem(
+                            "MoveUp",
+                            "Select.Folder.MoveUp",
+                            iconMoveup,
+                            null,
                             ModMain.frmSelectLeft.MoveUp_Click);
-                        AddMenuItem("MoveDown", Lang.Text("Select.Folder.MoveDown"), iconMovedown, null,
+                        AddMenuItem(
+                            "MoveDown",
+                            "Select.Folder.MoveDown",
+                            iconMovedown,
+                            null,
                             ModMain.frmSelectLeft.MoveDown_Click);
-                        AddMenuItem("Open", Lang.Text("Common.Action.Open"), iconOpen, null,
+                        AddMenuItem(
+                            "Open",
+                            "Common.Action.Open",
+                            iconOpen,
+                            null,
                             ModMain.frmSelectLeft.Open_Click);
-                        AddMenuItem("Refresh", Lang.Text("Common.Action.Refresh"), iconRefresh, null,
+                        AddMenuItem(
+                            "Refresh",
+                            "Common.Action.Refresh",
+                            iconRefresh,
+                            null,
                             ModMain.frmSelectLeft.Refresh_Click);
-                        AddMenuItem("Remove", Lang.Text("Select.Folder.RemoveFromList"), iconRemove,
-                            null, ModMain.frmSelectLeft.Remove_Click);
-                        AddMenuItem("Delete", Lang.Text("Common.Action.Delete"), iconDelete, new Thickness(0, 0, 0, 2),
+                        AddMenuItem(
+                            "Remove",
+                            "Select.Folder.RemoveFromList",
+                            iconRemove,
+                            null,
+                            ModMain.frmSelectLeft.Remove_Click);
+                        AddMenuItem(
+                            "Delete",
+                            "Common.Action.Delete",
+                            iconDelete,
+                            new Thickness(0, 0, 0, 2),
                             ModMain.frmSelectLeft.Delete_Click);
                         break;
                 }

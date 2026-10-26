@@ -837,10 +837,17 @@ public partial class PageInstanceSetup
                 var item = new MyComboBoxItem
                 {
                     Content = curJava.ToString(),
-                    ToolTip =
-                        Lang.Text("Instance.Setup.Options.Java.Details.ToolTip", curJava.Installation.JavaExePath, curJava.Installation.Version, curJava.Source),
                     Tag = curJava
                 };
+                var javaExePath = curJava.Installation.JavaExePath;
+                var javaVersion = curJava.Installation.Version;
+                var javaSource = curJava.Source;
+                LocalizedText.TryBind(
+                    item,
+                    "ToolTip",
+                    () => Lang.Text(
+                        "Instance.Setup.Options.Java.Details.ToolTip",
+                        javaExePath, javaVersion, javaSource));
                 ToolTipService.SetInitialShowDelay(item, 300);
                 ToolTipService.SetBetweenShowDelay(item, 100);
                 ComboArgumentJava.Items.Add(item);

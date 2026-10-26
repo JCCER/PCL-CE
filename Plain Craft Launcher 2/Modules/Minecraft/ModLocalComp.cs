@@ -15,7 +15,7 @@ namespace PCL;
 
 public static class ModLocalComp
 {
-    private const int localModCacheVersion = 8;
+    private const int localModCacheVersion = 9;
 
     private static readonly Lazy<HashCache> _hashCache = new(() =>
         new HashCache(ModBase.pathTemp + @"Cache\HashCache.db"));

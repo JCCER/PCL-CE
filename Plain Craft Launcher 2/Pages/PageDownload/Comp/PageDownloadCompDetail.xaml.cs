@@ -61,8 +61,24 @@ public partial class PageDownloadCompDetail
 
     protected override void RefreshLocalization()
     {
-        if (_compFileLoader is { State: ModBase.LoadState.Finished })
-            UpdateFilterResult();
+        if (_compFileLoader is not { State: ModBase.LoadState.Finished })
+            return;
+
+        var savedOffset = PanBack.VerticalOffset;
+        var expandedKeys = new List<string>();
+        foreach (MyCard card in PanResults.Children)
+            if (card.Tag is string cardKey && !card.IsSwapped)
+                expandedKeys.Add(cardKey);
+
+        if (expandedKeys.Count != 0 &&
+            ModMain.frmMain.pageCurrent.additional is { } additional)
+            ModMain.frmMain.pageCurrent.additional = additional with
+            {
+                ExpandedTitles = expandedKeys
+            };
+
+        UpdateFilterResult();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
     }
 
     // 整合包安装
@@ -170,8 +186,8 @@ public partial class PageDownloadCompDetail
                     return false;
                 if (!version.IsLoaded)
                     version.Load();
-                if (file.GameVersions.Any(v => v.Contains(".")) && !file.GameVersions.Any(v =>
-                        v.Contains(".") && (v ?? "") == (version.Info.VanillaName ?? "")))
+                if (file.GameVersions.Any(v => v.Contains(".")) &&
+                    !ModComp.ContainsGameVersion(file.GameVersions, version.Info.VanillaName))
                     return false;
                 // 加载器
                 if (!allowedLoaders.Any())
@@ -320,7 +336,8 @@ public partial class PageDownloadCompDetail
                         // 只对 Mod 和数据包进行版本检测
                         if (file.Type == ModComp.CompType.Mod || file.Type == ModComp.CompType.DataPack)
                             if (file.GameVersions.Any(v => v.Contains(".")) &&
-                                !file.GameVersions.Any(v => v.Contains(".") && v == version.Info.VanillaName))
+                                !ModComp.ContainsGameVersion(file.GameVersions,
+                                    version.Info.VanillaName))
                                 return false;
 
                         // 加载器判定
@@ -436,7 +453,7 @@ public partial class PageDownloadCompDetail
                             }
 
                             var mcVersion = targetInstance?.Info?.VanillaName
-                                            ?? file.GameVersions.FirstOrDefault(version => version.Contains("."))
+                                            ?? ModComp.FirstGameVersion(file.GameVersions)
                                             ?? string.Empty;
                             var targetLoaders = new List<ModComp.CompLoaderType>();
                             if (targetInstance is not null)
@@ -904,7 +921,13 @@ public partial class PageDownloadCompDetail
                 if (version == FilterAll)
                     newButton.SetLocalizedValue(MyRadioButton.TextProperty, "Common.Option.All");
                 else
-                    newButton.Text = GetVersionGroupDisplayName(version);
+                {
+                    var versionKey = version;
+                    LocalizedText.TryBind(
+                        newButton,
+                        "Text",
+                        () => GetVersionGroupDisplayName(versionKey));
+                }
                 newButton.Check += (sender, raiseByMouse) =>
                 {
                     _instanceFilter = (string)sender.Tag == FilterAll
@@ -944,7 +967,8 @@ public partial class PageDownloadCompDetail
             MyRadioButton modLoaderToCheck = null;
             if (!string.IsNullOrEmpty(_targetInstance))
             {
-                var targetFile = results.FirstOrDefault(v => v.GameVersions.Contains(_targetInstance));
+                var targetFile = results.FirstOrDefault(v =>
+                    ModComp.ContainsGameVersion(v.GameVersions, _targetInstance));
                 if (targetFile is not null)
                 {
                     var targetGroup = GetGroupedVersionName(_targetInstance, groupedDrop, groupedOld);
@@ -953,7 +977,7 @@ public partial class PageDownloadCompDetail
                         : PanInstanceFilter.Children.Cast<UIElement>();
                     foreach (MyRadioButton button in (IEnumerable)children)
                     {
-                        if ((button.Text ?? "") != (targetGroup ?? ""))
+                        if ((button.Tag as string ?? "") != (targetGroup ?? ""))
                             continue;
                         instanceToCheck = button;
                         break;
@@ -972,7 +996,7 @@ public partial class PageDownloadCompDetail
                             : PanInstanceFilter.Children.Cast<UIElement>();
                         foreach (MyRadioButton button in (IEnumerable)children)
                         {
-                            if ((button.Text ?? "") != (_targetLoader.ToString() ?? ""))
+                            if ((button.Tag as string ?? "") != (_targetLoader.ToString() ?? ""))
                                 continue;
                             modLoaderToCheck = button;
                             break;
@@ -1004,7 +1028,7 @@ public partial class PageDownloadCompDetail
         // 1. 预处理基础变量
         var targetVersionText = _targetLoader != ModComp.CompLoaderType.Any ? _targetLoader + " " : "";
         var targetCardName = !string.IsNullOrEmpty(_targetInstance) || _targetLoader != ModComp.CompLoaderType.Any
-            ? Lang.Text("Download.Comp.Detail.SelectedVersion", targetVersionText, _targetInstance)
+            ? VersionGroupSelected + "\0" + targetVersionText + "\0" + (_targetInstance ?? "")
             : "";
 
         // 使用 HashSet 提高查询性能 O(1)
@@ -1072,7 +1096,8 @@ public partial class PageDownloadCompDetail
                                     GetGroupedVersionName(_targetInstance, groupedDrop, groupedOld)
                                         .StartsWithF(_instanceFilter);
 
-                if (isMatchFilter && version.GameVersions.Contains(_targetInstance))
+                if (isMatchFilter &&
+                    ModComp.ContainsGameVersion(version.GameVersions, _targetInstance))
                     if (_targetLoader == ModComp.CompLoaderType.Any || version.ModLoaders.Contains(_targetLoader))
                         // 再次检查 version 是否符合筛选器（针对该文件的所有游戏版本）
                         if (_instanceFilter is null || version.GameVersions.Any(v =>
@@ -1098,9 +1123,14 @@ public partial class PageDownloadCompDetail
                 // 创建卡片组件
                 var newCard = new MyCard
                 {
-                    Title = GetVersionGroupDisplayName(pair.Key),
-                    Margin = new Thickness(0d, 0d, 0d, 15d)
+                    Margin = new Thickness(0d, 0d, 0d, 15d),
+                    Tag = pair.Key
                 };
+                var groupKey = pair.Key;
+                LocalizedText.TryBind(
+                    newCard,
+                    "Title",
+                    () => GetVersionGroupDisplayName(groupKey));
 
                 // 闭包引用：避免在 Sub 内做高耗时操作
                 var files = pair.Value;
@@ -1159,8 +1189,8 @@ public partial class PageDownloadCompDetail
 
                 PanResults.Children.Add(newCard);
 
-                // 展开逻辑
-                if ((currentKey ?? "") == (targetCardName ?? "") || additionalTitles.Contains(newCard.Title))
+                if ((currentKey ?? "") == (targetCardName ?? "") ||
+                    additionalTitles.Contains(groupKey))
                     newCard.StackInstall();
                 else
                     newCard.IsSwapped = true;
@@ -1218,20 +1248,40 @@ public partial class PageDownloadCompDetail
 
     private const string VersionGroupOld = "\0group.old";
 
+    private const string VersionGroupSelected = "\0group.selected\0";
+
+    internal static string GetVersionGroupTitleForLog(string groupKey)
+    {
+        return (groupKey ?? "")
+            .Replace("\0", "/", StringComparison.Ordinal);
+    }
+
     private static string GetVersionGroupDisplayName(string groupKey)
     {
+        if (groupKey is not null &&
+            groupKey.StartsWith(VersionGroupSelected, StringComparison.Ordinal))
+        {
+            var parts = groupKey[VersionGroupSelected.Length..].Split('\0');
+            var loaderPrefix = parts.Length > 0 ? parts[0] : "";
+            var instanceName = parts.Length > 1 ? parts[1] : "";
+            return Lang.Text("Download.Comp.Detail.SelectedVersion", loaderPrefix, instanceName);
+        }
+
         return groupKey switch
         {
             VersionGroupOther => Lang.Text("Download.Comp.Detail.VersionGroup.Other"),
             VersionGroupSnapshot => Lang.Text("Download.Comp.Detail.VersionGroup.Snapshot"),
             VersionGroupOld => Lang.Text("Download.Comp.Detail.VersionGroup.Old"),
-            _ => groupKey
+            _ => ModComp.FormatGameVersionInKey(groupKey)
         };
     }
 
     private string GetGroupedVersionName(string name, bool groupedByDrop, bool foldOld)
     {
         if (name is null)
+            return VersionGroupOther;
+        name = ModComp.StripGameVersionPreview(name);
+        if (name.Length == 0)
             return VersionGroupOther;
         if (name.Contains('w'))
             return VersionGroupSnapshot;

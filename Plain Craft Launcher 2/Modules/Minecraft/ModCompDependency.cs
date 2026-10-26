@@ -71,8 +71,12 @@ public static class ModCompDependency
             localFile.Load();
 
             var source = localFile.Comp is null ? null : GetSource(localFile.Comp.FromCurseForge);
-            var gameVersions = localFile.compFile?.GameVersions?.Where(static version => !string.IsNullOrWhiteSpace(version)).ToList()
-                               ?? new List<string>();
+            var gameVersions = localFile.compFile?.GameVersions?
+                                   .Where(static version => !string.IsNullOrWhiteSpace(version))
+                                   .Select(ModComp.StripGameVersionPreview)
+                                   .Where(static version => !string.IsNullOrWhiteSpace(version))
+                                   .ToList()
+                               ?? [];
             var loaders = ToLoaderNames(localFile.compFile?.ModLoaders);
 
             if (!string.IsNullOrWhiteSpace(localFile.Comp?.Id) && !string.IsNullOrWhiteSpace(source))
@@ -144,8 +148,12 @@ public static class ModCompDependency
                 Id = compFile.Id,
                 DisplayName = compFile.DisplayName,
                 Version = compFile.Version,
-                GameVersions = compFile.GameVersions?.Where(static version => !string.IsNullOrWhiteSpace(version)).ToList()
-                               ?? new List<string>(),
+                GameVersions = compFile.GameVersions?
+                                   .Where(static version => !string.IsNullOrWhiteSpace(version))
+                                   .Select(ModComp.StripGameVersionPreview)
+                                   .Where(static version => !string.IsNullOrWhiteSpace(version))
+                                   .ToList()
+                               ?? [],
                 Loaders = ToLoaderNames(compFile.ModLoaders),
                 ReleaseType = MapReleaseType(compFile.Status),
                 ReleaseDate = compFile.ReleaseDate,

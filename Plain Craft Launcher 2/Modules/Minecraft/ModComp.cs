@@ -216,6 +216,118 @@ public static class ModComp
         Update
     }
 
+    /// <summary>
+    ///     将原始游戏版本标识转换为 <see cref="CompFile.GameVersions" /> 中的语言中立形式。<br/>
+    ///     预发布版本会追加 <see cref="CompFile.PreviewVersionSuffix" />，
+    ///     远古版本（如 <c>b1.x</c>）会统一替换为 <see cref="CompFile.AncientGameVersion" />。
+    /// </summary>
+    private static string ToStoredGameVersion(string version)
+    {
+        if (version.StartsWith("b1.", StringComparison.OrdinalIgnoreCase))
+            return CompFile.AncientGameVersion;
+        var dashIndex = version.IndexOf('-');
+        return dashIndex < 0
+            ? version
+            : version[..dashIndex] + CompFile.PreviewVersionSuffix;
+    }
+
+    /// <summary>
+    ///     将支持的游戏版本标识转换为当前语言下的显示文本。<br/>
+    ///     <see cref="CompFile.GameVersions" /> 中保存的是语言中立的标识，
+    ///     需要在界面上展示时应调用本方法，以便切换语言后重新求值。
+    /// </summary>
+    /// <param name="version">语言中立的版本标识，例如 <c>1.20.1</c>、<c>1.20.1-pre</c>、<c>21w15a</c>。</param>
+    public static string FormatGameVersion(string? version)
+    {
+        if (string.IsNullOrEmpty(version) || version == CompFile.UnknownGameVersion)
+            return Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion");
+        if (version == CompFile.AncientGameVersion)
+            return Lang.Text("Download.Comp.Detail.CompItem.AncientVersion");
+        if (version.EndsWith(CompFile.PreviewVersionSuffix, StringComparison.Ordinal))
+            return version[..^CompFile.PreviewVersionSuffix.Length] +
+                   Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix");
+        return version;
+    }
+
+    /// <summary>
+    ///     将可能带有加载器前缀或分组标记的版本标识转换为当前语言下的显示文本。<br/>
+    ///     与 <see cref="FormatGameVersion" /> 的区别在于它会替换字符串中任意位置的标记，
+    ///     适用于 <c>Forge 1.20.1-pre</c> 这类拼接后的分组键。
+    /// </summary>
+    /// <param name="versionKey">分组键或版本标识。</param>
+    public static string FormatGameVersionInKey(string? versionKey)
+    {
+        return string.IsNullOrEmpty(versionKey)
+            ? Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion")
+            : versionKey
+                .Replace(
+                    CompFile.UnknownGameVersion,
+                    Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion"),
+                    StringComparison.Ordinal)
+                .Replace(
+                    CompFile.AncientGameVersion,
+                    Lang.Text("Download.Comp.Detail.CompItem.AncientVersion"),
+                    StringComparison.Ordinal)
+                .Replace(
+                    CompFile.PreviewVersionSuffix,
+                    Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix"),
+                    StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    ///     将标签资源键列表转换为当前语言下的显示文本列表，用于本地搜索等场景。<br/>
+    ///     资源键本身对用户不可见，直接拼接键名会导致搜索失效。
+    /// </summary>
+    /// <param name="tagKeys">标签资源键列表。</param>
+    public static IEnumerable<string> GetLocalizedTags(IEnumerable<string>? tagKeys)
+    {
+        return tagKeys is null
+            ? []
+            : tagKeys
+                .Where(key => !string.IsNullOrWhiteSpace(key))
+                .Select(Lang.Text)
+                .Where(text => !string.IsNullOrEmpty(text));
+    }
+
+    /// <summary>
+    ///     去掉 <see cref="CompFile.GameVersions" /> 中的预发布标记，得到可与其他版本字符串比较的基础版本号。
+    /// </summary>
+    /// <param name="version">语言中立的版本标识。</param>
+    public static string StripGameVersionPreview(string? version)
+    {
+        return string.IsNullOrEmpty(version)
+            ? ""
+            : version.EndsWith(CompFile.PreviewVersionSuffix, StringComparison.Ordinal)
+                ? version[..^CompFile.PreviewVersionSuffix.Length]
+                : version;
+    }
+
+    /// <summary>
+    ///     判断游戏版本列表是否包含指定版本。<br/>
+    ///     <see cref="CompFile.GameVersions" /> 中的预发布版本带有额外标记，直接比较会漏掉，因此需要借助本方法。
+    /// </summary>
+    /// <param name="versions">语言中立的版本标识列表。</param>
+    /// <param name="version">要查找的版本，例如实例的 <c>VanillaName</c>。</param>
+    public static bool ContainsGameVersion(IEnumerable<string>? versions, string? version)
+    {
+        return versions is not null &&
+               !string.IsNullOrEmpty(version) &&
+               versions.Any(v => string.Equals(
+                   StripGameVersionPreview(v),
+                   version,
+                   StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    ///     取列表中第一个可用于下载请求的 Minecraft 版本号（已去掉预发布标记）。
+    /// </summary>
+    /// <param name="versions">语言中立的版本标识列表。</param>
+    public static string? FirstGameVersion(IEnumerable<string>? versions)
+    {
+        var version = versions?.FirstOrDefault(v => v.Contains('.'));
+        return version is null ? null : StripGameVersionPreview(version);
+    }
+
     public static string GetCompTypeName(CompType type) => Lang.Text(type switch
     {
         CompType.Mod => "Download.Comp.Type.Mod",
@@ -2807,8 +2919,27 @@ public static class ModComp
         //  未经处理的支持的游戏版本列表。
         // </summary>
         public readonly List<string> RawGameVersions = new();
+
         /// <summary>
-        ///     支持的游戏版本列表。类型包括："26.1.5"，"26.1"，"26.1 预览版"，"1.18.5"，"1.18"，"1.18 预览版"，"21w15a"，"未知版本"。
+        ///     无法识别版本时使用的占位标记。该值语言中立，显示时请通过 <see cref="ModComp.FormatGameVersion" /> 求值。
+        /// </summary>
+        internal const string UnknownGameVersion = "\0unknown";
+
+        /// <summary>
+        ///     远古版本（如 b1.x）使用的占位标记。该值语言中立，显示时请通过 <see cref="ModComp.FormatGameVersion" /> 求值。
+        /// </summary>
+        internal const string AncientGameVersion = "\0ancient";
+
+        /// <summary>
+        ///     预发布版本在 <see cref="GameVersions" /> 中的后缀标记。该值语言中立，显示时请通过 <see cref="ModComp.FormatGameVersion" /> 求值。
+        /// </summary>
+        internal const string PreviewVersionSuffix = "-pre";
+
+        /// <summary>
+        ///     支持的游戏版本列表。<br/>
+        ///     该列表只保存语言中立的原始版本标识（例如 "26.1.5"、"1.18.5"、"1.18-pre1"、"21w15a"），
+        ///     以及无法识别时的 <see cref="UnknownGameVersion" />；
+        ///     需要展示给用户时请通过 <see cref="ModComp.FormatGameVersion" /> 按当前语言求值。
         /// </summary>
         public readonly List<string> GameVersions = new();
 
@@ -2976,8 +3107,13 @@ public static class ModComp
 
                     // GameVersions
                     RawGameVersions = data["gameVersions"].AsArray().Select(t => t.ToString().Trim().ToLower()).ToList();
-                    GameVersions = RawGameVersions.Where(v => McInstanceInfo.IsFormatFit(v))
-                        .Select(v => v.Replace("-snapshot", Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix"))).Distinct().ToList();
+                    GameVersions =
+                    [
+                        .. RawGameVersions
+                            .Where(McInstanceInfo.IsFormatFit)
+                            .Select(ToStoredGameVersion)
+                            .Distinct()
+                    ];
                     if (GameVersions.Count > 1)
                     {
                         GameVersions = GameVersions.Sort(McVersionComparer.CompareVersionGe).ToList();
@@ -2990,7 +3126,7 @@ public static class ModComp
                     }
                     else
                     {
-                        GameVersions = new List<string> { Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion") };
+                        GameVersions = new List<string> { UnknownGameVersion };
                     }
 
                     // ModLoaders
@@ -3117,8 +3253,13 @@ public static class ModComp
 
                     // GameVersions
                     RawGameVersions = data["game_versions"].AsArray().Select(t => t.ToString().Trim().ToLower()).ToList();
-                    GameVersions = RawGameVersions.Where(v => v.Contains(".")).Select(v =>
-                        v.Contains("-") ? v.BeforeFirst("-") + Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix") : v.StartsWithF("b1.") ? Lang.Text("Download.Comp.Detail.CompItem.AncientVersion") : v).Distinct().ToList();
+                    GameVersions =
+                    [
+                        .. RawGameVersions
+                            .Where(v => v.Contains('.'))
+                            .Select(ToStoredGameVersion)
+                            .Distinct()
+                    ];
                     if (GameVersions.Count > 1)
                     {
                         GameVersions = GameVersions.Sort(McVersionComparer.CompareVersionGe).ToList();
@@ -3135,7 +3276,7 @@ public static class ModComp
                     }
                     else
                     {
-                        GameVersions = new List<string> { Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion") };
+                        GameVersions = new List<string> { UnknownGameVersion };
                     }
 
                     #endregion
@@ -3293,40 +3434,60 @@ public static class ModComp
         }
 
         /// <summary>
+        ///     构造版本项的副文本（含相对时间、发布状态等），按当前语言求值。
+        /// </summary>
+        /// <param name="title">已确定的显示标题。</param>
+        private string BuildInfoText(string title)
+        {
+            var info = new List<string>();
+
+            if (title != FileName.BeforeLast("."))
+                info.Add(FileName.BeforeLast("."));
+
+            if (Dependencies.Count != 0)
+                info.Add(Lang.Text(
+                    "Download.Comp.Detail.FileList.DependencyCount",
+                    Dependencies.Count));
+
+            // 简化后的游戏版本逻辑喵（GameVersions 存语言中立的标识，展示时再本地化）
+            var snapshotKeywords = new[] { "w", "snapshot", "rc", "pre", "experimental", "-" };
+            if (GameVersions.All(ver =>
+                    !ver.Contains('.') || snapshotKeywords.Any(s => ver.ContainsF(s, true))))
+                info.Add(Lang.Text(
+                    "Download.Comp.Detail.FileList.GameVersion",
+                    string.Join("、", GameVersions.Select(FormatGameVersion))));
+
+            if (DownloadCount > 0)
+                info.Add(Lang.Text(
+                    "Common.Format.DownloadCount",
+                    Lang.CompactNumber(DownloadCount)));
+
+            info.Add(Lang.Text(
+                "Download.Comp.Detail.FileList.Updated",
+                Lang.TimeSpan(ReleaseDate - DateTime.Now)));
+
+            if (Status != CompFileStatus.Release)
+                info.Add(StatusDescription);
+
+            return string.Join("  |  ", info);
+        }
+
+        /// <summary>
         ///     将当前文件信息实例化为控件。
         /// </summary>
-        public MyVirtualizingElement<MyListItem> ToListItem(MyListItem.ClickEventHandler onClick,
+        public MyVirtualizingElement<MyListItem> ToListItem(
+            MyListItem.ClickEventHandler onClick,
             MyIconButton.ClickEventHandler? onSaveClick = null,
             bool badDisplayName = false)
         {
             return new MyVirtualizingElement<MyListItem>(() =>
                 {
                     // 1. 获取基础描述信息
-                    var title = badDisplayName ? FileName : DisplayName;
-                    var info = new List<string>();
+                    var title = badDisplayName
+                        ? FileName
+                        : DisplayName;
 
-                    // 2. 填充信息列表
-                    if (title != FileName.BeforeLast("."))
-                        info.Add(FileName.BeforeLast("."));
-
-                    if (Dependencies.Any())
-                        info.Add(Lang.Text("Download.Comp.Detail.FileList.DependencyCount", Dependencies.Count()));
-
-                    // 简化后的游戏版本逻辑喵
-                    var snapshotKeywords = new[] { "w", "snapshot", "rc", "pre", "experimental", "-" };
-                    if (GameVersions.All(ver =>
-                            !ver.Contains('.') || snapshotKeywords.Any(s => ver.ContainsF(s, true))))
-                        info.Add(Lang.Text("Download.Comp.Detail.FileList.GameVersion", string.Join("、", GameVersions)));
-
-                    if (DownloadCount > 0)
-                        info.Add(Lang.Text("Common.Format.DownloadCount", Lang.CompactNumber(DownloadCount)));
-
-                    info.Add(Lang.Text("Download.Comp.Detail.FileList.Updated", Lang.TimeSpan(ReleaseDate - DateTime.Now)));
-
-                    if (Status != CompFileStatus.Release)
-                        info.Add(StatusDescription);
-
-                    // 3. 建立控件
+                    // 2. 建立控件
                     var newItem = new MyListItem
                     {
                         Title = title,
@@ -3334,7 +3495,6 @@ public static class ModComp
                         Height = 42,
                         Type = MyListItem.CheckType.Clickable,
                         Tag = this,
-                        Info = string.Join("  |  ", info),
                         // 使用 switch 表达式精简 Logo 选择喵！
                         Logo = Status switch
                         {
@@ -3343,12 +3503,16 @@ public static class ModComp
                             _ => ModBase.pathImage + "Icons/A.png"
                         }
                     };
+                    LocalizedText.TryBind(newItem, "Info", () => BuildInfoText(title));
                     newItem.Click += onClick;
 
                     // 4. 建立另存为按钮
                     if (onSaveClick is not null)
                     {
-                        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+                        var btnSave = new MyIconButton { SvgIcon = "lucide/save" };
+                        btnSave.SetLocalizedValue(
+                            FrameworkElement.ToolTipProperty,
+                            "Download.Version.SaveAs");
                         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
                         ToolTipService.SetVerticalOffset(btnSave, 30);
                         ToolTipService.SetHorizontalOffset(btnSave, 2);
@@ -3782,7 +3946,7 @@ public static class ModComp
         // 只对 Mod 和数据包进行版本检测
         if (file.Type == CompType.Mod || file.Type == CompType.DataPack)
             if (file.GameVersions.Any(v => v.Contains(".")) &&
-                !file.GameVersions.Any(v => v.Contains(".") && v == version.Info.VanillaName))
+                !ContainsGameVersion(file.GameVersions, version.Info.VanillaName))
                 return false;
 
         // 加载器判定

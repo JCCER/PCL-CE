@@ -219,7 +219,6 @@ public partial class FormMain
         // Timer 启动
         ModAnimation.AniStart();
         ModMain.TimerMainStart();
-        // 特殊版本提示        // 次级页面标题栏dd由代码设置，语言变更后需要重新求值
 
         ModBase.RunInNewThread(() =>
         {
@@ -1529,6 +1528,7 @@ public partial class FormMain
     {
         ModBase.RunInUi(() =>
         {
+            // 次级页面标题栏由代码设置，语言变更后需要重新求值
             if (!string.IsNullOrEmpty(form.PageNameGet(form.pageCurrent)))
                 form.PageNameRefresh();
         });
@@ -1598,12 +1598,6 @@ public partial class FormMain
 
     public class PageStackData
     {
-        /// <summary>
-        /// <list type="bullet">
-        ///   <item><description>CompDetail: (CompProject, ExpandedTitles, TargetVersion, TargetLoader, ResourceType)</description></item>
-        ///   <item><description>VersionSaves: SavePath</description></item>
-        /// </list>
-        /// </summary>
         public (
             ModComp.CompProject CompProject,
             List<string> ExpandedTitles,
