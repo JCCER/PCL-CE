@@ -340,7 +340,7 @@ public partial class PageComp
     private ModComp.CompProjectRequest LoaderInput()
     {
         var request = new ModComp.CompProjectRequest(PageType, storage, (page + 1) * pageSize);
-        var gameVersion = TextSearchVersion.SelectedIndex <= 0
+        var gameVersion = TextSearchVersion.SelectedIndex == 0
             ? null
             : TextSearchVersion.Text.Contains('.') || TextSearchVersion.Text.Contains('w')
                 ? TextSearchVersion.Text
