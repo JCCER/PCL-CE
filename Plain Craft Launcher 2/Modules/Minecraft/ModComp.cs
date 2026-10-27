@@ -220,9 +220,19 @@ public static class ModComp
     ///     将原始游戏版本标识转换为 <see cref="CompFile.GameVersions" /> 中的语言中立形式。<br/>
     ///     预发布版本会追加 <see cref="CompFile.PreviewVersionSuffix" />，
     ///     远古版本（如 <c>b1.x</c>）会统一替换为 <see cref="CompFile.AncientGameVersion" />。
+    ///     对已经是语言中立形式的值重复调用不会改变结果。
     /// </summary>
-    private static string ToStoredGameVersion(string version)
+    /// <param name="version">原始或已规范化的游戏版本标识。</param>
+    /// <returns>用于存储/比较的语言中立版本标识。</returns>
+    public static string NormalizeGameVersion(string? version)
     {
+        if (string.IsNullOrEmpty(version))
+            return string.Empty;
+        if (version[0] == '\0')
+            return version;
+        if (string.Equals(version, McInstanceInfo.UnknownVanillaName,
+                StringComparison.OrdinalIgnoreCase))
+            return CompFile.UnknownGameVersion;
         if (version.StartsWith("b1.", StringComparison.OrdinalIgnoreCase))
             return CompFile.AncientGameVersion;
         var dashIndex = version.IndexOf('-');
@@ -304,18 +314,20 @@ public static class ModComp
 
     /// <summary>
     ///     判断游戏版本列表是否包含指定版本。<br/>
-    ///     <see cref="CompFile.GameVersions" /> 中的预发布版本带有额外标记，直接比较会漏掉，因此需要借助本方法。
+    ///     双方都会先通过 <see cref="NormalizeGameVersion" /> 规范化为语言中立形式，
+    ///     因此可以直接用实例的 <c>VanillaName</c> 或存储键进行比较。
     /// </summary>
     /// <param name="versions">语言中立的版本标识列表。</param>
     /// <param name="version">要查找的版本，例如实例的 <c>VanillaName</c>。</param>
     public static bool ContainsGameVersion(IEnumerable<string>? versions, string? version)
     {
-        return versions is not null &&
-               !string.IsNullOrEmpty(version) &&
-               versions.Any(v => string.Equals(
-                   StripGameVersionPreview(v),
-                   version,
-                   StringComparison.OrdinalIgnoreCase));
+        if (versions is null) return false;
+        var normalized = NormalizeGameVersion(version);
+        if (normalized.Length == 0) return false;
+        return versions.Any(v => string.Equals(
+            NormalizeGameVersion(v),
+            normalized,
+            StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -325,7 +337,7 @@ public static class ModComp
     public static string? FirstGameVersion(IEnumerable<string>? versions)
     {
         var version = versions?.FirstOrDefault(v => v.Contains('.'));
-        return version is null ? null : StripGameVersionPreview(version);
+        return version is null ? null : NormalizeGameVersion(version);
     }
 
     public static string GetCompTypeName(CompType type) => Lang.Text(type switch
@@ -3111,7 +3123,7 @@ public static class ModComp
                     [
                         .. RawGameVersions
                             .Where(McInstanceInfo.IsFormatFit)
-                            .Select(ToStoredGameVersion)
+                            .Select(NormalizeGameVersion)
                             .Distinct()
                     ];
                     if (GameVersions.Count > 1)
@@ -3257,7 +3269,7 @@ public static class ModComp
                     [
                         .. RawGameVersions
                             .Where(v => v.Contains('.'))
-                            .Select(ToStoredGameVersion)
+                            .Select(NormalizeGameVersion)
                             .Distinct()
                     ];
                     if (GameVersions.Count > 1)

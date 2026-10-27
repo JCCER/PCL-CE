@@ -30,6 +30,15 @@ public partial class PageInstanceCompJarInJar
         Loaded += (_, _) => RefreshList();
     }
 
+    protected override void RefreshLocalization()
+    {
+        if (ModLocalComp.compResourceListLoader.output is null)
+            return;
+        var savedOffset = PanBack.VerticalOffset;
+        RefreshList();
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
+    }
+
     private bool _Match(CompFile m)
     {
         if (_search.Length == 0) return true;

@@ -840,9 +840,10 @@ public partial class PageInstanceExport : IRefreshable
 
         // 重复任务检查
         var loaderName = Lang.Text("Instance.Export.ExportTask.Prefix") + packName;
+        var loaderIdentifier = "Export:" + packName;
         foreach (var OngoingLoader in ModLoader.loaderTaskbar)
         {
-            if ((OngoingLoader.name ?? "") != (loaderName ?? ""))
+            if (OngoingLoader.Identifier != loaderIdentifier)
                 continue;
             ModMain.frmMain.PageChange(FormMain.PageType.TaskManager);
             return;
@@ -1270,7 +1271,10 @@ public partial class PageInstanceExport : IRefreshable
 
         // 启动
         var mainLoader = new ModLoader.LoaderCombo<string>(loaderName, loaders)
-            { OnStateChanged = ModDownloadLib.LoaderStateChangedHintOnly };
+        {
+            OnStateChanged = ModDownloadLib.LoaderStateChangedHintOnly,
+            Identifier = loaderIdentifier
+        };
         mainLoader.Start();
         ModLoader.LoaderTaskbarAdd(mainLoader);
         ModMain.frmMain.BtnExtraDownload.ShowRefresh();

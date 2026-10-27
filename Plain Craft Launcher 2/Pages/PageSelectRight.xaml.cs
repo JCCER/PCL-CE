@@ -43,6 +43,15 @@ public partial class PageSelectRight
         LoaderInit();
     }
 
+    protected override void RefreshLocalization()
+    {
+        if (ModInstanceList.mcInstanceListLoader.State != ModBase.LoadState.Finished)
+            return;
+        var savedOffset = PanBack.VerticalOffset;
+        McInstanceListUI(ModInstanceList.mcInstanceListLoader);
+        Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
+    }
+
     // 窗口基础
     private void PageSelectRight_Loaded(object sender, RoutedEventArgs e)
     {

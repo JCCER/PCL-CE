@@ -82,6 +82,14 @@ public class McInstance
         }
 
         /// <summary>
+        ///     标记实例描述已具备可用的数据来源。
+        /// </summary>
+        internal void MarkDescriptionLoaded()
+        {
+            _descNotLoaded = false;
+        }
+
+        /// <summary>
         ///     强制实例分类，0 为未启用，1 为隐藏，2 及以上为其他普通分类。
         /// </summary>
         public McInstanceCardType displayType = McInstanceCardType.Auto;
@@ -1021,10 +1029,14 @@ public class McInstance
 
         private bool IsSnapshot()
         {
-            return new[] { "w", "snapshot", "rc", "pre", "experimental", "-" }.Any(s =>
-                       Info.VanillaName.ContainsF(s, true)) || Name.ContainsF("combat", true) ||
-                   (JsonObject["type"] ?? "").ToString() == "snapshot" ||
-                   (JsonObject["type"] ?? "").ToString() == "pending";
+            var vanillaName = Info.VanillaName ?? string.Empty;
+            if (new[] { "w", "snapshot", "rc", "pre", "experimental", "-" }.Any(s =>
+                    vanillaName.ContainsF(s, true)) ||
+                Name.ContainsF("combat", true))
+                return true;
+            if (JsonObject is null) return false;
+            var type = (JsonObject["type"] ?? "").ToString();
+            return type is "snapshot" or "pending";
         }
 
         /// <summary>
@@ -1066,18 +1078,34 @@ public class McInstance
                 case McInstanceState.OptiFine:
                 case McInstanceState.LiteLoader:
                 {
-                    if (this.Info.VanillaName.ContainsF("pre", true))
-                        info = Lang.Text("Select.Instance.Description.PreRelease", this.Info.VanillaName);
-                    else if (this.Info.VanillaName.ContainsF("rc", true))
-                        info = Lang.Text("Select.Instance.Description.ReleaseCandidate", this.Info.VanillaName);
-                    else if (this.Info.VanillaName.Contains("experimental"))
-                        info = Lang.Text("Select.Instance.Description.ExperimentalSnapshot", this.Info.VanillaName);
-                    else if (this.Info.VanillaName == "pending")
-                        info = Lang.Text("Select.Instance.Description.ExperimentalSnapshot.Pending");
-                    else if (IsSnapshot())
-                        info = this.Info.Reliable ? Lang.Text("Select.Instance.Description.Snapshot", this.Info.VanillaName.Replace("-snapshot", "")) : Lang.Text("Select.Instance.Description.Snapshot.Unknown");
+                    var vanillaName = Info.VanillaName ?? string.Empty;
+                    if (vanillaName.ContainsF("pre", true))
+                        info = Lang.Text(
+                            "Select.Instance.Description.PreRelease",
+                            vanillaName);
+                    else if (vanillaName.ContainsF("rc", true))
+                        info = Lang.Text(
+                            "Select.Instance.Description.ReleaseCandidate",
+                            vanillaName);
+                    else if (vanillaName.Contains("experimental"))
+                        info = Lang.Text(
+                            "Select.Instance.Description.ExperimentalSnapshot",
+                            vanillaName);
+                    else if (vanillaName == "pending")
+                        info = Lang.Text(
+                            "Select.Instance.Description.ExperimentalSnapshot.Pending");
+                    else if (state == McInstanceState.Snapshot || IsSnapshot())
+                        info = Info.Reliable
+                            ? Lang.Text(
+                                "Select.Instance.Description.Snapshot",
+                                vanillaName.Replace("-snapshot", ""))
+                            : Lang.Text("Select.Instance.Description.Snapshot.Unknown");
                     else
-                        info = this.Info.Reliable ? Lang.Text("Select.Instance.Description.Release", this.Info.VanillaName) : Lang.Text("Select.Instance.Description.Release.Unknown");
+                        info = Info.Reliable
+                            ? Lang.Text(
+                                "Select.Instance.Description.Release",
+                                vanillaName)
+                            : Lang.Text("Select.Instance.Description.Release.Unknown");
 
                     break;
                 }
@@ -1088,7 +1116,9 @@ public class McInstance
                 }
                 case McInstanceState.Fool:
                 {
-                    info = Lang.Text("Select.Instance.Description.AprilFools", this.Info.VanillaName);
+                    info = Lang.Text(
+                        "Select.Instance.Description.AprilFools",
+                        Info.VanillaName ?? string.Empty);
                     break;
                 }
                 case McInstanceState.Error:

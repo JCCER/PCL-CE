@@ -139,8 +139,9 @@ public static class ModNet
     {
         foreach (var task in ModLoader.loaderTaskbar.ToList())
         {
-            if (task.show && task.State == ModBase.LoadState.Loading &&
-                (!ignoreCustomDownload || !task.name.Contains("自定义下载")))
+            if (task is { show: true, State: ModBase.LoadState.Loading } &&
+                (!ignoreCustomDownload ||
+                 task.Identifier?.StartsWith("CustomDownload:", StringComparison.Ordinal) != true))
                 return true;
         }
         return false;

@@ -354,6 +354,11 @@ public static class ModDownloadLib
         return McDownloadStageIdPrefix + id;
     }
 
+    private static string DownloadIdentifier(string kind, string key)
+    {
+        return $"Download:{kind}:{key}";
+    }
+
     private const string McDownloadClientLibId = "VanillaLibrariesDownload";
 
     private const string McDownloadClientJsonId = "VanillaJsonDownload";
@@ -502,8 +507,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.MinecraftServerDownload", id) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("Server", id))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.ServerDownloading"), HintType.Error);
                 return;
@@ -575,7 +579,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Download.Stage.MinecraftServerDownload", id),
                         loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("Server", id)
+                };
             loader.Start(id);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -689,8 +696,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar)
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.OptiFineDownload", downloadInfo.DisplayName) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("OptiFine", downloadInfo.NameVersion))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -718,7 +724,11 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<string>(
                     Lang.Text("Minecraft.Download.Stage.OptiFineDownload", downloadInfo.DisplayName),
-                    McDownloadOptiFineLoader(downloadInfo)) { OnStateChanged = McInstallState };
+                    McDownloadOptiFineLoader(downloadInfo))
+                {
+                    OnStateChanged = McInstallState,
+                    Identifier = DownloadIdentifier("OptiFine", downloadInfo.NameVersion)
+                };
             loader.Start(versionFolder);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -747,8 +757,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.OptiFineDownload", downloadInfo.DisplayName) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("OptiFine", downloadInfo.NameVersion))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -758,7 +767,10 @@ public static class ModDownloadLib
                 new ModLoader.LoaderCombo<ModDownload.DlOptiFineListEntry>(
                         Lang.Text("Minecraft.Download.Stage.OptiFineDownload", downloadInfo.DisplayName),
                         McDownloadOptiFineSaveLoader(downloadInfo, target))
-                    { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("OptiFine", downloadInfo.NameVersion)
+                };
             loader.Start(downloadInfo);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -1385,7 +1397,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") != (Lang.Text("Minecraft.Download.Stage.LiteLoaderDownload", id) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("LiteLoader", id))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -1413,7 +1425,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Download.Stage.LiteLoaderDownload", id),
                         McDownloadLiteLoaderLoader(downloadInfo))
-                    { OnStateChanged = McInstallState };
+                {
+                    OnStateChanged = McInstallState,
+                    Identifier = DownloadIdentifier("LiteLoader", id)
+                };
             loader.Start(versionFolder);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -1443,7 +1458,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") != (Lang.Text("Minecraft.Download.Stage.LiteLoaderDownload", id) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("LiteLoader", id))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -1502,7 +1517,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<ModDownload.DlLiteLoaderListEntry>(
                         Lang.Text("Minecraft.Download.Stage.LiteLoaderInstallerDownload", id), loaders)
-                    { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("LiteLoader", id)
+                };
             loader.Start(downloadInfo);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -1632,7 +1650,7 @@ public static class ModDownloadLib
 
             if (entry.ReleaseTime is not null)
                 infoParts.Add(Lang.Text("Download.Version.ReleaseDate",
-                    Lang.Date(entry.ReleaseTime.Value, "d")));
+                    Lang.Date(entry.ReleaseTime.Value, "g")));
 
             return string.Join("  |  ", infoParts);
         });
@@ -1727,8 +1745,9 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.ForgelikeDownload", displayName) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier(
+                        "Forgelike",
+                        $"{info.forgeType}:{info.Inherit}:{info.VersionName}"))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -1773,7 +1792,12 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<ModDownload.DlForgelikeEntry>(
                         Lang.Text("Minecraft.Download.Stage.ForgelikeDownload", displayName), loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier(
+                        "Forgelike",
+                        $"{info.forgeType}:{info.Inherit}:{info.VersionName}")
+                };
             loader.Start(info);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -2585,7 +2609,7 @@ public static class ModDownloadLib
             if (entry.ReleaseTime is not null)
                 infoParts.Add(Lang.Text(
                     "Download.Version.ReleaseDate",
-                    Lang.Date(entry.ReleaseTime.Value, "d")));
+                    Lang.Date(entry.ReleaseTime.Value, "g")));
             if (ModBase.modeDebug)
                 infoParts.Add(Lang.Text("Download.Version.Forge.Type", entry.Category));
             return string.Join("  |  ", infoParts);
@@ -3006,8 +3030,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.FabricInstallerDownload", version) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("FabricInstaller", version))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -3026,7 +3049,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<JsonObject>(
                         Lang.Text("Minecraft.Download.Stage.FabricInstallerDownload", version), loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("FabricInstaller", version)
+                };
             loader.Start(downloadInfo);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -3132,8 +3158,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.LegacyFabricInstallerDownload", version) ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("LegacyFabricInstaller", version))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -3151,7 +3176,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<JsonObject>(
                         Lang.Text("Minecraft.Download.Stage.LegacyFabricInstallerDownload", version), loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("LegacyFabricInstaller", version)
+                };
             loader.Start(downloadInfo);
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -3381,8 +3409,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.LabyModInstallerDownload") ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("LabyMod", "Installer"))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -3400,7 +3427,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<JsonObject>(Lang.Text("Minecraft.Download.Stage.LabyModInstallerDownload"),
                         loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("LabyMod", "Installer")
+                };
             loader.Start();
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();
@@ -3429,8 +3459,7 @@ public static class ModDownloadLib
             // 重复任务检查
             foreach (var OngoingLoader in ModLoader.loaderTaskbar.ToList())
             {
-                if ((OngoingLoader.name ?? "") !=
-                    (Lang.Text("Minecraft.Download.Stage.LabyModInstallerDownload") ?? ""))
+                if (OngoingLoader.Identifier != DownloadIdentifier("LabyMod", "Installer"))
                     continue;
                 HintService.Hint(Lang.Text("Minecraft.Download.Error.InstanceDownloading"), HintType.Error);
                 return;
@@ -3448,7 +3477,10 @@ public static class ModDownloadLib
             var loader =
                 new ModLoader.LoaderCombo<JsonObject>(Lang.Text("Minecraft.Download.Stage.LabyModInstallerDownload"),
                         loaders)
-                { OnStateChanged = LoaderStateChangedHintOnly };
+                {
+                    OnStateChanged = LoaderStateChangedHintOnly,
+                    Identifier = DownloadIdentifier("LabyMod", "Installer")
+                };
             loader.Start();
             ModLoader.LoaderTaskbarAdd(loader);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();

@@ -153,7 +153,10 @@ public partial class PageToolsTest
                 loaderdownload = new LoaderDownloadUnc(Lang.Text("Tools.Test.CustomDownload.LoaderName", fileName),
                     new Tuple<string, string>(url, folder + fileName));
             var loaderCombo = new ModLoader.LoaderCombo<int>(Lang.Text("Tools.Test.CustomDownload.LoaderTitle", uuid), new[] { loaderdownload })
-                { OnStateChanged = a => DownloadState((ModLoader.LoaderCombo<int>)a) };
+            {
+                OnStateChanged = a => DownloadState((ModLoader.LoaderCombo<int>)a),
+                Identifier = "CustomDownload:" + uuid
+            };
             loaderCombo.Start();
             ModLoader.LoaderTaskbarAdd(loaderCombo);
             ModMain.frmMain.BtnExtraDownload.ShowRefresh();

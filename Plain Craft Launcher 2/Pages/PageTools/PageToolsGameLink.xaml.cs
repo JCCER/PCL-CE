@@ -782,12 +782,13 @@ public partial class PageToolsGameLink
             BtnNatTest.IsEnabled = false;
             LabNatType.TrySetLocalizedValue("Text", "Tools.GameLink.Nat.Testing");
             var status = await CliNetTest.GetNetStatusAsync();
-            var udpNatType = CliNetTest.GetNatTypeString(status.UdpNatType);
-            var tcpNatType = CliNetTest.GetNatTypeString(status.TcpNatType);
             ModBase.RunInUi(() => LocalizedText.TryBind(
                 LabNatType,
                 "Text",
-                () => Lang.Text("Tools.GameLink.Nat.Result", udpNatType, tcpNatType)));
+                () => Lang.Text(
+                    "Tools.GameLink.Nat.Result",
+                    CliNetTest.GetNatTypeString(status.UdpNatType),
+                    CliNetTest.GetNatTypeString(status.TcpNatType))));
         }
         catch (Exception ex)
         {

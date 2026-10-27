@@ -70,8 +70,7 @@ public partial class PageDownloadCompDetail
             if (card.Tag is string cardKey && !card.IsSwapped)
                 expandedKeys.Add(cardKey);
 
-        if (expandedKeys.Count != 0 &&
-            ModMain.frmMain.pageCurrent.additional is { } additional)
+        if (ModMain.frmMain.pageCurrent.additional is { } additional)
             ModMain.frmMain.pageCurrent.additional = additional with
             {
                 ExpandedTitles = expandedKeys
@@ -949,9 +948,12 @@ public partial class PageDownloadCompDetail
                         LabText =
                         {
                             Margin = new Thickness(-2, 0d, 10d, 0d)
-                        },
-                        Text = loader
+                        }
                     };
+                    if (loader == FilterAll)
+                        newButton.SetLocalizedValue(MyRadioButton.TextProperty, "Common.Option.All");
+                    else
+                        newButton.Text = loader;
                     newButton.Check += (sender, raiseByMouse) =>
                     {
                         _modLoaderFilter = (string)sender.Tag == FilterAll
@@ -1028,7 +1030,7 @@ public partial class PageDownloadCompDetail
         // 1. 预处理基础变量
         var targetVersionText = _targetLoader != ModComp.CompLoaderType.Any ? _targetLoader + " " : "";
         var targetCardName = !string.IsNullOrEmpty(_targetInstance) || _targetLoader != ModComp.CompLoaderType.Any
-            ? VersionGroupSelected + "\0" + targetVersionText + "\0" + (_targetInstance ?? "")
+            ? VersionGroupSelected + targetVersionText + "\0" + (_targetInstance ?? "")
             : "";
 
         // 使用 HashSet 提高查询性能 O(1)
@@ -1248,7 +1250,7 @@ public partial class PageDownloadCompDetail
 
     private const string VersionGroupOld = "\0group.old";
 
-    private const string VersionGroupSelected = "\0group.selected\0";
+    private const string VersionGroupSelected = "\0group.selected";
 
     internal static string GetVersionGroupTitleForLog(string groupKey)
     {
@@ -1280,9 +1282,11 @@ public partial class PageDownloadCompDetail
     {
         if (name is null)
             return VersionGroupOther;
-        name = ModComp.StripGameVersionPreview(name);
-        if (name.Length == 0)
+        name = ModComp.NormalizeGameVersion(name);
+        if (name.Length == 0 || name == ModComp.CompFile.UnknownGameVersion)
             return VersionGroupOther;
+        if (name == ModComp.CompFile.AncientGameVersion)
+            return foldOld ? VersionGroupOld : name;
         if (name.Contains('w'))
             return VersionGroupSnapshot;
         if (foldOld && McInstanceInfo.VersionToDrop(name, true) < 120)

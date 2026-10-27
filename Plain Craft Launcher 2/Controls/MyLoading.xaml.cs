@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using static PCL.MyLoading;
@@ -37,8 +38,8 @@ public partial class MyLoading
     public MyLoading()
     {
         InitializeComponent();
-        SetCurrentValue(TextProperty, Lang.Text("Application.Control.Loading.Default"));
-        SetCurrentValue(TextErrorProperty, Lang.Text("Application.Control.Loading.Failed"));
+        SetCurrentValue(TextProperty, string.Empty);
+        SetCurrentValue(TextErrorProperty, string.Empty);
         SetResourceReference(ForegroundProperty, "ColorBrush3");
         IsErrorChanged += (_, _) => RefreshText();
         Loaded += (_, _) => RefreshText();
@@ -48,7 +49,22 @@ public partial class MyLoading
         MouseLeftButtonUp += Button_MouseUp;
         MouseLeftButtonDown += Button_MouseDown;
         MouseLeave += Button_MouseLeave;
+        BindDefaultLocalizedText();
         MouseLeftButtonUp += Button_MouseLeave;
+    }
+
+    private void BindDefaultLocalizedText()
+    {
+        if (BindingOperations.GetBindingExpression(this, TextProperty) is null)
+            LocalizedText.TryBind(
+                this,
+                nameof(Text),
+                () => Lang.Text("Application.Control.Loading.Default"));
+        if (BindingOperations.GetBindingExpression(this, TextErrorProperty) is null)
+            LocalizedText.TryBind(
+                this,
+                nameof(TextError),
+                () => Lang.Text("Application.Control.Loading.Failed"));
     }
 
     #endregion

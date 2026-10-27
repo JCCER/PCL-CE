@@ -197,9 +197,10 @@ namespace PCL;
             {
                 if (!HasForgelike)
                     return 0;
-                if (string.IsNullOrEmpty(Forge) && string.IsNullOrEmpty(NeoForge))
+                var forgelikeVersion = !string.IsNullOrEmpty(Forge) ? Forge : NeoForge;
+                if (string.IsNullOrEmpty(forgelikeVersion))
                     return 0;
-                var segments = (HasForge ? Forge : NeoForge).RegexSearch(@"\d+");
+                var segments = forgelikeVersion.RegexSearch(@"\d+");
                 switch (segments.Count)
                 {
                     case var @case when @case > 4:

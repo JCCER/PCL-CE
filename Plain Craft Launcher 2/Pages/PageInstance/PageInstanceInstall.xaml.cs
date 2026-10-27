@@ -45,13 +45,6 @@ public partial class PageInstanceInstall
         ModBase.RunInUi(() =>
         {
             LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
-            if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray)
-            {
-                var savedOffset = PanBack.VerticalOffset;
-                LoadMinecraft_OnFinish(true);
-                Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
-            }
-
             ReloadSelected();
         });
     }
@@ -215,7 +208,9 @@ public partial class PageInstanceInstall
             case MyLoading.MyLoadingState.Error:
             {
                 var message = ((ModLoader.LoaderBase)loader.State).Error.Message;
-                return Lang.Text("Download.Install.State.GetFailed", message);
+                return message == Lang.Text("Download.Install.State.NoVersion")
+                    ? Lang.Text("Download.Install.State.NoVersion")
+                    : Lang.Text("Download.Install.State.GetFailed", message);
             }
             case MyLoading.MyLoadingState.Unloaded:
             {
@@ -1163,59 +1158,83 @@ public partial class PageInstanceInstall
         ClearSelected();
         BtnSelectStart.IsEnabled = true;
         var currentInstance = PageInstanceLeft.McInstance.Info;
-        _vanillaName = currentInstance.VanillaName;
+        var vanillaName = currentInstance.VanillaName ?? string.Empty;
+        _vanillaName = vanillaName;
         if (currentInstance.HasLiteLoader)
-            selectedLiteLoader = new ModDownload.DlLiteLoaderListEntry { Inherit = currentInstance.VanillaName };
-        if (currentInstance.HasOptiFine)
+            selectedLiteLoader = new ModDownload.DlLiteLoaderListEntry { Inherit = vanillaName };
+        if (currentInstance.HasOptiFine && !string.IsNullOrEmpty(currentInstance.OptiFine))
+        {
+            var optiFineVersion = currentInstance.OptiFine;
             selectedOptiFine = new ModDownload.DlOptiFineListEntry
             {
-                DisplayName = currentInstance.VanillaName + " " + currentInstance.OptiFine.Replace("_", " "),
-                IsPreview = currentInstance.OptiFine.ContainsF("pre"), Inherit = currentInstance.VanillaName,
-                NameVersion = currentInstance.VanillaName + "-OptiFine_HD_U_" + currentInstance.OptiFine
+                DisplayName = vanillaName + " " + optiFineVersion.Replace("_", " "),
+                IsPreview = optiFineVersion.ContainsF("pre"), Inherit = vanillaName,
+                NameVersion = vanillaName + "-OptiFine_HD_U_" + optiFineVersion
             };
+        }
+
         if (currentInstance.HasCleanroom)
         {
-            _selectedLoaderType = ModLoaderType.Cleanroom;
-            selectedAPIName = "Cleanroom";
-            selectedCleanroomVersion = currentInstance.Cleanroom;
-            selectedCleanroom = new ModDownload.DlCleanroomListEntry(selectedCleanroomVersion);
+            if (!string.IsNullOrEmpty(currentInstance.Cleanroom))
+            {
+                _selectedLoaderType = ModLoaderType.Cleanroom;
+                selectedAPIName = "Cleanroom";
+                selectedCleanroomVersion = currentInstance.Cleanroom;
+                selectedCleanroom = new ModDownload.DlCleanroomListEntry(selectedCleanroomVersion);
+            }
         }
         else if (currentInstance.HasForge)
         {
-            _selectedLoaderType = ModLoaderType.Forge;
-            selectedForge =
-                new ModDownload.DlForgeVersionEntry(currentInstance.Forge, null, currentInstance.VanillaName)
-                {
-                    Category = "installer", forgeType = ModDownload.DlForgelikeEntry.ForgelikeType.Forge,
-                    Inherit = currentInstance.VanillaName
-                };
+            if (!string.IsNullOrEmpty(currentInstance.Forge))
+            {
+                _selectedLoaderType = ModLoaderType.Forge;
+                selectedForge =
+                    new ModDownload.DlForgeVersionEntry(currentInstance.Forge, null, vanillaName)
+                    {
+                        Category = "installer",
+                        forgeType = ModDownload.DlForgelikeEntry.ForgelikeType.Forge,
+                        Inherit = vanillaName
+                    };
+            }
         }
         else if (currentInstance.HasLegacyFabric)
         {
-            _selectedLoaderType = ModLoaderType.LegacyFabric;
-            selectedLegacyFabric = currentInstance.LegacyFabric;
-            selectedLegacyFabricApi = (ModComp.CompFile)GetCurrentLegacyFabricApi();
+            if (!string.IsNullOrEmpty(currentInstance.LegacyFabric))
+            {
+                _selectedLoaderType = ModLoaderType.LegacyFabric;
+                selectedLegacyFabric = currentInstance.LegacyFabric;
+                selectedLegacyFabricApi = (ModComp.CompFile)GetCurrentLegacyFabricApi();
+            }
         }
         else if (currentInstance.HasFabric)
         {
-            _selectedLoaderType = ModLoaderType.Fabric;
-            selectedFabric = currentInstance.Fabric;
-            selectedFabricApi = (ModComp.CompFile)GetCurrentFabricApi();
+            if (!string.IsNullOrEmpty(currentInstance.Fabric))
+            {
+                _selectedLoaderType = ModLoaderType.Fabric;
+                selectedFabric = currentInstance.Fabric;
+                selectedFabricApi = (ModComp.CompFile)GetCurrentFabricApi();
+            }
         }
         else if (currentInstance.HasLabyMod)
         {
-            _selectedLoaderType = ModLoaderType.LabyMod;
-            selectedLabyModVersion = currentInstance.LabyMod;
+            if (!string.IsNullOrEmpty(currentInstance.LabyMod))
+            {
+                _selectedLoaderType = ModLoaderType.LabyMod;
+                selectedLabyModVersion = currentInstance.LabyMod;
+            }
         }
         else if (currentInstance.HasNeoForge)
         {
-            _selectedLoaderType = ModLoaderType.NeoForge;
-            selectedNeoForgeVersion = currentInstance.NeoForge;
-            selectedNeoForge = new ModDownload.DlNeoForgeListEntry(currentInstance.NeoForge)
+            if (!string.IsNullOrEmpty(currentInstance.NeoForge))
             {
-                VersionName = currentInstance.NeoForge, Inherit = currentInstance.VanillaName,
-                forgeType = ModDownload.DlForgelikeEntry.ForgelikeType.NeoForge
-            };
+                _selectedLoaderType = ModLoaderType.NeoForge;
+                selectedNeoForgeVersion = currentInstance.NeoForge;
+                selectedNeoForge = new ModDownload.DlNeoForgeListEntry(currentInstance.NeoForge)
+                {
+                    VersionName = currentInstance.NeoForge, Inherit = vanillaName,
+                    forgeType = ModDownload.DlForgelikeEntry.ForgelikeType.NeoForge
+                };
+            }
         }
 
         if (currentInstance.HasFabric && currentInstance.HasOptiFine)
@@ -1250,10 +1269,9 @@ public partial class PageInstanceInstall
         return resourceKey is null ? key : Lang.Text(resourceKey);
     }
 
-    private void LoadMinecraft_OnFinish(bool fromLanguageChange = false)
+    private void LoadMinecraft_OnFinish()
     {
-        if (!fromLanguageChange)
-            ExitSelectPage(); // 返回
+        ExitSelectPage(); // 返回
         do
         {
             try
@@ -1454,6 +1472,8 @@ public partial class PageInstanceInstall
                     var item = ModDownloadLib.McDownloadListItem(Version, (_, _) => { }, false);
                     MinecraftSelected(item, null);
                 }
+
+                mcVersionWaitingForSelect = null;
             }
             catch (Exception ex)
             {
@@ -2332,9 +2352,7 @@ public partial class PageInstanceInstall
     {
         try
         {
-            if (supportVersions.Contains(minecraftVersion)) return true;
-
-            return false;
+            return ModComp.ContainsGameVersion(supportVersions, minecraftVersion);
         }
         catch (Exception ex)
         {

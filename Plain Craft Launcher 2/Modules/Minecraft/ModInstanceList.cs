@@ -222,6 +222,7 @@ public static class ModInstanceList
                         instanceList.Add(instance);
                         var instanceCfg = States.Instance;
                         instance.CustomDesc = instanceCfg.CustomInfo[instance.PathInstance];
+                        var hasCachedInfo = false;
 
                         if (!instanceCfg.LogoPathConfig.IsDefault(instance.PathInstance))
                             instance.Logo = instanceCfg.LogoPath[instance.PathInstance];
@@ -262,24 +263,30 @@ public static class ModInstanceList
                                 !string.IsNullOrEmpty(instanceInfo.Cleanroom);
                             instanceInfo.HasOptiFine = !string.IsNullOrEmpty(instanceInfo.OptiFine);
                             instance.Info = instanceInfo;
+                            hasCachedInfo = true;
                         }
 
                         // 重新检查错误实例
                         if (instance.state == McInstanceState.Error)
                         {
-                            // 重新获取实例错误信息
-                            var oldRuntimeDesc = instance.RuntimeDesc;
+                            // 重新获取实例错误信息。
                             instance.state = McInstanceState.Original;
                             instance.Check();
-                            // 校验错误原因是否改变
-                            var customInfo = States.Instance.CustomInfo[instance.PathInstance];
-                            if (instance.state == McInstanceState.Original ||
-                                (string.IsNullOrEmpty(customInfo) &&
-                                 (oldRuntimeDesc ?? "") != (instance.RuntimeDesc ?? "")))
+                            if (instance.state == McInstanceState.Original)
                             {
-                                ModBase.Log("[Minecraft] 实例 " + instance.Name + " 的错误状态已变更，新的状态为：" + instance.Desc);
+                                ModBase.Log($"[Minecraft] 实例 {instance.Name} 的错误状态已解除，重新加载缓存");
                                 return null;
                             }
+                        }
+                        else
+                        {
+                            if (!hasCachedInfo)
+                            {
+                                ModBase.Log($"[Minecraft] 实例 {instance.Name} 缺少缓存信息，重新加载");
+                                return null;
+                            }
+
+                            instance.MarkDescriptionLoaded();
                         }
 
                         // 校验未加载的实例

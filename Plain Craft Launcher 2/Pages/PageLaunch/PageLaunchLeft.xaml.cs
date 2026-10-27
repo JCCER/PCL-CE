@@ -654,10 +654,12 @@ public partial class PageLaunchLeft
         ModLaunch.mcLaunchWatcher = null;
 
         var shouldShowHint = Config.Preference.ShowLaunchingHint;
-        if (shouldShowHint)
-            LabLaunchingHint.Text = PageLaunchRight.GetRandomHint(true, true);
-        else
-            LabLaunchingHint.Text = "";
+        LocalizedText.TryBind(
+            LabLaunchingHint,
+            "Text",
+            () => shouldShowHint
+                ? PageLaunchRight.GetRandomHint(true, true)
+                : "");
 
         // 初始化其他页面
         PanInput.IsHitTestVisible = false;

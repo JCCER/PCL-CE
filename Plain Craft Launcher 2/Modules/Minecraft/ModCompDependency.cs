@@ -73,7 +73,7 @@ public static class ModCompDependency
             var source = localFile.Comp is null ? null : GetSource(localFile.Comp.FromCurseForge);
             var gameVersions = localFile.compFile?.GameVersions?
                                    .Where(static version => !string.IsNullOrWhiteSpace(version))
-                                   .Select(ModComp.StripGameVersionPreview)
+                                   .Select(ModComp.NormalizeGameVersion)
                                    .Where(static version => !string.IsNullOrWhiteSpace(version))
                                    .ToList()
                                ?? [];
@@ -150,7 +150,7 @@ public static class ModCompDependency
                 Version = compFile.Version,
                 GameVersions = compFile.GameVersions?
                                    .Where(static version => !string.IsNullOrWhiteSpace(version))
-                                   .Select(ModComp.StripGameVersionPreview)
+                                   .Select(ModComp.NormalizeGameVersion)
                                    .Where(static version => !string.IsNullOrWhiteSpace(version))
                                    .ToList()
                                ?? [],

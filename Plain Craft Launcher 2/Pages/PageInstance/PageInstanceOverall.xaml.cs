@@ -646,18 +646,25 @@ public partial class PageInstanceOverall
 
             // 重复任务检查
             var taskName = PageInstanceLeft.McInstance.Name + " " + Lang.Text("Instance.Overall.Repair.TaskName");
+            var taskIdentifier = "Repair:" + PageInstanceLeft.McInstance.Name;
             foreach (var OngoingLoader in ModLoader.loaderTaskbar)
             {
-                if ((OngoingLoader.name ?? "") != (taskName ?? ""))
+                if (OngoingLoader.Identifier != taskIdentifier)
                     continue;
                 HintService.Hint(Lang.Text("Instance.Overall.Repair.Processing"), HintType.Error);
                 return;
             }
 
             // 启动
-            var loader = new ModLoader.LoaderCombo<string>(taskName,
-                ModDownload.DlClientFix(PageInstanceLeft.McInstance, true,
-                    ModDownload.AssetsIndexExistsBehaviour.AlwaysDownload));
+            var loader = new ModLoader.LoaderCombo<string>(
+                taskName,
+                ModDownload.DlClientFix(
+                    PageInstanceLeft.McInstance,
+                    true,
+                    ModDownload.AssetsIndexExistsBehaviour.AlwaysDownload))
+            {
+                Identifier = taskIdentifier
+            };
             loader.OnStateChanged = _ =>
             {
                 switch (loader.State)

@@ -138,7 +138,9 @@ public partial class PageDownloadInstall
             case MyLoading.MyLoadingState.Error:
             {
                 var message = ((ModLoader.LoaderBase)loader.State).Error.Message;
-                return Lang.Text("Download.Install.State.GetFailed", message);
+                return message == Lang.Text("Download.Install.State.NoVersion")
+                    ? Lang.Text("Download.Install.State.NoVersion")
+                    : Lang.Text("Download.Install.State.GetFailed", message);
             }
             case MyLoading.MyLoadingState.Unloaded:
             {
@@ -1018,6 +1020,8 @@ public partial class PageDownloadInstall
                 MinecraftSelected(item, null);
                 break;
             }
+
+            mcVersionWaitingForSelect = null;
         }
         catch (Exception ex)
         {
@@ -1064,13 +1068,6 @@ public partial class PageDownloadInstall
     private void _OnLanguageChanged() => ModBase.RunInUi(() =>
     {
         LoadMinecraft.TrySetLocalizedValue("Text", "Download.Version.LoadingList");
-        if (ModDownload.dlClientListLoader.output.Value?["versions"] is JsonArray versions)
-        {
-            var savedOffset = PanBack.VerticalOffset;
-            _RebuildVersionCards(versions);
-            Dispatcher.BeginInvoke(new Action(() => PanBack.ScrollToVerticalOffset(savedOffset)));
-        }
-
         ReloadSelected();
     });
 
@@ -2004,9 +2001,7 @@ public partial class PageDownloadInstall
     {
         try
         {
-            if (supportVersions.Contains(minecraftVersion)) return true;
-
-            return false;
+            return ModComp.ContainsGameVersion(supportVersions, minecraftVersion);
         }
         catch (Exception ex)
         {
