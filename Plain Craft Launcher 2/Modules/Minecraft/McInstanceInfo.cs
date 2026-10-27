@@ -152,6 +152,10 @@ namespace PCL;
             {
                 if (string.IsNullOrEmpty(OptiFine))
                     return 0;
+                // 合法 OptiFine 版本形如 C8、C9_pre10、G5；
+                // 旧版本缓存可能保存本地化的「未知版本」文本，不能把首字符当作版本字母参与排序。
+                if (OptiFine.Length < 2 || !char.IsAsciiLetter(OptiFine[0]) || !char.IsAsciiDigit(OptiFine[1]))
+                    return 0;
                 // 字母编号，如 G2 中的 G（7）
                 var result = char.ToUpperInvariant(OptiFine.First()) - 'A' + 1;
                 // 末尾数字，如 C5 beta4 中的 5
