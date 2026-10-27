@@ -69,7 +69,7 @@ public partial class PageInstanceOverall
     /// </summary>
     private void Reload()
     {
-        ModAnimation.AniControlEnabled += 1;
+        ModAnimation.AniBeginControl();
 
         var instance = PageInstanceLeft.McInstance;
         // 刷新设置项目
@@ -98,7 +98,7 @@ public partial class PageInstanceOverall
                     break;
                 }
 
-        ModAnimation.AniControlEnabled -= 1;
+        ModAnimation.AniEndControl();
     }
 
     private void GetInstanceInfo()
@@ -230,7 +230,7 @@ public partial class PageInstanceOverall
     // 实例分类
     private void ComboDisplayType_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!(isLoad && ModAnimation.AniControlEnabled == 0))
+        if (!(isLoad && !ModAnimation.AniExitsAnyControl()))
             return;
         if (ComboDisplayType.SelectedIndex != 1)
         {
@@ -425,7 +425,7 @@ public partial class PageInstanceOverall
     // 实例图标
     private void ComboDisplayLogo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!(isLoad && ModAnimation.AniControlEnabled == 0))
+        if (!(isLoad && !ModAnimation.AniExitsAnyControl()))
             return;
         // 选择 自定义 时修改图片
         try
@@ -575,6 +575,7 @@ public partial class PageInstanceOverall
     // 补全文件
     private void BtnManageCheck_Click(object sender, MouseButtonEventArgs e)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-repair")) return;
         try
         {
             // 忽略文件检查提示
@@ -641,6 +642,7 @@ public partial class PageInstanceOverall
     // 重置
     private void BtnManageRestore_Click(object sender, MouseButtonEventArgs e)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-reset")) return;
         try
         {
             var currentVersion = PageInstanceLeft.McInstance.Info;

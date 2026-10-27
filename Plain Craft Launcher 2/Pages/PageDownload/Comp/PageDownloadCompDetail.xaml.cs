@@ -28,7 +28,7 @@ public partial class PageDownloadCompDetail
 
     private void Init()
     {
-        ModAnimation.AniControlEnabled += 1;
+        ModAnimation.AniBeginControl();
         _project = ModMain.frmMain.pageCurrent.additional.Value.CompProject;
         PanBack.ScrollToHome();
         // 重启加载器
@@ -56,12 +56,13 @@ public partial class PageDownloadCompDetail
             : Visibility.Collapsed;
         RefreshFavoriteButton();
 
-        ModAnimation.AniControlEnabled -= 1;
+        ModAnimation.AniEndControl();
     }
 
     // 整合包安装
     public void Install_Click(MyListItem sender, EventArgs e)
     {
+        if (!RestrictedFeaturePolicy.Check("online-modpack-install")) return;
         try
         {
             // 获取基本信息
@@ -217,7 +218,7 @@ public partial class PageDownloadCompDetail
                 }
             }
 
-            var target = SystemDialogs.SelectSaveFile(Lang.Text("Download.Comp.Detail.SelectWorldInstallLocation"), file.FileName, Lang.Text("Download.Comp.Detail.WorldFile.Filter"),
+            var target = SystemDialogs.SelectSaveFile(Lang.Text("Download.Comp.Detail.SelectWorldInstallLocation"), file.FileName ?? "", Lang.Text("Download.Comp.Detail.WorldFile.Filter"),
                 defaultFolder);
             if (string.IsNullOrEmpty(target))
                 return;
@@ -387,8 +388,9 @@ public partial class PageDownloadCompDetail
                     var target = SystemDialogs.SelectSaveFile(Lang.Text("Download.Comp.Detail.SelectSaveLocation"),
                         fileName, Lang.Text("Download.Comp.Detail.ResourceFile.Filter", desc) + "|" +
                                   (file.Type == ModComp.CompType.Mod
-                                      ? file.FileName.EndsWith(".litemod") ? "*.litemod" : "*.jar"
-                                      : file.FileName.EndsWith(".mrpack")
+                                      ? file.FileName?.EndsWith(".litemod") == true ? "*.litemod" : "*.jar"
+                                      : file.FileName?.EndsWith(".mrpack") == true
+                                        || (string.IsNullOrWhiteSpace(file.FileName) && file.Type == ModComp.CompType.ModPack && !file.FromCurseForge)
                                           ? "*.mrpack"
                                           : "*.zip"),
                         defaultFolder);

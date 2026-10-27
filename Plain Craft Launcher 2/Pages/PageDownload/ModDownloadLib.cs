@@ -68,6 +68,7 @@ public static class ModDownloadLib
     public static ModLoader.LoaderCombo<string> McDownloadClient(NetPreDownloadBehaviour behaviour, string id,
         string jsonUrl = null)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-client-download")) return null;
         try
         {
             var versionFolder = Path.Combine(ModFolder.mcFolderSelected, "versions", id);
@@ -134,6 +135,7 @@ public static class ModDownloadLib
     /// <param name="jsonUrl">Json 文件的 Mojang 官方地址。</param>
     public static void McDownloadClientCore(string id, string jsonUrl, NetPreDownloadBehaviour behaviour)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-client-save")) return;
         try
         {
             var versionFolder = SystemDialogs.SelectFolder();
@@ -530,6 +532,7 @@ public static class ModDownloadLib
 
     public static void McDownloadMenuSave(object sender, RoutedEventArgs e)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-client-save")) return;
         var element = (FrameworkElement)sender;
         MyListItem version;
         if (element is MyListItem s1) version = s1;
@@ -884,8 +887,10 @@ public static class ModDownloadLib
         var versionFolder = Path.Combine(mcFolder, "versions", id);
         var isNewVersion = downloadInfo.Inherit.Contains("w") || McVersionComparer.CompareVersionGe(downloadInfo.Inherit, "1.14");
         var target = isNewVersion
-            ? $"{ModMain.RequestTaskTempFolder()}OptiFine.jar"
-            : $@"{mcFolder}libraries\optifine\OptiFine\{downloadInfo.NameFile.Replace("OptiFine_", "").Replace(".jar", "").Replace("preview_", "")}\{downloadInfo.NameFile.Replace("OptiFine_", "OptiFine-").Replace("preview_", "")}";
+            ? Path.Combine(ModMain.RequestTaskTempFolder(), "OptiFine.jar")
+            : Path.Combine(mcFolder, "libraries", "optifine", "OptiFine",
+                downloadInfo.NameFile.Replace("OptiFine_", "").Replace(".jar", "").Replace("preview_", ""),
+                downloadInfo.NameFile.Replace("OptiFine_", "OptiFine-").Replace("preview_", ""));
         var loaders = new List<ModLoader.LoaderBase>();
         var javaVersion = McVersionComparer.CompareVersionGe(downloadInfo.Inherit, "26.1.2")
             ? new Version(21, 0, 0, 0)
@@ -977,11 +982,11 @@ public static class ModDownloadLib
                 var clientName = ModBase.GetFolderNameFromPath(clientFolder);
                 Directory.CreateDirectory(Path.Combine(mcFolder, "versions", downloadInfo.Inherit));
                 if (!File.Exists(Path.Combine(mcFolder, "versions", downloadInfo.Inherit, downloadInfo.Inherit + ".json")))
-                    ModBase.CopyFile($"{clientFolder}{clientName}.json",
-                        $@"{mcFolder}versions\{downloadInfo.Inherit}\{downloadInfo.Inherit}.json");
+                    ModBase.CopyFile(Path.Combine(clientFolder, clientName + ".json"),
+                        Path.Combine(mcFolder, "versions", downloadInfo.Inherit, downloadInfo.Inherit + ".json"));
                 if (!File.Exists(Path.Combine(mcFolder, "versions", downloadInfo.Inherit, downloadInfo.Inherit + ".jar")))
-                    ModBase.CopyFile($"{clientFolder}{clientName}.jar",
-                        $@"{mcFolder}versions\{downloadInfo.Inherit}\{downloadInfo.Inherit}.jar");
+                    ModBase.CopyFile(Path.Combine(clientFolder, clientName + ".jar"),
+                        Path.Combine(mcFolder, "versions", downloadInfo.Inherit, downloadInfo.Inherit + ".jar"));
             }
         })
         {
@@ -1980,8 +1985,8 @@ public static class ModDownloadLib
 
         string loaderName = ModBase.GetStringFromEnum(forgeType);
         var isCustomFolder = (mcFolder ?? "") != (ModFolder.mcFolderSelected ?? "");
-        var installerAddress = ModMain.RequestTaskTempFolder() + "forge_installer.jar";
-        var versionFolder = $@"{mcFolder}versions\{targetVersion}\";
+        var installerAddress = Path.Combine(ModMain.RequestTaskTempFolder(), "forge_installer.jar");
+        var versionFolder = Path.Combine(mcFolder, "versions", targetVersion) + @"\";
         var displayName = $"{loaderName} {inherit} - {loaderVersion}";
         var loaders = new List<ModLoader.LoaderBase>();
         var libVersionFolder = $@"{ModFolder.mcFolderSelected}versions\{targetVersion}\"; // 作为 Lib 文件目标的实例文件夹
@@ -2230,7 +2235,7 @@ public static class ModDownloadLib
                         // 记录当前文件夹列表（在新建目标文件夹之前）
                         ModBase.Log("[Download] 开始进行 Forgelike 安装：" + installerAddress);
                         // 解压并获取信息
-                        var oldList = new DirectoryInfo(mcFolder + "versions/")
+                        var oldList = new DirectoryInfo(Path.Combine(mcFolder, "versions"))
                             .EnumerateDirectories().Select(i => i.FullName).ToList();
 
 
@@ -2269,7 +2274,7 @@ public static class ModDownloadLib
                             // 拷贝新增的实例 Json
                         }
 
-                        var deltaList = new DirectoryInfo(mcFolder + "versions/").EnumerateDirectories()
+                        var deltaList = new DirectoryInfo(Path.Combine(mcFolder, "versions")).EnumerateDirectories()
                             .SkipWhile(i => oldList.Contains(i.FullName)).ToList();
 
                         if (deltaList.Count > 1)
@@ -3734,6 +3739,7 @@ public static class ModDownloadLib
     /// </summary>
     public static bool McInstall(McInstallRequest request, string type = mcInstallDefaultType)
     {
+        if (!RestrictedFeaturePolicy.Check("minecraft-install")) return false;
         try
         {
             var subLoaders = McInstallLoader(request, ignoreDump: type != mcInstallDefaultType);
@@ -3790,6 +3796,7 @@ public static class ModDownloadLib
     public static List<ModLoader.LoaderBase> McInstallLoader(McInstallRequest request, bool dontFixLibraries = false,
         bool ignoreDump = false)
     {
+        RestrictedFeaturePolicy.ThrowIfRestricted("minecraft-install");
         // 获取缓存目录（安装 Mod 加载器的文件夹不能包含空格）
         var tempMcFolder = ModMain.RequestTaskTempFolder(request.optiFineEntry is not null ||
                                                          request.forgeEntry is not null ||
