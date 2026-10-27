@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PCL.Core.App.Localization;
 
@@ -24,8 +25,16 @@ public static class McVersionComparer
     /// </summary>
     public static int CompareVersion(string? left, string? right)
     {
-        var leftUnknown = string.IsNullOrEmpty(left);
-        var rightUnknown = string.IsNullOrEmpty(right);
+        var leftUnknown = string.IsNullOrEmpty(left) ||
+                          string.Equals(
+                              left,
+                              McInstanceInfo.UnknownVanillaName,
+                              StringComparison.OrdinalIgnoreCase);
+        var rightUnknown = string.IsNullOrEmpty(right) ||
+                           string.Equals(
+                               right,
+                               McInstanceInfo.UnknownVanillaName,
+                               StringComparison.OrdinalIgnoreCase);
         if (leftUnknown || rightUnknown)
         {
             if (leftUnknown && rightUnknown) return 0;
