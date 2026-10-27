@@ -337,13 +337,22 @@ public static class ModLaunch
         try
         {
             // 构造主加载器
+            var skipClientDownloads = RestrictedFeaturePolicy.IsRestricted;
+            if (skipClientDownloads && !ModDownload.McClientFilesAvailableLocally(ModInstanceList.McMcInstanceSelected))
+            {
+                RestrictedFeaturePolicy.Check("minecraft-launch-missing-files");
+                throw new ModBase.CancelledException();
+            }
+
             var loaders = new List<ModLoader.LoaderBase>
             {
                 new ModLoader.LoaderTask<int, int>(Lang.Text("Minecraft.Launch.Stage.GetJava"), McLaunchJava) { ProgressWeight = 4d, block = false },
                 mcLoginLoader,
                 new ModLoader.LoaderCombo<string>(Lang.Text("Minecraft.Launch.Stage.CompleteFiles"),
-                        ModDownload.DlClientFix(ModInstanceList.McMcInstanceSelected, false,
-                            ModDownload.AssetsIndexExistsBehaviour.DownloadInBackground))
+                        skipClientDownloads
+                            ? new List<ModLoader.LoaderBase>()
+                            : ModDownload.DlClientFix(ModInstanceList.McMcInstanceSelected, false,
+                                ModDownload.AssetsIndexExistsBehaviour.DownloadInBackground))
                     { ProgressWeight = 15d, show = false },
                 new ModLoader.LoaderTask<string, List<ModLibrary.McLibToken>>(Lang.Text("Minecraft.Launch.Stage.GetArguments"), McLaunchArgumentMain)
                     { ProgressWeight = 2d },
@@ -2693,9 +2702,9 @@ public static class ModLaunch
             if (ModMain.frmLogRight is null)
                 ModBase.RunInUiWait(() =>
                 {
-                    ModAnimation.AniControlEnabled += 1;
+                    ModAnimation.AniBeginControl();
                     ModMain.frmLogRight = new PageLogRight();
-                    ModAnimation.AniControlEnabled -= 1;
+                    ModAnimation.AniEndControl();
                 });
             ModMain.frmLogLeft.Add(watcher);
             McLaunchLog("已显示游戏实时日志");
