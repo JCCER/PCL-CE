@@ -218,7 +218,7 @@ public static class ModComp
 
     /// <summary>
     ///     将原始游戏版本标识转换为 <see cref="CompFile.GameVersions" /> 中的语言中立形式。<br/>
-    ///     预发布版本会追加 <see cref="CompFile.PreviewVersionSuffix" />，
+    ///     预发布版本的完整标识（例如 <c>1.21-pre2</c>）会被保留，以便进行精确的兼容性判断；
     ///     远古版本（如 <c>b1.x</c>）会统一替换为 <see cref="CompFile.AncientGameVersion" />。
     ///     对已经是语言中立形式的值重复调用不会改变结果。
     /// </summary>
@@ -235,10 +235,7 @@ public static class ModComp
             return CompFile.UnknownGameVersion;
         if (version.StartsWith("b1.", StringComparison.OrdinalIgnoreCase))
             return CompFile.AncientGameVersion;
-        var dashIndex = version.IndexOf('-');
-        return dashIndex < 0
-            ? version
-            : version[..dashIndex] + CompFile.PreviewVersionSuffix;
+        return version;
     }
 
     /// <summary>
@@ -253,10 +250,10 @@ public static class ModComp
             return Lang.Text("Download.Comp.Detail.CompItem.UnknownVersion");
         if (version == CompFile.AncientGameVersion)
             return Lang.Text("Download.Comp.Detail.CompItem.AncientVersion");
-        if (version.EndsWith(CompFile.PreviewVersionSuffix, StringComparison.Ordinal))
-            return version[..^CompFile.PreviewVersionSuffix.Length] +
-                   Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix");
-        return version;
+        return version.Replace(
+            CompFile.PreviewVersionSuffix,
+            Lang.Text("Download.Comp.Detail.CompItem.PreviewSuffix"),
+            StringComparison.Ordinal);
     }
 
     /// <summary>
