@@ -201,6 +201,9 @@ namespace PCL;
                 if (string.IsNullOrEmpty(forgelikeVersion))
                     return 0;
                 var segments = forgelikeVersion.RegexSearch(@"\d+");
+                // 旧版本缓存可能保存了本地化的「未知版本」文本，不含数字，不能进入下面的索引逻辑
+                if (segments.Count == 0)
+                    return 0;
                 switch (segments.Count)
                 {
                     case var @case when @case > 4:

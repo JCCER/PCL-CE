@@ -1130,7 +1130,10 @@ public static class ModModpack
         }
 
         // 启动任务
-        var loader = new LoaderCombo<string>(loaderName, loaders);
+        var loader = new LoaderCombo<string>(loaderName, loaders)
+        {
+            Identifier = loaderIdentifier
+        };
         loader.OnStateChanged = ModDownloadLib.McInstallState;
 
         loader.Start(request.targetInstanceFolder);
