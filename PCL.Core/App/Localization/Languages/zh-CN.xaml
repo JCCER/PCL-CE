@@ -103,14 +103,6 @@
 
     <sys:String x:Key="Common.Validate.Blacklisted">输入内容不能包含 {0}！</sys:String>
     <sys:String x:Key="Common.Validate.Empty">输入内容不能为空！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.Duplicate">不可与现有文件重名！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">文件名不能以小数点结尾！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">文件名不能以空格结尾！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.InvalidChar">文件名不可包含 {0} 字符！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">父文件夹不存在：{0}</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.ReservedWord">文件名不可为 {0}！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">文件名不能包含这一特殊格式！</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">文件名不能以空格开头！</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.Duplicate">不可与现有文件夹重名！</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.EndsWithDot">文件夹名不能以小数点结尾！</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.EndsWithSpace">文件夹名不能以空格结尾！</sys:String>
@@ -128,6 +120,17 @@
     <sys:String x:Key="Common.Validate.Length.Max">长度最长为 {0} 个字符！</sys:String>
     <sys:String x:Key="Common.Validate.Length.Min">长度至少为 {0} 个字符！</sys:String>
     <sys:String x:Key="Common.Validate.RegexFailed">正则检查失败！</sys:String>
+
+    <!-- Common.Validate.FileName -->
+
+    <sys:String x:Key="Common.Validate.FileName.Duplicate">不可与现有文件重名！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">文件名不能以小数点结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">文件名不能以空格结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.InvalidChar">文件名不可包含 {0} 字符！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">父文件夹不存在：{0}</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ReservedWord">文件名不可为 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">文件名不能包含这一特殊格式！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">文件名不能以空格开头！</sys:String>
 
     <!-- Config -->
 
@@ -1574,15 +1577,15 @@
     <sys:String x:Key="Launch.Account.Auth.LoginFailed">第三方登录尝试失败</sys:String>
     <sys:String x:Key="Launch.Account.Auth.LoginFailed.WithDetail">第三方登录尝试失败。&#xA;&#xA;原始错误信息：&#xA;{0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Logout">退出登录</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">处理回调出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">回调参数解析出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">读取回调内容出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">获取用户信息失败，请尝试重新登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Password">密码</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Preset.LittleSkin">预设 - LittleSkin</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Register">注册账号</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">验证服务器: {0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.SelectServer">选择验证服务器</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">处理回调出错</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">回调参数解析出错</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">读取回调内容出错</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">获取用户信息失败，请尝试重新登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.OAuthLogin">开始 OAuth 登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UsePassword">»  使用密码登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UseOAuth">»  使用 OAuth 登录</sys:String>

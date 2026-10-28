@@ -103,14 +103,6 @@
 
     <sys:String x:Key="Common.Validate.Blacklisted">Input cannot contain {0}!</sys:String>
     <sys:String x:Key="Common.Validate.Empty">Input cannot be empty!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.Duplicate">A file with this name already exists!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">Name cannot end with a dot!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">Name cannot end with a space!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.InvalidChar">Name cannot contain the character {0}!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">Parent folder does not exist: {0}</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.ReservedWord">"{0}" is a reserved name!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">Name cannot use this special format!</sys:String>
-    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">Name cannot start with a space!</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.Duplicate">A folder with this name already exists!</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.EndsWithDot">Folder name cannot end with a dot!</sys:String>
     <sys:String x:Key="Common.Validate.FolderName.EndsWithSpace">Folder name cannot end with a space!</sys:String>
@@ -128,6 +120,17 @@
     <sys:String x:Key="Common.Validate.Length.Max">Length must be at most {0} characters!</sys:String>
     <sys:String x:Key="Common.Validate.Length.Min">Length must be at least {0} characters!</sys:String>
     <sys:String x:Key="Common.Validate.RegexFailed">Regular expression check failed!</sys:String>
+
+    <!-- Common.Validate.FileName -->
+
+    <sys:String x:Key="Common.Validate.FileName.Duplicate">A file with this name already exists!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">Name cannot end with a dot!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">Name cannot end with a space!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.InvalidChar">Name cannot contain the character {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">Parent folder does not exist: {0}</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ReservedWord">"{0}" is a reserved name!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">Name cannot use this special format!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">Name cannot start with a space!</sys:String>
 
     <!-- Config -->
 
@@ -1574,15 +1577,15 @@
     <sys:String x:Key="Launch.Account.Auth.LoginFailed">Third-party login failed.</sys:String>
     <sys:String x:Key="Launch.Account.Auth.LoginFailed.WithDetail">Third-party login failed.&#xA;&#xA;Original error:&#xA;{0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Logout">Log out</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">Failed to handle the callback</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">Failed to parse callback parameters</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">Failed to read callback content</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">Failed to fetch user information. Please try signing in again.</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Password">Password</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Preset.LittleSkin">Preset - LittleSkin</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Register">Register</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">Authentication server: {0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.SelectServer">Select authentication server</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">Failed to handle the callback</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">Failed to parse callback parameters</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">Failed to read callback content</sys:String>
-    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">Failed to fetch user information. Please try signing in again.</sys:String>
     <sys:String x:Key="Launch.Account.Auth.OAuthLogin">Start OAuth login</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UsePassword">»  Use password login</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UseOAuth">»  Use OAuth login</sys:String>
