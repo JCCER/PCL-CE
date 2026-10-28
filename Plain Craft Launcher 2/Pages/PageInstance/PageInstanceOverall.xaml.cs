@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -646,7 +646,7 @@ public partial class PageInstanceOverall
         try
         {
             var currentVersion = PageInstanceLeft.McInstance.Info;
-            if (McVersionComparer.CompareVersion(currentVersion.VanillaName, "1.5.2") == -1 && currentVersion.HasForge)
+            if (McVersionComparer.CompareVanilla(currentVersion.VanillaName, "1.5.2") == -1 && currentVersion.HasForge)
             {
                 HintService.Hint(Lang.Text("Instance.Overall.Reset.NotSupported"));
                 return;

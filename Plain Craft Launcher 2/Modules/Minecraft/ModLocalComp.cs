@@ -2865,7 +2865,7 @@ public static class ModLocalComp
                         if (indexVersion != mcInstance) continue; // MC 版本匹配
                         // latestFilesIndexes 按时间从新到老排序，只保留最新的 MC 版本
                         if (newestVersion is not null &&
-                            McVersionComparer.CompareVersion(newestVersion, indexVersion) > -1)
+                            McVersionComparer.CompareVanilla(newestVersion, indexVersion) > -1)
                             continue;
 
                         if (newestVersion != indexVersion)

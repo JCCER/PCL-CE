@@ -8,9 +8,7 @@ public static class McVersionComparer
     public const string UNKNOWN_VERSION_KEY = "UnknownVersion";
 
     /// <summary>
-    ///     比较两个版本名；等同 Left >= Right。
-    ///     无法比较两个预发布版的大小。
-    ///     支持的格式：未知版本, 1.13.2, 1.7.10-pre4, 1.8_pre, 1.14 Pre-Release 2, 1.14.4 C6
+    ///     比较两个版本名（用于非 MC 实例的比较）；等同 Left >= Right。
     /// </summary>
     public static bool CompareVersionGe(string left, string right)
     {
@@ -18,8 +16,7 @@ public static class McVersionComparer
     }
 
     /// <summary>
-    ///     比较两个版本名，若 Left 较新则返回 1，相同则返回 0，Right 较新则返回 -1；等同 Left - Right。
-    ///     原版 id 按版本索引行号比较。两边都不在索引里时，才用 token 比较加载器和库版本。
+    ///     比较两个版本名，若 Left 较新则返回 1，相同则返回 0，Right 较新则返回 -1；等同 Left - Right。（用于非 MC 实例的比较）
     /// </summary>
     public static int CompareVersion(string left, string right)
     {
@@ -33,11 +30,23 @@ public static class McVersionComparer
                 return -1;
         }
 
+        return _CompareTokens(left, right);
+    }
+
+    /// <summary> 比较两个 Minecraft 原版 id.</summary>
+    public static int CompareVanilla(string left, string right)
+    {
         var leftFound = VanillaVersionIndex.TryGetLine(left, out var leftLine);
         var rightFound = VanillaVersionIndex.TryGetLine(right, out var rightLine);
-        if (leftFound || rightFound)
-            return VanillaVersionIndex.CompareLines(leftFound ? leftLine : null, rightFound ? rightLine : null);
-        return _CompareTokens(left, right);
+        if (leftFound && rightFound)
+            return leftLine.CompareTo(rightLine);
+        return CompareVersion(left, right);
+    }
+
+    /// <summary>原版 id 的大于等于比较。</summary>
+    public static bool CompareVanillaGe(string left, string right)
+    {
+        return CompareVanilla(left, right) >= 0;
     }
 
     private static int _CompareTokens(string left, string right)
@@ -112,7 +121,7 @@ public static class McVersionComparer
     {
         public int Compare(string x, string y)
         {
-            return CompareVersion(x, y);
+            return CompareVanilla(x, y);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -72,7 +72,7 @@ public partial class PageDownloadLiteLoader
                 newCard.InstallMethod = stack =>
                 {
                     stack.Tag = ((List<ModDownload.DlLiteLoaderListEntry>)stack.Tag).Sort((a, b) =>
-                        McVersionComparer.CompareVersion(a.Inherit, b.Inherit) == 1);
+                        McVersionComparer.CompareVanilla(a.Inherit, b.Inherit) == 1);
                     foreach (var item in (IEnumerable)stack.Tag)
                         stack.Children.Add(ModDownloadLib.LiteLoaderDownloadListItem(
                             (ModDownload.DlLiteLoaderListEntry)item, ModDownloadLib.LiteLoaderSave_Click, true));

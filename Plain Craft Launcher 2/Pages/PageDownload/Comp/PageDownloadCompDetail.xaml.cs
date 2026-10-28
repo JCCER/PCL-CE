@@ -740,12 +740,12 @@ public partial class PageDownloadCompDetail
             if (isYSpecial)
                 return -1;
             // 比较版本号
-            var versionCodeSort = -McVersionComparer.CompareVersion(x.Replace(x.BeforeFirst(" ") + " ", ""),
+            var versionCodeSort = -McVersionComparer.CompareVanilla(x.Replace(x.BeforeFirst(" ") + " ", ""),
                 y.Replace(y.BeforeFirst(" ") + " ", ""));
             if (versionCodeSort != 0)
                 return versionCodeSort;
             // 比较全部
-            return -McVersionComparer.CompareVersion(x, y);
+            return -McVersionComparer.CompareVanilla(x, y);
         }
     }
 

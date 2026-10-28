@@ -463,7 +463,7 @@ public partial class PageInstanceInstall
         LabMinecraft.Text = _vanillaName;
         LabMinecraft.Foreground = ThemeManager.colorGray1;
         // OptiFine
-        if (!McVersionComparer.CompareVersionGe(_vanillaName, "1.7.2"))
+        if (!McVersionComparer.CompareVanillaGe(_vanillaName, "1.7.2"))
         {
             CardOptiFine.Visibility = Visibility.Collapsed;
         }
@@ -493,8 +493,8 @@ public partial class PageInstanceInstall
 
         // LiteLoader
         if (!McInstanceInfo.IsFormatFit(_vanillaName)
-            || !McVersionComparer.CompareVersionGe(_vanillaName, "1.5.2")
-            || !McVersionComparer.CompareVersionGe("1.12.2", _vanillaName))
+            || !McVersionComparer.CompareVanillaGe(_vanillaName, "1.5.2")
+            || !McVersionComparer.CompareVanillaGe("1.12.2", _vanillaName))
         {
             CardLiteLoader.Visibility = Visibility.Collapsed;
         }
@@ -524,7 +524,7 @@ public partial class PageInstanceInstall
 
         // Forge
         if (!McInstanceInfo.IsFormatFit(_vanillaName)
-            || !McVersionComparer.CompareVersionGe(_vanillaName, "1.1"))
+            || !McVersionComparer.CompareVanillaGe(_vanillaName, "1.1"))
         {
             CardForge.Visibility = Visibility.Collapsed;
         }
@@ -582,7 +582,7 @@ public partial class PageInstanceInstall
         }
 
         // NeoForge
-        if (!McVersionComparer.CompareVersionGe(_vanillaName, "1.20.1"))
+        if (!McVersionComparer.CompareVanillaGe(_vanillaName, "1.20.1"))
         {
             CardNeoForge.Visibility = Visibility.Collapsed;
         }
@@ -731,7 +731,7 @@ public partial class PageInstanceInstall
 
         // LabyMod
         if (!McInstanceInfo.IsFormatFit(_vanillaName)
-            || !McVersionComparer.CompareVersionGe(_vanillaName, "1.8.9"))
+            || !McVersionComparer.CompareVanillaGe(_vanillaName, "1.8.9"))
         {
             CardLabyMod.Visibility = Visibility.Collapsed;
         }
@@ -1278,10 +1278,10 @@ public partial class PageInstanceInstall
         if (LoadOptiFine.State.LoadingState == MyLoading.MyLoadingState.Error)
             return $"{Lang.Text("Download.Install.State.GetVersionListFailed")}{((ModLoader.LoaderBase)LoadOptiFine.State).Error.Message}";
         // 检查 Forge 1.13 - 1.14.3：全部不兼容
-        if (_selectedLoaderType == ModLoaderType.Forge && McVersionComparer.CompareVersion(_vanillaName, "1.13") >= 0 &&
-            McVersionComparer.CompareVersion("1.14.3", _vanillaName) >= 0) return Lang.Text("Download.Install.Compat.IncompatibleWithLoader", _selectedLoaderType);
+        if (_selectedLoaderType == ModLoaderType.Forge && McVersionComparer.CompareVanilla(_vanillaName, "1.13") >= 0 &&
+            McVersionComparer.CompareVanilla("1.14.3", _vanillaName) >= 0) return Lang.Text("Download.Install.Compat.IncompatibleWithLoader", _selectedLoaderType);
         // 检查 Fabric 1.20.5+: 全部不兼容
-        if (selectedFabric is not null && McVersionComparer.CompareVersion(_vanillaName, "1.20.4") > 0)
+        if (selectedFabric is not null && McVersionComparer.CompareVanilla(_vanillaName, "1.20.4") > 0)
             return Lang.Text("Download.Install.Compat.IncompatibleWithLoader", _selectedLoaderType);
         // 检查 Loader
         if (GetLoaderError(LoadOptiFine) is not null)
@@ -1492,7 +1492,7 @@ public partial class PageInstanceInstall
     /// </summary>
     private string LoadForgeGetError()
     {
-        if (McVersionComparer.CompareVersionGe("1.5.1", _vanillaName) && McVersionComparer.CompareVersionGe(_vanillaName, "1.1"))
+        if (McVersionComparer.CompareVanillaGe("1.5.1", _vanillaName) && McVersionComparer.CompareVanillaGe(_vanillaName, "1.1"))
             return Lang.Text("Download.Install.State.NoVersion");
                 
         if (_selectedLoaderType is not null && _selectedLoaderType != ModLoaderType.Forge)
@@ -1511,8 +1511,8 @@ public partial class PageInstanceInstall
                 continue; // 跳过无法自动安装的版本
             if (_selectedLoaderType is not null && _selectedLoaderType != ModLoaderType.Forge)
                 return Lang.Text("Download.Install.Compat.IncompatibleWithLoader", _selectedLoaderType);
-            if (selectedOptiFine is not null && McVersionComparer.CompareVersionGe(_vanillaName, "1.13") &&
-                McVersionComparer.CompareVersionGe("1.14.3", _vanillaName))
+            if (selectedOptiFine is not null && McVersionComparer.CompareVanillaGe(_vanillaName, "1.13") &&
+                McVersionComparer.CompareVanillaGe("1.14.3", _vanillaName))
                 return Lang.Text("Download.Install.Compat.IncompatibleWithOptiFine"); // 1.13 ~ 1.14.3 OptiFine 检查
             if (selectedOptiFine is not null && !(bool)IsOptiFineSuitForForge(selectedOptiFine, Version))
                 continue;
@@ -1777,7 +1777,7 @@ public partial class PageInstanceInstall
     private string LoadFabricGetError()
     {
         // 检查 OptiFine 1.20.5+：没有 OptiFabric 故全部不兼容
-        if (selectedOptiFine is not null && McVersionComparer.CompareVersionGe(_vanillaName, "1.20.5"))
+        if (selectedOptiFine is not null && McVersionComparer.CompareVanillaGe(_vanillaName, "1.20.5"))
             return Lang.Text("Download.Install.Compat.IncompatibleWithOptiFine");
         // 检查 Loader
         if (GetLoaderError(LoadFabric) is not null)

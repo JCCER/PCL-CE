@@ -615,7 +615,7 @@ public static class ModDownloadLib
         {
             var id = downloadInfo.NameVersion;
             var versionFolder = Path.Combine(ModFolder.mcFolderSelected, "versions", id);
-            var isNewVersion = McVersionComparer.CompareVersionGe(downloadInfo.Inherit, "1.14");
+            var isNewVersion = McVersionComparer.CompareVanillaGe(downloadInfo.Inherit, "1.14");
             var target = isNewVersion
                 ? Path.Combine(ModBase.pathTemp, "Cache", "Code", downloadInfo.NameVersion + "_" + ModBase.GetUuid())
                 : Path.Combine(ModFolder.mcFolderSelected, "libraries", "optifine", "OptiFine",
@@ -885,14 +885,14 @@ public static class ModDownloadLib
         var isCustomFolder = (mcFolder ?? "") != (ModFolder.mcFolderSelected ?? "");
         var id = downloadInfo.NameVersion;
         var versionFolder = Path.Combine(mcFolder, "versions", id);
-        var isNewVersion = downloadInfo.Inherit.Contains("w") || McVersionComparer.CompareVersionGe(downloadInfo.Inherit, "1.14");
+        var isNewVersion = downloadInfo.Inherit.Contains("w") || McVersionComparer.CompareVanillaGe(downloadInfo.Inherit, "1.14");
         var target = isNewVersion
             ? Path.Combine(ModMain.RequestTaskTempFolder(), "OptiFine.jar")
             : Path.Combine(mcFolder, "libraries", "optifine", "OptiFine",
                 downloadInfo.NameFile.Replace("OptiFine_", "").Replace(".jar", "").Replace("preview_", ""),
                 downloadInfo.NameFile.Replace("OptiFine_", "OptiFine-").Replace("preview_", ""));
         var loaders = new List<ModLoader.LoaderBase>();
-        var javaVersion = McVersionComparer.CompareVersionGe(downloadInfo.Inherit, "26.1.2")
+        var javaVersion = McVersionComparer.CompareVanillaGe(downloadInfo.Inherit, "26.1.2")
             ? new Version(21, 0, 0, 0)
             : new Version(1, 8, 0, 0);
 
