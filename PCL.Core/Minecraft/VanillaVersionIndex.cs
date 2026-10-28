@@ -204,6 +204,13 @@ public sealed class VanillaVersionIndex
                (category == McVersionCategory.Snapshot && canonical.Contains('.'));
     }
 
+    public static bool IsAfter(string? versionId, string thresholdId)
+    {
+        var index = Capture();
+        if (index is null || !index.MatchLine(versionId, out var line)) return false;
+        return line > index._Line(thresholdId);
+    }
+
     public static bool IsAtOrAfter(string? versionId, string thresholdId)
     {
         var index = Capture();
