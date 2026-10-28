@@ -854,18 +854,18 @@ public static class ModLaunch
                     ModBase.Log("[Launch] [Debug] MC 1.17+ (21w19a+) 要求至少 Java 16");
                 minVer = new Version(16, 0, 0, 0);
             }
-            else if (VanillaVersionIndex.IsAtOrAfter(vanillaName, "1.12"))
+            else if (VanillaVersionIndex.IsAtOrAfter(vanillaName, "17w13a"))
             {
-                // 1.12+：至少 Java 8
+                // 1.12+（17w13a+）：至少 Java 8
                 if (ModBase.modeDebug)
                     ModBase.Log("[Launch] [Debug] MC 1.12+ 要求至少 Java 8");
                 minVer = new Version(1, 8, 0, 0);
             }
-            else if (VanillaVersionIndex.IsAtMost152(vanillaName))
+            else if (VanillaVersionIndex.IsAtOrBefore(vanillaName, "1.5.2"))
             {
                 // 1.5.2-：最高 Java 8
                 if (ModBase.modeDebug)
-                    ModBase.Log("[Launch] [Debug] MC 1.5.2- 要求最高 Java 12");
+                    ModBase.Log("[Launch] [Debug] MC 1.5.2- 要求最高 Java 8");
                 maxVer = new Version(1, 8, 999, 999);
             }
         }

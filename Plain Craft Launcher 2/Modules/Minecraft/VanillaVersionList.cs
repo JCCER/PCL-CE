@@ -116,10 +116,8 @@ internal static class VanillaVersionList
         var map = new Dictionary<string, DateTime>(versions.Count, StringComparer.Ordinal);
         foreach (JsonObject entry in versions)
         {
-            var id = (string)entry["id"]!;
-            if (!JsonCompat.TryGetDateTime(entry["releaseTime"], out var time))
-                continue;
-            map[id] = time;
+            JsonCompat.TryGetDateTime(entry["releaseTime"], out var time);
+            map[(string)entry["id"]!] = time;
         }
 
         return map;

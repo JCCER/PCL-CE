@@ -36,8 +36,7 @@ public partial class PageDownloadClient
                 McVersionCategory.Release,
                 McVersionCategory.Snapshot,
                 McVersionCategory.BeforeRelease,
-                McVersionCategory.AprilFools,
-                McVersionCategory.Unknown
+                McVersionCategory.AprilFools
             };
 
             var dict = categoryOrder.ToDictionary(

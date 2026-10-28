@@ -193,14 +193,6 @@ public sealed class VanillaVersionIndex
         return familyLine < versionLine;
     }
 
-    public int EarliestReleaseLine(string family)
-    {
-        for (var i = 0; i < _releaseFamily.Length; i++)
-            if (_releaseFamily[i] == family)
-                return i;
-        throw new KeyNotFoundException(family);
-    }
-
     private int _Line(string id) => _lineById[id];
 
     public bool IsFormatFit(string? id)
@@ -233,21 +225,10 @@ public sealed class VanillaVersionIndex
         return line <= index._Line(thresholdId);
     }
 
-    /// <summary>在列表中且不新于 1.5.2。</summary>
-    public static bool IsAtMost152(string? versionId)
+    public static bool IsInRange(string? versionId, string fromInclusive, string untilExclusive)
     {
         var index = Capture();
         if (index is null || !index.MatchLine(versionId, out var line)) return false;
-        return line <= index._Line("1.5.2");
+        return line >= index._Line(fromInclusive) && line < index._Line(untilExclusive);
     }
-
-    public static bool IsLegacyFabricRange(string? versionId)
-    {
-        var index = Capture();
-        if (index is null || !index.MatchLine(versionId, out var line)) return false;
-        return line >= index.EarliestReleaseLine("1.3") && line < index._Line("1.14");
-    }
-
-    public static bool Is14To15(string? versionId) =>
-        IsAtOrAfter(versionId, "1.14") && IsBefore(versionId, "1.16");
 }

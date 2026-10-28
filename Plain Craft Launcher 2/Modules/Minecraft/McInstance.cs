@@ -639,7 +639,7 @@ public class McInstance
                 #region 确定实例分类
 
                 var vanillaCategory = _ClassifyVanilla();
-                if ((Info.VanillaName ?? "") == "Unknown" || vanillaCategory == McVersionCategory.Unknown)
+                if ((Info.VanillaName ?? "") == "Unknown")
                 {
                     state = McInstanceState.Error;
                 }

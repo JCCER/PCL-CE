@@ -11,8 +11,7 @@ public enum McVersionCategory
     Release,
     Snapshot,
     BeforeRelease,
-    AprilFools,
-    Unknown
+    AprilFools
 }
 
 public static class McVersionClassifier
@@ -28,26 +27,24 @@ public static class McVersionClassifier
             McVersionCategory.Release => Lang.Text("Download.Version.Type.Release"),
             McVersionCategory.Snapshot => Lang.Text("Download.Version.Type.Development"),
             McVersionCategory.BeforeRelease => Lang.Text("Download.Version.Type.BeforeRelease"),
-            McVersionCategory.AprilFools => Lang.Text("Download.Version.Type.AprilFools"),
-            McVersionCategory.Unknown => Lang.Text("Download.Version.Type.Unknown"),
-            _ => Lang.Text("Download.Version.Type.Unknown")
+            McVersionCategory.AprilFools => Lang.Text("Download.Version.Type.AprilFools")
         };
     }
 
-    public static McVersionCategory Classify(string? id, int? line, int? anchorLine, DateTime? releaseTime,
+    public static McVersionCategory Classify(string id, int? line, int? anchorLine, DateTime? releaseTime,
         string? versionType = null)
     {
-        if (string.IsNullOrEmpty(id)) return McVersionCategory.Unknown;
         if (_IsAprilFoolsSnapshot(releaseTime, versionType) || id.StartsWith("2point0_", StringComparison.Ordinal))
             return McVersionCategory.AprilFools;
 
-        var lower = id.ToLowerInvariant();
         if (line is int current && anchorLine is int anchor && current < anchor)
             return McVersionCategory.BeforeRelease;
-        if (lower.Contains("snapshot") || lower.Contains("rc") || lower.Contains("pre") || lower.Contains("combat") || _WeekSnapshot.IsMatch(lower) || lower.Contains("13w12~"))
+
+        var lower = id.ToLowerInvariant();
+        if (lower.Contains("snapshot") || lower.Contains("rc") || lower.Contains("pre") || lower.Contains("combat") ||
+            _WeekSnapshot.IsMatch(lower) || lower.Contains("13w12~"))
             return McVersionCategory.Snapshot;
-        if (lower.Contains('.')) return McVersionCategory.Release;
-        return McVersionCategory.Unknown;
+        return McVersionCategory.Release;
     }
 
     private static bool _IsAprilFoolsSnapshot(DateTime? releaseTime, string? versionType)
@@ -70,8 +67,7 @@ public static class McVersionClassifier
         int? line = null;
         if (index is not null && index.MatchLine(id, out var found))
             line = found;
-        var releaseTime = GetReleaseTime(version);
-        return Classify(id, line, index?.AnchorLine, releaseTime == DateTime.MinValue ? null : releaseTime, type);
+        return Classify(id, line, index?.AnchorLine, GetReleaseTime(version), type);
     }
 
     public static McVersionCategory ClassifyVersion(JsonObject version)

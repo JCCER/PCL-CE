@@ -602,7 +602,7 @@ public partial class PageDownloadInstall
         }
 
         // LegacyFabric
-        if (!VanillaVersionIndex.IsLegacyFabricRange(_vanillaName))
+        if (!VanillaVersionIndex.IsInRange(_vanillaName, "1.3", "1.14"))
         {
             CardLegacyFabric.Visibility = Visibility.Collapsed;
         }
@@ -734,7 +734,7 @@ public partial class PageDownloadInstall
         if ((selectedFabric is not null || selectedLegacyFabric is not null) && selectedOptiFine is not null &&
             selectedOptiFabric is null)
         {
-            if (VanillaVersionIndex.Is14To15(_vanillaName))
+            if (VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
             {
                 HintOptiFabric.Visibility = Visibility.Collapsed;
                 HintLegacyOptiFabric.Visibility = Visibility.Collapsed;
@@ -981,8 +981,7 @@ public partial class PageDownloadInstall
             McVersionCategory.Release,
             McVersionCategory.Snapshot,
             McVersionCategory.BeforeRelease,
-            McVersionCategory.AprilFools,
-            McVersionCategory.Unknown
+            McVersionCategory.AprilFools
         };
 
         var dict = categoryOrder.ToDictionary(
@@ -2085,7 +2084,7 @@ public partial class PageDownloadInstall
     /// </summary>
     private string LoadOptiFabricGetError()
     {
-        if (VanillaVersionIndex.Is14To15(_vanillaName))
+        if (VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
             return Lang.Text("Download.Install.Compat.OptiFabricOriginsRequired");
         // 检查 Loader
         if (GetLoaderError(LoadOptiFabric) is not null)
@@ -2157,7 +2156,7 @@ public partial class PageDownloadInstall
             }
 
             // 自动选择 OptiFabric
-            if (autoSelectedOptiFabric || VanillaVersionIndex.Is14To15(_vanillaName))
+            if (autoSelectedOptiFabric || VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
                 return; // 1.14~15 不自动选择
             autoSelectedOptiFabric = true;
             ModBase.Log($"[Download] 已自动选择 OptiFabric：{((MyListItem)PanOptiFabric.Children[0]).Title}");

@@ -670,7 +670,7 @@ public partial class PageInstanceInstall
         }
 
         // LegacyFabric
-        if (!VanillaVersionIndex.IsLegacyFabricRange(_vanillaName))
+        if (!VanillaVersionIndex.IsInRange(_vanillaName, "1.3", "1.14"))
         {
             CardLegacyFabric.Visibility = Visibility.Collapsed;
         }
@@ -802,7 +802,7 @@ public partial class PageInstanceInstall
         if ((selectedFabric is not null || selectedLegacyFabric is not null) && selectedOptiFine is not null &&
             selectedOptiFabric is null)
         {
-            if (VanillaVersionIndex.Is14To15(_vanillaName))
+            if (VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
             {
                 HintOptiFabric.Visibility = Visibility.Collapsed;
                 HintLegacyOptiFabric.Visibility = Visibility.Collapsed;
@@ -1152,16 +1152,6 @@ public partial class PageInstanceInstall
     #region 加载器
 
     // 结果数据化
-    private static string GetVersionTypeTitle(string key) => key switch
-    {
-        "正式版" => Lang.Text("Download.Version.Type.Release"),
-        "预览版" => Lang.Text("Download.Version.Type.Development"),
-        "远古版" => Lang.Text("Download.Version.Type.BeforeRelease"),
-        "愚人节版" => Lang.Text("Download.Version.Type.AprilFools"),
-        "未知" => Lang.Text("Download.Version.Type.Unknown"),
-        _ => key
-    };
-
     private void LoadMinecraft_OnFinish()
     {
         ExitSelectPage(); // 返回
@@ -1169,28 +1159,24 @@ public partial class PageInstanceInstall
         {
             try
             {
-                var names = new Dictionary<McVersionCategory, string>
+                var categoryOrder = new[]
                 {
-                    [McVersionCategory.Release] = "正式版",
-                    [McVersionCategory.Snapshot] = "预览版",
-                    [McVersionCategory.BeforeRelease] = "远古版",
-                    [McVersionCategory.AprilFools] = "愚人节版",
-                    [McVersionCategory.Unknown] = "未知"
+                    McVersionCategory.Release,
+                    McVersionCategory.Snapshot,
+                    McVersionCategory.BeforeRelease,
+                    McVersionCategory.AprilFools
                 };
-                var dict = names.Values.ToDictionary(name => name, _ => new List<JsonObject>());
+                var dict = categoryOrder.ToDictionary(category => category, _ => new List<JsonObject>());
                 var versions = (JsonArray)ModDownload.dlClientListLoader.output.Value["versions"];
                 foreach (JsonObject Version in versions)
-                {
-                    var category = McVersionClassifier.ClassifyVersion(Version);
-                    dict[names[category]].Add(Version);
-                }
+                    dict[McVersionClassifier.ClassifyVersion(Version)].Add(Version);
 
-                foreach (var Pair in dict.ToList())
-                    dict[Pair.Key] = Pair.Value.OrderByDescending(McVersionClassifier.ListedLine).ToList();
+                foreach (var category in categoryOrder)
+                    dict[category] = dict[category].OrderByDescending(McVersionClassifier.ListedLine).ToList();
                 PanMinecraft.Children.Clear();
                 var topestVersions = new List<JsonObject>();
-                var latestRelease = dict["正式版"].FirstOrDefault();
-                var latestSnapshot = dict["预览版"].FirstOrDefault();
+                var latestRelease = dict[McVersionCategory.Release].FirstOrDefault();
+                var latestSnapshot = dict[McVersionCategory.Snapshot].FirstOrDefault();
                 if (latestRelease is not null)
                 {
                     var release = (JsonObject)latestRelease.DeepClone();
@@ -1233,7 +1219,7 @@ public partial class PageInstanceInstall
                         continue;
                     // 增加卡片
                     var newCard = new MyCard
-                        { Title = GetVersionTypeTitle(Pair.Key) + " (" + Pair.Value.Count + ")", Margin = new Thickness(0d, 0d, 0d, 15d) };
+                        { Title = McVersionClassifier.GetCategoryDisplayName(Pair.Key) + " (" + Pair.Value.Count + ")", Margin = new Thickness(0d, 0d, 0d, 15d) };
                     var newStack = new StackPanel
                     {
                         Margin = new Thickness(20d, MyCard.SwapedHeight, 18d, 0d),
@@ -2284,7 +2270,7 @@ public partial class PageInstanceInstall
     /// </summary>
     private string LoadOptiFabricGetError()
     {
-        if (VanillaVersionIndex.Is14To15(_vanillaName))
+        if (VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
             return Lang.Text("Download.Install.Compat.OptiFabricOriginsRequired");
         // 检查 Loader
         if (GetLoaderError(LoadOptiFabric) is not null)
@@ -2356,7 +2342,7 @@ public partial class PageInstanceInstall
             }
 
             // 自动选择 OptiFabric
-            if (autoSelectedOptiFabric || VanillaVersionIndex.Is14To15(_vanillaName))
+            if (autoSelectedOptiFabric || VanillaVersionIndex.IsInRange(_vanillaName, "1.14", "1.16"))
                 return; // 1.14~15 不自动选择
             autoSelectedOptiFabric = true;
             ModBase.Log($"[Download] 已自动选择 OptiFabric：{((MyListItem)PanOptiFabric.Children[0]).Title}");
