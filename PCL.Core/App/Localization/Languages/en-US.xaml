@@ -99,6 +99,36 @@
     <sys:String x:Key="Common.Installation.OptiFine">OptiFine</sys:String>
     <sys:String x:Key="Common.Installation.Quilt">Quilt</sys:String>
 
+    <!-- Common.Validate -->
+
+    <sys:String x:Key="Common.Validate.Blacklisted">Input cannot contain {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.Empty">Input cannot be empty!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.Duplicate">A file with this name already exists!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">Name cannot end with a dot!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">Name cannot end with a space!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.InvalidChar">Name cannot contain the character {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">Parent folder does not exist: {0}</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ReservedWord">"{0}" is a reserved name!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">Name cannot use this special format!</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">Name cannot start with a space!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.Duplicate">A folder with this name already exists!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.EndsWithDot">Folder name cannot end with a dot!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.EndsWithSpace">Folder name cannot end with a space!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.InvalidChar">Folder name cannot contain the character {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.ReservedWord">"{0}" is a reserved folder name!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.SpecialFormat">Folder name cannot use this special format!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.StartsWithSpace">Folder name cannot start with a space!</sys:String>
+    <sys:String x:Key="Common.Validate.FolderPath.Malformed">The folder path contains an invalid segment!</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Invalid">Please enter an integer!</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Max">Cannot exceed {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Min">Cannot be less than {0}!</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Unreasonable">Please enter a reasonably sized number!</sys:String>
+    <sys:String x:Key="Common.Validate.InvalidUrl">The URL is invalid!</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Exact">Length must be exactly {0} characters!</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Max">Length must be at most {0} characters!</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Min">Length must be at least {0} characters!</sys:String>
+    <sys:String x:Key="Common.Validate.RegexFailed">Regular expression check failed!</sys:String>
+
     <!-- Config -->
 
     <sys:String x:Key="Config.Error.InvalidFormat.RecoveryMessage">Configuration initialization failed during the {0} stage.&#xA;&#xA;The configuration file at {1} contains invalid data and was backed up to {2}.&#xA;To help prevent the problem from happening again, PCL CE tried to restore a previous version when one was available. If you changed the configuration file manually, fix the problem and replace the current file.&#xA;&#xA;If you are not sure what happened, you can ignore this message for now. After restarting PCL CE, the affected settings may return to their defaults, but normal use should not be affected.</sys:String>
@@ -1549,6 +1579,10 @@
     <sys:String x:Key="Launch.Account.Auth.Register">Register</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">Authentication server: {0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.SelectServer">Select authentication server</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">Failed to handle the callback</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">Failed to parse callback parameters</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">Failed to read callback content</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">Failed to fetch user information. Please try signing in again.</sys:String>
     <sys:String x:Key="Launch.Account.Auth.OAuthLogin">Start OAuth login</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UsePassword">»  Use password login</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UseOAuth">»  Use OAuth login</sys:String>
@@ -3477,6 +3511,8 @@
     <sys:String x:Key="Tools.Test.Dependency.Checking">Checking environment...</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.Later">Later</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.MissingMessage">Required dependency "{0}" is missing.&#xA;&#xA;Click OK to open Microsoft Store.</sys:String>
+    <sys:String x:Key="Tools.Test.Dependency.Package.D3DMappingLayers">OpenGL compatibility pack</sys:String>
+    <sys:String x:Key="Tools.Test.Dependency.Package.WebpImageExtension">WebP component</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.Title">Dependency check</sys:String>
     <sys:String x:Key="Tools.Test.Error.OperationFailed">A test utility operation failed. See the details below.</sys:String>
     <sys:String x:Key="Tools.Test.LaunchCount.Message">PCL CE has launched games for you {0} times.</sys:String>

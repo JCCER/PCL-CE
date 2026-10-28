@@ -99,6 +99,36 @@
     <sys:String x:Key="Common.Installation.OptiFine">OptiFine</sys:String>
     <sys:String x:Key="Common.Installation.Quilt">Quilt</sys:String>
 
+    <!-- Common.Validate -->
+
+    <sys:String x:Key="Common.Validate.Blacklisted">输入内容不能包含 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.Empty">输入内容不能为空！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.Duplicate">不可与现有文件重名！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithDot">文件名不能以小数点结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.EndsWithSpace">文件名不能以空格结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.InvalidChar">文件名不可包含 {0} 字符！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ParentFolderMissing">父文件夹不存在：{0}</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.ReservedWord">文件名不可为 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.SpecialFormat">文件名不能包含这一特殊格式！</sys:String>
+    <sys:String x:Key="Common.Validate.FileName.StartsWithSpace">文件名不能以空格开头！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.Duplicate">不可与现有文件夹重名！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.EndsWithDot">文件夹名不能以小数点结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.EndsWithSpace">文件夹名不能以空格结尾！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.InvalidChar">文件夹名不可包含 {0} 字符！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.ReservedWord">文件夹名不可为 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.SpecialFormat">文件夹名不能包含这一特殊格式！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderName.StartsWithSpace">文件夹名不能以空格开头！</sys:String>
+    <sys:String x:Key="Common.Validate.FolderPath.Malformed">文件夹路径存在错误！</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Invalid">请输入一个整数！</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Max">不可超过 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Min">不可低于 {0}！</sys:String>
+    <sys:String x:Key="Common.Validate.Int.Unreasonable">请输入一个大小合理的数字！</sys:String>
+    <sys:String x:Key="Common.Validate.InvalidUrl">输入的网址无效！</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Exact">长度必须为 {0} 个字符！</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Max">长度最长为 {0} 个字符！</sys:String>
+    <sys:String x:Key="Common.Validate.Length.Min">长度至少为 {0} 个字符！</sys:String>
+    <sys:String x:Key="Common.Validate.RegexFailed">正则检查失败！</sys:String>
+
     <!-- Config -->
 
     <sys:String x:Key="Config.Error.InvalidFormat.RecoveryMessage">配置初始化失败，当前位于 {0} 阶段。&#xA;&#xA;配置文件 {1} 的内容出现问题，已备份到 {2}。&#xA;为尽可能防止重复故障，若存在上一版本，PCL CE 已尝试将配置恢复至上一版本。若曾手动更改过配置文件，请修复问题并替换当前的配置文件。&#xA;&#xA;如果你不知道发生了什么，可以先无视。重新打开启动器后，相关配置项可能会恢复为默认值，但通常不影响正常使用。</sys:String>
@@ -1549,6 +1579,10 @@
     <sys:String x:Key="Launch.Account.Auth.Register">注册账号</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">验证服务器: {0}</sys:String>
     <sys:String x:Key="Launch.Account.Auth.SelectServer">选择验证服务器</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackHandleFailed">处理回调出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackParseFailed">回调参数解析出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.CallbackReadFailed">读取回调内容出错</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.OAuth.ProfileFetchFailed">获取用户信息失败，请尝试重新登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.OAuthLogin">开始 OAuth 登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UsePassword">»  使用密码登录</sys:String>
     <sys:String x:Key="Launch.Account.Auth.UseOAuth">»  使用 OAuth 登录</sys:String>
@@ -3477,6 +3511,8 @@
     <sys:String x:Key="Tools.Test.Dependency.Checking">开始环境检查……</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.Later">稍后</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.MissingMessage">当前系统环境缺失软件运行所需依赖"{0}"&#xA;&#xA;点击确定打开微软应用商店安装</sys:String>
+    <sys:String x:Key="Tools.Test.Dependency.Package.D3DMappingLayers">OpenGL 兼容包</sys:String>
+    <sys:String x:Key="Tools.Test.Dependency.Package.WebpImageExtension">WebP 组件包</sys:String>
     <sys:String x:Key="Tools.Test.Dependency.Title">依赖检查</sys:String>
     <sys:String x:Key="Tools.Test.Error.OperationFailed">测试工具操作失败。请查看错误详情。</sys:String>
     <sys:String x:Key="Tools.Test.LaunchCount.Message">PCL CE 已经为你启动了 {0} 次游戏了。</sys:String>
