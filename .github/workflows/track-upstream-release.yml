@@ -1,0 +1,82 @@
+name: Track Upstream Release
+
+# 定时轮询上游 PCL-Community/PCL-CE 的最新 Release。
+# 发现新版本后：把上游 tag 合并进本 fork 的 dev（保留本 fork 的自定义改动），
+# 然后打同名 tag 触发 build-release.yml 自动编译发版。
+# 若合并冲突则自动开 PR 供人工解决。
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # 每小时检查一次
+  workflow_dispatch:       # 也可手动触发
+
+jobs:
+  track:
+    name: Track upstream release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Get upstream latest release tag
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="$(gh api repos/PCL-Community/PCL-CE/releases/latest --jq .tag_name 2>/dev/null || true)"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          if [ -z "${TAG}" ]; then
+            echo "::notice::上游暂无 Release，跳过"
+          else
+            echo "::notice::上游最新 Release：${TAG}"
+          fi
+
+      - name: Check if already processed
+        id: check
+        if: steps.upstream.outputs.tag != ''
+        run: |
+          TAG="${{ steps.upstream.outputs.tag }}"
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "done=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::tag ${TAG} 已处理过，跳过"
+          else
+            echo "done=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::发现新 Release ${TAG}，开始同步并构建"
+          fi
+
+      - name: Sync and tag (trigger build)
+        if: steps.check.outputs.done == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.upstream.outputs.tag }}"
+          git remote add upstream https://github.com/PCL-Community/PCL-CE.git
+          git fetch upstream tag "${TAG}"
+          git checkout dev
+
+          if git merge "${TAG}" --no-edit; then
+            echo "::notice::合并成功，推送 dev 并打 tag ${TAG} 触发构建"
+            git push origin dev
+            git tag "${TAG}"
+            git push origin "${TAG}"
+          else
+            echo "::warning::合并冲突，开 PR 供人工解决"
+            git merge --abort
+            BRANCH="sync/upstream-release-${TAG}"
+            git push origin "refs/tags/${TAG}:refs/heads/${BRANCH}" --force
+            gh pr create --base dev --head "${BRANCH}" \
+              --title "Sync upstream release ${TAG}" \
+              --body "上游发布了 ${TAG}，自动合并到本 fork 时产生冲突。请在此 PR 中手动解决后合并，然后手动打 tag ${TAG} 触发构建。" \
+              || echo "::notice::PR 可能已存在，跳过创建"
+          fi
