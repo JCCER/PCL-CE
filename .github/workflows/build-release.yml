@@ -71,20 +71,18 @@ jobs:
             -p:Configuration=Release -p:Platform=${{ matrix.arch }} \
             -p:DeleteExistingFiles=true -o ./artifact --no-self-contained
 
-      - name: Package zip
+      - name: Rename exe
         shell: bash
         run: |
           ARCH="${{ matrix.arch }}"
           if [ "$ARCH" = "ARM64" ]; then ARCH=arm64; else ARCH=x64; fi
-          cd artifact
-          zip -r "../PCL-CE-win-${ARCH}.zip" .
-          cd ..
+          mv "./artifact/Plain Craft Launcher 2.exe" "PCL-CE-win-${ARCH}.exe"
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: PCL-CE-win-${{ matrix.arch }}
-          path: PCL-CE-win-*.zip
+          path: PCL-CE-win-*.exe
 
   release:
     name: Publish Release
@@ -113,5 +111,5 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
           name: Release ${{ steps.tag.outputs.tag }}
-          files: dist/*.zip
+          files: dist/*.exe
           generate_release_notes: true

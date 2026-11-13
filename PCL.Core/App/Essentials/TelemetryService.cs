@@ -161,15 +161,16 @@ public sealed partial class TelemetryService
     [LifecycleStart]
     private static async Task _StartAsync()
     {
-        // 遥测已整体禁用（个人自用 fork）：不初始化 Sentry、不上报错误与设备环境信息。
-        if (!Config.System.Telemetry || TelemetryDisabled)
-            return;
+        // 构建完整性校验：与自己的 GitHub Releases 哈希比对，检测被篡改的二进制（不依赖遥测）。
         if (!await BuildProvenance.IsTrustedAsync().ConfigureAwait(false))
         {
             IsBuildUntrusted = true;
-            Context.Warn($"当前版本 {Basics.VersionName} 的文件哈希与官方发布资产不匹配，遥测上报已禁用");
-            return;
+            Context.Warn($"当前版本 {Basics.VersionName} 的文件哈希与官方发布资产不匹配");
         }
+
+        // 遥测已整体禁用（个人自用 fork）：不初始化 Sentry、不上报错误与设备环境信息。
+        if (!Config.System.Telemetry || TelemetryDisabled)
+            return;
 
         _InitSentry();
         

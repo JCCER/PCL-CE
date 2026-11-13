@@ -1,0 +1,38 @@
+name: Sync Upstream
+
+# 定期把上游 PCL-Community/PCL-CE 的 dev 分支合并到本 fork 的 dev。
+# 注意：若上游改动与本 fork 的自定义改动（如已删除的中国区限制代码）发生冲突，
+# 此工作流会在 merge 步骤失败，需要手动解决冲突后再跑一次。
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 每天 UTC 00:00 自动执行
+  workflow_dispatch:       # 也可手动触发
+
+jobs:
+  sync:
+    name: Merge upstream/dev into dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream and merge
+        run: |
+          git remote add upstream https://github.com/PCL-Community/PCL-CE.git
+          git fetch upstream dev
+          git checkout dev
+          git merge upstream/dev --no-edit
+
+      - name: Push
+        run: git push origin dev
