@@ -25,6 +25,9 @@ public sealed partial class TelemetryService
 {
     public static bool IsBuildUntrusted { get; private set; }
 
+    // 遥测功能已整体禁用（个人自用 fork）。
+    private static readonly bool TelemetryDisabled = true;
+
     private static void _InitSentry()
     {
         Context.Info("开始初始化 Sentry SDK");
@@ -158,7 +161,10 @@ public sealed partial class TelemetryService
     [LifecycleStart]
     private static async Task _StartAsync()
     {
-        if (!Config.System.Telemetry) return;
+        // 遥测已整体禁用（个人自用 fork）：不初始化 Sentry、不上报错误与设备环境信息。
+        IsBuildUntrusted = true;
+        if (!Config.System.Telemetry || TelemetryDisabled)
+            return;
         if (!await BuildProvenance.IsTrustedAsync().ConfigureAwait(false))
         {
             IsBuildUntrusted = true;

@@ -34,7 +34,7 @@ public static class Secrets
     /// <summary>
     /// 联机根服务器
     /// </summary>
-    public static string[] LinkServers { get; } = EnvironmentInterop.GetSecret("LINK_SERVER_ROOT", readEnvDebugOnly: true).ReplaceNullOrEmpty().Split("|");
+    public static string[] LinkServers { get; } = [];
 
     /// <summary>
     /// 当前版本的 Git 提交 SHA

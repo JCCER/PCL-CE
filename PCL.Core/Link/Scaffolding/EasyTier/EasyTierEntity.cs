@@ -269,15 +269,7 @@ public class EasyTierEntity
         return result;
     }
 
-    private readonly string[] _fallbackNodeLinks =
-    [
-        "tcp://public.easytier.top:11010",
-        "tcp://public2.easytier.cn:54321",
-        "https://etnode.zkitefly.eu.org/node1",
-        "https://etnode.zkitefly.eu.org/node2",
-        "https://etnode.zkitefly.eu.org/-node1",
-        "https://etnode.zkitefly.eu.org/-node2"
-    ];
+    private readonly string[] _fallbackNodeLinks = [];
 
 
     private async Task<IReadOnlyList<string>> _GetPublicNodeAsync()

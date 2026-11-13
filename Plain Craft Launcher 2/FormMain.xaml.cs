@@ -285,18 +285,7 @@ public partial class FormMain
                             }
                     }
 
-                // 遥测提示
-                if (Config.System.TelemetryConfig.IsDefault())
-                {
-                    var selection = (DialogService.Instance.Show(new TextDialogRequest
-                    {
-                        Title = Lang.Text("Main.Telemetry.Title"),
-                        Content = Lang.Text("Main.Telemetry.Message"),
-                        Buttons = DialogButtons.AgreeDecline,
-                        ForceWait = true
-                    }).Result?.Button ?? 0);
-                    Config.System.TelemetryConfig.SetValue(selection == 1, forceNewValue: true);
-                }
+
                 // 启动加载器池
                 try
                 {

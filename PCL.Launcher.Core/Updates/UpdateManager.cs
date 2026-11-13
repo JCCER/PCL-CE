@@ -14,17 +14,7 @@ public static class UpdateManager
     public static UpdatesWrapperModel remoteServer = new(
         new List<IUpdateSource>
         {
-            new UpdatesMirrorChyanModel(),
-            new UpdatesRandomModel(
-            [
-                new UpdatesMinioModel("https://s3.pysio.online/pcl2-ce/", "Pysio"),
-                new UpdatesMinioModel(
-                    "https://staticassets.naids.com/resources/pclce/",
-                    "Naids")
-            ]),
-            new UpdatesMinioModel(
-                "https://github.com/PCL-Community/PCL2_CE_Server/raw/main/",
-                "GitHub")
+            new UpdatesGitHubReleasesModel()
         });
 
     public static Loading.LoaderCombo<JsonObject> updateLoader;
@@ -147,7 +137,8 @@ public static class UpdateManager
                         _ =>
                         {
                             var curHash = LauncherCommon.GetFileSha256(dlTargetPath);
-                            if ((curHash ?? "") != (version.Sha256 ?? ""))
+                            if (!string.IsNullOrWhiteSpace(version.Sha256)
+                                && (curHash ?? "") != version.Sha256)
                                 throw new Exception(
                                     Lang.Text(
                                         "Update.Error.Sha256Mismatch",
