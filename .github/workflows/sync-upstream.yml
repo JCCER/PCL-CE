@@ -1,11 +1,11 @@
 name: Sync Upstream
 
-# 定期把上游 PCL-Community/PCL-CE 的 dev 分支合并到本 fork 的 dev。
-# 注意：若上游改动与本 fork 的自定义改动（如已删除的中国区限制代码）发生冲突，
-# 此工作流会在 merge 步骤失败，需要手动解决冲突后再跑一次。
+# 每天自动把上游 PCL-Community/PCL-CE 的 dev 合并到本 fork 的 dev。
+# 若合并无冲突则直接推送到 dev；若发生冲突则自动开一个 PR 供人工解决。
 
 permissions:
   contents: write
+  pull-requests: write
 
 on:
   schedule:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   sync:
-    name: Merge upstream/dev into dev
+    name: Sync upstream/dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,12 +27,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Fetch upstream and merge
+      - name: Sync upstream/dev
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git remote add upstream https://github.com/PCL-Community/PCL-CE.git
           git fetch upstream dev
           git checkout dev
-          git merge upstream/dev --no-edit
 
-      - name: Push
-        run: git push origin dev
+          if git merge upstream/dev --no-edit; then
+            echo "::notice::merge clean, pushing to dev"
+            git push origin dev
+          else
+            echo "::warning::merge conflict, opening a PR for manual resolution"
+            git merge --abort
+            BRANCH="sync/upstream-dev"
+            git push origin upstream/dev:refs/heads/${BRANCH} --force
+            gh pr create --base dev --head "${BRANCH}" \
+              --title "Sync upstream/dev" \
+              --body "自动同步上游 PCL-Community/PCL-CE 的 dev 分支时产生冲突，请在此 PR 中手动解决后合并。" \
+              || echo "::notice::PR 可能已存在，跳过创建"
+          fi
