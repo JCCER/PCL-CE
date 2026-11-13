@@ -1,16 +1,15 @@
 name: Sync Upstream
 
-# 每天自动把上游 PCL-Community/PCL-CE 的 dev 合并到本 fork 的 dev。
-# 若合并无冲突则直接推送到 dev；若发生冲突则自动开一个 PR 供人工解决。
+# （手动）把上游 PCL-Community/PCL-CE 的 dev 合并到本 fork 的 dev。
+# 注意：上游 Release 是 dev 的「快照」而非最新 dev，自动构建请用 track-upstream-release.yml。
+# 本工作流仅在需要手动拉取 dev 最新代码时使用（会领先于上游 Release）。
 
 permissions:
   contents: write
   pull-requests: write
 
 on:
-  schedule:
-    - cron: '0 0 * * *'   # 每天 UTC 00:00 自动执行
-  workflow_dispatch:       # 也可手动触发
+  workflow_dispatch:       # 仅手动触发；自动同步统一由 track-upstream-release.yml 按上游 Release 快照进行
 
 jobs:
   sync:
