@@ -18,8 +18,7 @@ public partial class PageSetupLeftViewModel : ViewModelBase
             PageID = FormMain.PageSubType.SetupJava;
         else if (!hideCfg.SetupGameManage)
             PageID = FormMain.PageSubType.SetupGameManage;
-        else if (!hideCfg.SetupGameLink)
-            PageID = FormMain.PageSubType.SetupGameLink;
+
         else if (!hideCfg.SetupUi)
             PageID = FormMain.PageSubType.SetupUI;
         else if (!hideCfg.SetupLauncherLanguage)

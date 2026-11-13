@@ -803,9 +803,7 @@ public partial class PageSetupUI : IPageView
                     !HiddenForceShow && conf.SetupJava ? Visibility.Collapsed : Visibility.Visible;
                 Launcher.frmSetupLeft.ItemUpdate.Visibility =
                     !HiddenForceShow && conf.SetupUpdate ? Visibility.Collapsed : Visibility.Visible;
-                Launcher.frmSetupLeft.ItemGameLink.Visibility = !HiddenForceShow && conf.SetupGameLink
-                    ? Visibility.Collapsed
-                    : Visibility.Visible;
+                Launcher.frmSetupLeft.ItemGameLink.Visibility = Visibility.Collapsed; // 联机功能已移除
                 Launcher.frmSetupLeft.ItemAbout.Visibility =
                     !HiddenForceShow && conf.SetupAbout ? Visibility.Collapsed : Visibility.Visible;
                 Launcher.frmSetupLeft.ItemFeedback.Visibility = !HiddenForceShow && conf.SetupFeedback
@@ -818,7 +816,7 @@ public partial class PageSetupUI : IPageView
                 {
                     (Launcher.frmSetupLeft.TextGameCategory,
                         !(conf.SetupLaunch && conf.SetupJava && conf.SetupGameManage)),
-                    (Launcher.frmSetupLeft.TextToolsCategory, !conf.SetupGameLink),
+                    (Launcher.frmSetupLeft.TextToolsCategory, false), // 联机功能已移除
                     (Launcher.frmSetupLeft.TextLauncherCategory, !(conf.SetupUi && conf.SetupLauncherLanguage && conf.SetupLauncherMisc)),
                     (Launcher.frmSetupLeft.TextAboutCategory,
                         !(conf.SetupAbout && conf.SetupUpdate && conf.SetupFeedback && conf.SetupLog))
@@ -863,16 +861,12 @@ public partial class PageSetupUI : IPageView
             // 工具子页面 (FrmToolsLeft)
             if (Launcher.frmToolsLeft is not null)
             {
-                Launcher.frmToolsLeft.ItemGameLink.Visibility = !HiddenForceShow && conf.ToolsGameLink
-                    ? Visibility.Collapsed
-                    : Visibility.Visible;
+                Launcher.frmToolsLeft.ItemGameLink.Visibility = Visibility.Collapsed; // 联机功能已移除
                 Launcher.frmToolsLeft.ItemTest.Visibility =
                     !HiddenForceShow && conf.ToolsTest ? Visibility.Collapsed : Visibility.Visible;
 
                 // 处理分类标题
-                var isGameLinkVisible = (!HiddenForceShow && !conf.ToolsGameLink) || HiddenForceShow;
-                Launcher.frmToolsLeft.TextGameLinkCategory.Visibility = isGameLinkVisible ? Visibility.Visible : Visibility.Collapsed;
-                if (isGameLinkVisible) Launcher.frmToolsLeft.TextGameLinkCategory.Opacity = 0.6;
+                Launcher.frmToolsLeft.TextGameLinkCategory.Visibility = Visibility.Collapsed; // 联机功能已移除
 
                 var isToolsVisible = (!HiddenForceShow && !conf.ToolsTest) || HiddenForceShow;
                 Launcher.frmToolsLeft.TextToolsCategory.Visibility = isToolsVisible ? Visibility.Visible : Visibility.Collapsed;

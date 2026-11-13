@@ -15,9 +15,7 @@ public class PageToolsLeftViewModel : ViewModelBase
 
     public FormMain.PageSubType ResolveInitialPageId()
     {
-        var hide = Config.Preference.Hide;
-        if (!hide.ToolsGameLink) return FormMain.PageSubType.ToolsGameLink;
-        if (!hide.ToolsTest) return FormMain.PageSubType.ToolsTest;
-        return FormMain.PageSubType.ToolsGameLink;
+        // 联机功能已移除，工具页默认返回「测试」子页面
+        return FormMain.PageSubType.ToolsTest;
     }
 }
