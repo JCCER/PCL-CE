@@ -16,7 +16,7 @@ internal static class BuildProvenance
     // 只是检测到程序不是官方构建版之后关掉 Sentry 回报，以此减少我们的统计压力
     // 如果你正在制作 PCL-CE 的 fork 而不是进行二进制修补，你可以放心关闭、忽略甚至移除此功能，
     // 因为通过代码构建的 PCL-CE 或其 fork 一般不会带有我们的 Sentry 汇报端点，此功能就无用了
-    public const bool Enabled = true;
+    public const bool Enabled = false; // 个人自用 fork：已关闭非官方构建检测
 
     // 如果你在做 PCL-CE fork 并且有自己的 Sentry，记得改掉这里的地址！
     private const string ReleaseApiUrl = "https://api.github.com/repos/JCCER/PCL-CE/releases/tags/v";

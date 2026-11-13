@@ -162,7 +162,6 @@ public sealed partial class TelemetryService
     private static async Task _StartAsync()
     {
         // 遥测已整体禁用（个人自用 fork）：不初始化 Sentry、不上报错误与设备环境信息。
-        IsBuildUntrusted = true;
         if (!Config.System.Telemetry || TelemetryDisabled)
             return;
         if (!await BuildProvenance.IsTrustedAsync().ConfigureAwait(false))

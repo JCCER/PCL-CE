@@ -16,6 +16,7 @@ namespace PCL;
 public class UpdatesGitHubReleasesModel : IUpdateSource
 {
     private const string ReleaseApiUrl = "https://api.github.com/repos/JCCER/PCL-CE/releases/latest";
+    private const string DownloadProxy = "https://gh-proxy.com/";
 
     private JsonObject? _release;
     private string? _assetDownloadUrl;
@@ -45,7 +46,10 @@ public class UpdatesGitHubReleasesModel : IUpdateSource
         var tag = _release?["tag_name"]?.ToString()?.TrimStart('v') ?? "0.0.0";
         var body = _release?["body"]?.ToString() ?? "";
         var asset = _SelectAsset(arch);
-        _assetDownloadUrl = asset?["browser_download_url"]?.ToString();
+        var rawUrl = asset?["browser_download_url"]?.ToString();
+        _assetDownloadUrl = string.IsNullOrWhiteSpace(rawUrl)
+            ? null
+            : DownloadProxy + rawUrl;
         _assetName = asset?["name"]?.ToString();
 
         var sha256 = "";
